@@ -35,7 +35,7 @@ const firebaseConfig = {
       })
       .then(() => {
         console.log('User added to Firestore');
-        window.location.href = 'index.html';  // Redirect to homepage after sign up
+        window.location.href = 'profile.html';  // Redirect to profile page after sign up
       })
       .catch((error) => {
         var errorCode = error.code;
@@ -65,7 +65,7 @@ const firebaseConfig = {
         } else {
           console.log('No such document!');
         }
-        window.location.href = 'index.html';  // Redirect to homepage after login
+        window.location.href = 'profile.html';  // Redirect to profile page after login
       })
       .catch((error) => {
         var errorCode = error.code;

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - CodeDuels</title>
+    <link rel="stylesheet" href="assets/css/profile.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script src="assets/js/profile.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="assets/img/logo.png" alt="Logo">
+            <span><a href="index.html" id="webname">CodeDuels</a></span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="multiplayer_battle.html">Play with friends</a></li>
+                <li><a href="#">Play online</a></li>
+                <li><a href="#">Hackathons</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <a href="login.html" class="button log">Sign in</a>
+            <a href="signup.html" class="button log">Join</a>
+        </div>
+    </header>
+    <main>
+        <section class="profile-section">
+            <div class="profile-container">
+                <div class="profile-header">
+                    <img src="assets/img/profile_placeholder.png" alt="Profile Picture" id="profile-picture">
+                    <h2 id="username">Username</h2>
+                    <p id="email">user@example.com</p>
+                </div>
+                <div class="profile-details">
+                    <h3>Profile Details</h3>
+                    <p><strong>Joined:</strong> <span id="join-date">Date</span></p>
+                    <p><strong>Completed Challenges:</strong> <span id="completed-challenges">0</span></p>
+                    <p><strong>Rank:</strong> <span id="user-rank">Newbie</span></p>
+                    <button class="button" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
+        </div>
+    </footer>
+</body>
+</html>
