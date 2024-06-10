@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play with a Friend - CodeDuels</title>
+    <link rel="stylesheet" href="assets/css/friends.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <img src="assets/img/logo.png" alt="Logo">
+            <span><a href="index.html" id="webname">CodeDuels</a></span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#">Play with friends</a></li>
+                <li><a href="#">Play online</a></li>
+                <li><a href="#">Hackathons</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <button><a href="login.html" class="log">Sign in</a></button>
+            <button><a href="signup.html" class="log">Join</a></button>
+        </div>
+    </header>
+    <main>
+        <section class="task-container">
+            <h1>Task: Sam with Frodo</h1>
+            <p>Sam and Frodo need to be close. If they are side by side in the array, your function should return true. If there are other persons between them, return false.</p>
+            <h3>Examples:</h3>
+            <ul>
+                <li>true == solution(["Sam","Frodo","Troll","Balrog","Human"])</li>
+                <li>false == solution(["Orc","Frodo","Treant","Saruman","Sam"])</li>
+                <li>true == solution(["Orc","Sam","Frodo","Gandalf","Legolas"])</li>
+            </ul>
+        </section>
+        <section class="game-container">
+            <div class="editor-container">
+                <h3>Player 1</h3>
+                <textarea id="editor1"></textarea>
+            </div>
+            <div class="editor-container">
+                <h3>Player 2</h3>
+                <textarea id="editor2"></textarea>
+            </div>
+            <div class="chat-container">
+                <h3>Chat</h3>
+                <div id="chat-box"></div>
+                <input type="text" id="chat-input" placeholder="Be nice in chat!" />
+                <button id="send-btn">Send</button>
+            </div>
+        </section>
+        <button id="run-btn">Run code!</button>
+    </main>
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
+        </div>
+    </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+    <script src="assets/js/friends.js"></script>
+</body>
+
+</html>

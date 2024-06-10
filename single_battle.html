@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Singleplayer Exercises - CodeDuels</title>
+    <link rel="stylesheet" href="assets/css/single_battle.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <img src="assets/img/logo.png" alt="Logo">
+            <span><a href="index.html" id="webname">CodeDuels</a></span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#">Play with friends</a></li>
+                <li><a href="#">Play online</a></li>
+                <li><a href="#">Hackathons</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <button><a href="login.html" class="log">Sign in</a></button>
+            <button><a href="signup.html" class="log">Join</a></button>
+        </div>
+    </header>
+    <main>
+        <section class="intro">
+            <h1>Welcome to Singleplayer Exercises!</h1>
+            <p>Sharpen your coding skills with our exercises. Choose a language and start solving problems immediately.</p>
+        </section>
+        <section class="exercise-options">
+            <div class="exercise-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png" alt="JavaScript">
+                <h2>JavaScript</h2>
+                <p>Interactive web applications and more.</p>
+                <button onclick="startExercise('javascript')">Start JavaScript</button>
+            </div>
+            <div class="exercise-card">
+                <img src="https://upload.wikimedia.org/wikipedia/en/3/30/Java_programming_language_logo.svg" alt="Java">
+                <h2>Java</h2>
+                <p>Robust applications and solutions.</p>
+                <button onclick="startExercise('java')">Start Java</button>
+            </div>
+            <div class="exercise-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="Python">
+                <h2>Python</h2>
+                <p>Simple and powerful programming.</p>
+                <button onclick="startExercise('python')">Start Python</button>
+            </div>
+            <div class="exercise-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg" alt="C++">
+                <h2>C++</h2>
+                <p>High-performance applications.</p>
+                <button onclick="startExercise('cpp')">Start C++</button>
+            </div>
+            <div class="exercise-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" alt="C#">
+                <h2>C#</h2>
+                <p>Develop games and Windows apps.</p>
+                <button onclick="startExercise('csharp')">Start C#</button>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
+        </div>
+    </footer>
+    <script>
+        function startExercise(language) {
+            const pages = {
+                'javascript': 'javascript_exercise.html',
+                'java': 'java_exercise.html',
+                'python': 'python_exercise.html',
+                'cpp': 'cpp_exercise.html',
+                'csharp': 'csharp_exercise.html'
+            };
+            window.location.href = pages[language];
+        }
+    </script>
+</body>
+
+</html>
