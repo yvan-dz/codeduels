@@ -8,29 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
 
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
-      
-        // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-        const firebaseConfig = {
-          apiKey: "AIzaSyAIwf6RVzexCZ0LMfmEFIFBq5YsHm5-lnM",
-          authDomain: "codeduels-1b79f.firebaseapp.com",
-          projectId: "codeduels-1b79f",
-          storageBucket: "codeduels-1b79f.appspot.com",
-          messagingSenderId: "927315184082",
-          appId: "1:927315184082:web:e115d2bdc6465ffea6a00b",
-          measurementId: "G-6Z7PS1DT05"
-        };
-      
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-      </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="assets/js/index.js" defer></script>
 </head>
 
 <body>
@@ -41,19 +22,23 @@
         </div>
         <nav>
             <ul>
-                <li><a href="multiplayer_battle.html">Play with friends</a></li>
-                <li><a href="#">Play online</a></li>
-                <li><a href="#">Hackathons</a></li>
+                <li><a href="#" id="friends-link">Play with friends</a></li>
+                <li><a href="#" id="online-link">Play online</a></li>
+                <li><a href="#" id="hackathons-link">Hackathons</a></li>
+                <li><a href="profile.html" id="profile-link" style="display: none;">Profile</a></li>
+                <li><a href="settings.html" id="settings-link" style="display: none;">Settings</a></li>
+                <li><a href="friends_list.html" id="friends-page-link" style="display: none;">Friends</a></li>
             </ul>
         </nav>
         <div class="auth-buttons">
-            <a href="login.html" class="button log">Sign in</a>
-            <a href="signup.html" class="button log">Join</a>
+            <a href="login.html" class="button log" id="login-button">Sign in</a>
+            <a href="signup.html" class="button log" id="signup-button">Join</a>
+            <button class="button log" id="logout-button" onclick="logout()" style="display: none;">Logout</button>
         </div>
     </header>
     <main>
         <section class="hero">
-            <h1>It's time to duel!</h1>
+            <h1 id="welcome-message">It's time to duel!</h1>
             <p>Enhance your coding skills by practicing with training codes, challenging your friends in 1v1 duels, and competing against coders worldwide!</p>
             <p id="p2">Participate in hackathons to showcase your talents and prove what you can achieve!</p>
             <a href="single_battle.html" class="button">Try Simple Battle</a>
@@ -74,7 +59,6 @@
                     <img src="https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg" alt="C++">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" alt="C#">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png" alt="JavaScript">
-                   
                 </div>
             </div>
             <div class="statistics">
@@ -114,7 +98,6 @@
             <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
         </div>
     </footer>
-
 </body>
 
 </html>

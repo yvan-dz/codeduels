@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile - CodeDuels</title>
     <link rel="stylesheet" href="assets/css/profile.css">
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="assets/js/profile.js" defer></script>
 </head>
 <body>
@@ -21,12 +23,9 @@
                 <li><a href="multiplayer_battle.html">Play with friends</a></li>
                 <li><a href="#">Play online</a></li>
                 <li><a href="#">Hackathons</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
             </ul>
         </nav>
-        <div class="auth-buttons">
-            <a href="login.html" class="button log">Sign in</a>
-            <a href="signup.html" class="button log">Join</a>
-        </div>
     </header>
     <main>
         <section class="profile-section">
