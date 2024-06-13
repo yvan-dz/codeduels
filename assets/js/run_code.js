@@ -34,14 +34,19 @@ function runCode() {
 
     console.log('Payload:', payload);
 
-    fetch('https://codeduels.vercel.app/java_exercise.html', {
+    fetch('https://codeduels.vercel.app/api/execute', {  // Die richtige API-URL verwenden
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(result => {
         console.log('Result:', result);
         if (result.error) {
