@@ -25,8 +25,10 @@
             </ul>
         </nav>
         <div class="auth-buttons">
-            <button><a href="login.html" class="log">Sign in</a></button>
-            <button><a href="signup.html" class="log">Join</a></button>
+            <button id="login-button"><a href="login.html" class="log">Sign in</a></button>
+            <button id="signup-button"><a href="signup.html" class="log">Join</a></button>
+            <button id="logout-button" style="display: none;" onclick="logout()">Sign out</button>
+            <span id="user-status"></span>
         </div>
     </header>
     <main>
@@ -67,12 +69,33 @@
 
         // Check the authentication state
         firebase.auth().onAuthStateChanged(function(user) {
+            const loginButton = document.getElementById('login-button');
+            const signupButton = document.getElementById('signup-button');
+            const logoutButton = document.getElementById('logout-button');
+            const userStatus = document.getElementById('user-status');
             if (user) {
                 console.log('User is authenticated:', user);
+                loginButton.style.display = 'none';
+                signupButton.style.display = 'none';
+                logoutButton.style.display = 'block';
+                userStatus.innerText = `Signed in as: ${user.email}`;
             } else {
                 console.log('User is not authenticated');
+                loginButton.style.display = 'block';
+                signupButton.style.display = 'block';
+                logoutButton.style.display = 'none';
+                userStatus.innerText = 'Not signed in';
             }
         });
+
+        // Logout function
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                console.log('User signed out');
+            }).catch((error) => {
+                console.error('Error signing out:', error);
+            });
+        }
     </script>
 </body>
 </html>
