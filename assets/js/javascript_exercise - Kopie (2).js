@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadRandomExercise() {
-    fetch('assets/js/java_exercises.json')
+    fetch('assets/js/javascript_exercises.json')
         .then(response => response.json())
         .then(data => {
             const randomIndex = Math.floor(Math.random() * data.length);
@@ -15,7 +15,7 @@ function loadRandomExercise() {
                 <p id="exercise-description">${exercise.description}</p>
             `;
             document.getElementById('exercise-info').innerHTML = exerciseInfo;
-            initializeMonaco(exercise.language.toLowerCase());
+            initializeMonaco('javascript');
         })
         .catch(error => console.error('Error loading exercises:', error));
 }
@@ -30,27 +30,25 @@ function initializeMonaco(language) {
 
         window.editor = monaco.editor.create(document.getElementById('code-editor'), {
             value: '// your code here',
-            language: language,
+            language: language.toLowerCase(),
             theme: 'vs-dark',
             automaticLayout: true
         });
 
-        if (language === 'java') {
-            monaco.languages.registerCompletionItemProvider('java', {
-                provideCompletionItems: function() {
-                    return {
-                        suggestions: [
-                            {
-                                label: 'System.out.println',
-                                kind: monaco.languages.CompletionItemKind.Function,
-                                insertText: 'System.out.println(${1:object});',
-                                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                                documentation: 'Prints the given object to the console.'
-                            }
-                        ]
-                    };
-                }
-            });
-        }
+        // Enable IntelliSense for JavaScript
+        monaco.languages.typescript.javascriptDefaults.addExtraLib([
+            'declare var console: {',
+            '    log(msg: any): void;',
+            '};'
+        ].join('\n'), 'ts:filename/console.d.ts');
     });
+}
+
+function runCode() {
+    const code = window.editor.getValue();
+    try {
+        eval(code);
+    } catch (error) {
+        console.error('Error executing code:', error);
+    }
 }
