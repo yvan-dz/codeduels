@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-function runCode() {
+async function runCode() {
     console.log('Run code button clicked');
     const code = window.editor.getValue();
     console.log('Code:', code);
@@ -27,14 +27,23 @@ function runCode() {
     outputElement.textContent = 'Running code...';
     outputElement.style.color = 'black';
 
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        console.error('User not authenticated.');
+        return;
+    }
+
+    const idToken = await user.getIdToken();
+
     const payload = {
         language: language,
-        code: code
+        code: code,
+        idToken: idToken
     };
 
     console.log('Payload:', payload);
 
-    fetch('https://codeduels.vercel.app/api/execute', {  // Die richtige API-URL verwenden
+    fetch('https://codeduels-dkocozwjw-yvan-dzefaks-projects.vercel.app/api/execute', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
