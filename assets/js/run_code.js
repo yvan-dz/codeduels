@@ -37,6 +37,12 @@ async function runCode(user) {
         return;
     }
 
+    const creditsElement = document.getElementById('credits'); // Definiere die Variable credits
+    if (!creditsElement) {
+        console.error('Credits element not found.');
+        return;
+    }
+
     outputElement.textContent = 'Running code...';
     outputElement.style.color = 'black';
 
@@ -51,15 +57,15 @@ async function runCode(user) {
 
         console.log('Payload:', payload);
 
-        const proxyUrl = "http://localhost:3000/proxy";
-        const targetUrl = "https://api.jdoodle.com/v1/execute";
-        fetch(proxyUrl, {
+        const proxyUrl = "https://corsproxy.io/?";
+        const url = "https://api.jdoodle.com/v1/execute";
+        fetch(proxyUrl + url, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ url: targetUrl, ...payload })
+            body: JSON.stringify(payload)
         })
         .then(response => {
             if (!response.ok) {
@@ -84,13 +90,13 @@ async function runCode(user) {
         });
 
         const creditsUrl = "https://api.jdoodle.com/v1/credit-spent";
-        fetch(proxyUrl, {
+        fetch(proxyUrl + creditsUrl, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ url: creditsUrl, ...payload })
+            body: JSON.stringify(payload)
         })
         .then(response => {
             if (!response.ok) {
@@ -101,12 +107,12 @@ async function runCode(user) {
         .then(data => {
             console.log(data);
             var creditsLeft = 200 - data.used;
-            console.log(credits);
-            credits.innerHTML = "Runs left: " + creditsLeft;
+            console.log(creditsElement); // Verwende die Variable creditsElement
+            creditsElement.innerHTML = "Runs left: " + creditsLeft;
         })
         .catch(error => {
             console.error('Fetch error:', error);
-            credits.innerHTML = "Error: " + error.message;
+            creditsElement.innerHTML = "Error: " + error.message;
         });
     } catch (error) {
         console.error('Error getting ID token:', error);
