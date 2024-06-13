@@ -44,9 +44,12 @@ async function runCode(user) {
         const idToken = await user.getIdToken();
 
         const payload = {
+            script: code,
             language: language,
-            code: code,
-            idToken: idToken
+            versionIndex: "0", // Stelle sicher, dass die Version korrekt ist
+            clientId: "yourClientId",
+            clientSecret: "yourClientSecret",
+            stdin: "" // Wenn du Eingabewerte hast, kannst du sie hier einfügen
         };
 
         console.log('Payload:', payload);
@@ -59,7 +62,7 @@ async function runCode(user) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ url: targetUrl, ...payload })
+            body: JSON.stringify({ url: targetUrl, options: { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json' } } })
         })
         .then(response => {
             if (!response.ok) {
