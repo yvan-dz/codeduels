@@ -51,19 +51,19 @@ async function runCode(user) {
 
         console.log('Payload:', payload);
 
-        const proxyurl = "https://corsproxy.io/?";
-        const url = "https://api.jdoodle.com/v1/execute";
-        fetch(proxyurl + url, {
+        const proxyUrl = "http://localhost:3000/proxy";
+        const targetUrl = "https://api.jdoodle.com/v1/execute";
+        fetch(proxyUrl, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ url: targetUrl, ...payload })
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Network response was not ok ' + response.statusText);
             }
             return response.json();
         })
@@ -81,6 +81,32 @@ async function runCode(user) {
             console.error('Fetch error:', error);
             outputElement.textContent = 'Error: ' + error.message;
             outputElement.style.color = 'red';
+        });
+
+        const creditsUrl = "https://api.jdoodle.com/v1/credit-spent";
+        fetch(proxyUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ url: creditsUrl, ...payload })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+            var creditsLeft = 200 - data.used;
+            console.log(credits);
+            credits.innerHTML = "Runs left: " + creditsLeft;
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            credits.innerHTML = "Error: " + error.message;
         });
     } catch (error) {
         console.error('Error getting ID token:', error);
