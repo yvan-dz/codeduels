@@ -64,6 +64,15 @@
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+
+        // Check the authentication state
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                console.log('User is authenticated:', user);
+            } else {
+                console.log('User is not authenticated');
+            }
+        });
     </script>
 </body>
 </html>

@@ -1,11 +1,19 @@
 document.addEventListener("DOMContentLoaded", function() {
     const runButton = document.getElementById('run-button');
     if (runButton) {
-        runButton.addEventListener('click', runCode);
+        runButton.addEventListener('click', function() {
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    runCode(user);
+                } else {
+                    console.error('User not authenticated.');
+                }
+            });
+        });
     }
 });
 
-async function runCode() {
+async function runCode(user) {
     console.log('Run code button clicked');
     const code = window.editor.getValue();
     console.log('Code:', code);
@@ -26,12 +34,6 @@ async function runCode() {
 
     outputElement.textContent = 'Running code...';
     outputElement.style.color = 'black';
-
-    const user = firebase.auth().currentUser;
-    if (!user) {
-        console.error('User not authenticated.');
-        return;
-    }
 
     const idToken = await user.getIdToken();
 
