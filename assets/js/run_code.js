@@ -51,15 +51,15 @@ async function runCode(user) {
 
         console.log('Payload:', payload);
 
-        const proxyUrl = "https://corsproxy.io/?";
-        const url = "https://api.jdoodle.com/v1/execute";
-        fetch(proxyUrl + url, {
+        const proxyUrl = "http://localhost:3000/proxy"; // Verwende deinen eigenen Proxy-Server
+        const targetUrl = "https://api.jdoodle.com/v1/execute";
+        fetch(proxyUrl, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ url: targetUrl, ...payload })
         })
         .then(response => {
             if (!response.ok) {
