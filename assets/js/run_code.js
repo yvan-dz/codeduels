@@ -51,9 +51,12 @@ async function runCode(user) {
 
         console.log('Payload:', payload);
 
-        fetch('https://codeduels-dkocozwjw-yvan-dzefaks-projects.vercel.app/api/execute', {
+        const proxyurl = "https://corsproxy.io/?";
+        const url = "https://api.jdoodle.com/v1/execute";
+        fetch(proxyurl + url, {
             method: 'POST',
             headers: {
+                'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)
