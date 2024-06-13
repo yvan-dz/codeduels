@@ -34,7 +34,7 @@ function runCode() {
 
     console.log('Payload:', payload);
 
-    fetch('http://127.0.0.1:5500/java_exercise.html', {
+    fetch('https://codeduels.vercel.app/java_exercise.html', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
