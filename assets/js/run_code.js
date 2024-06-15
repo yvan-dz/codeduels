@@ -1,23 +1,12 @@
-document.addEventListener("DOMContentLoaded", function() {
-    const runButton = document.getElementById('run-button');
-    if (runButton) {
-        runButton.addEventListener('click', runCode);
-    }
-});
-
-async function runCode() {
-    console.log('Run code button clicked');
+async function runCode(user) {
     const code = window.editor.getValue();
-    console.log('Code:', code);
     const languageElement = document.getElementById('exercise-language');
     if (!languageElement) {
         console.error('Language element not found.');
         return;
     }
 
-    const language = languageElement.textContent.split(': ')[1];
-    console.log('Language:', language);
-
+    const language = languageElement.textContent.split(': ')[1].toLowerCase();
     const outputElement = document.getElementById('output');
     if (!outputElement) {
         console.error('Output element not found.');
@@ -27,37 +16,23 @@ async function runCode() {
     outputElement.textContent = 'Running code...';
     outputElement.style.color = 'black';
 
-    const user = firebase.auth().currentUser;
-    if (!user) {
-        console.error('User not authenticated.');
-        return;
-    }
+    try {
+        const idToken = await user.getIdToken();
+        const payload = {
+            language: language,
+            code: code
+        };
 
-    const idToken = await user.getIdToken();
+        const response = await fetch('http://localhost:5000/run_code', {  // Passe hier die URL zu deinem Backend an
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify(payload)
+        });
 
-    const payload = {
-        language: language,
-        code: code,
-        idToken: idToken
-    };
-
-    console.log('Payload:', payload);
-
-    fetch('https://codeduels-dkocozwjw-yvan-dzefaks-projects.vercel.app/api/execute', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(result => {
-        console.log('Result:', result);
+        const result = await response.json();
         if (result.error) {
             outputElement.textContent = 'Error: ' + result.error;
             outputElement.style.color = 'red';
@@ -65,10 +40,9 @@ async function runCode() {
             outputElement.textContent = 'Output: ' + result.output;
             outputElement.style.color = 'green';
         }
-    })
-    .catch(error => {
-        console.error('Fetch error:', error);
+    } catch (error) {
+        console.error('Error:', error);
         outputElement.textContent = 'Error: ' + error.message;
         outputElement.style.color = 'red';
-    });
+    }
 }
