@@ -40,7 +40,7 @@ async function evaluateCode(user) {
             language: language
         };
 
-        const response = await fetch('https://codeduels-6pkt9jy0q-yvan-dzefaks-projects.vercel.app/', { // Stelle sicher, dass die URL korrekt ist
+        const response = await fetch('https://codeduels.vercel.app/api/run_code', { // Verwende die tatsächliche URL
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
