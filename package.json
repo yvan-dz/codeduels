@@ -1,7 +1,7 @@
 {
   "name": "codeduels",
   "version": "1.0.0",
-  "description": "",
+  "description": "A coding battle platform",
   "main": "index.js",
   "scripts": {
     "start": "node api/index.js"
