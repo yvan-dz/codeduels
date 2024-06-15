@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(cors());
 
 const configuration = new Configuration({
-  apiKey: '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',
+  apiKey: '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',  // Ersetze durch deinen tatsächlichen API-Schlüssel
 });
 const openai = new OpenAIApi(configuration);
 
@@ -27,6 +27,11 @@ app.post('/run_code', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server läuft auf http://localhost:${port}`);
 });
 
 module.exports = app;
