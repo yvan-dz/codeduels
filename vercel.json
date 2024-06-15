@@ -1,16 +1,12 @@
 {
-    "builds": [
-    {
-      "use": "@vercel/node"
-    }
-  ],
+    "version": 2,
     "routes": [
       {
-        "src": "/api/.*",
-        "dest": "/api/index.js",
+        "src": "/api/(.*)",
         "headers": {
           "Access-Control-Allow-Private-Network": "true"
-        }
+        },
+        "dest": "/api/index.js"
       }
     ]
   }
