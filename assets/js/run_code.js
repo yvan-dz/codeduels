@@ -43,19 +43,18 @@ async function evaluateCode(user) {
         const response = await fetch('https://codeduels.vercel.app/api/run_code', {  // Stelle sicher, dass die URL korrekt ist
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${idToken}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)
         });
 
         const result = await response.json();
-        if (result.error) {
-            outputElement.textContent = 'Error: ' + result.error;
-            outputElement.style.color = 'red';
-        } else {
+        if (response.ok) {
             outputElement.textContent = 'Feedback: ' + result.output;
             outputElement.style.color = 'green';
+        } else {
+            outputElement.textContent = 'Error: ' + (result.error || 'Unknown error');
+            outputElement.style.color = 'red';
         }
     } catch (error) {
         console.error('Error:', error);
