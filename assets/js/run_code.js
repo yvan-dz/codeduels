@@ -1,4 +1,21 @@
-async function runCode(user) {
+document.addEventListener("DOMContentLoaded", function() {
+    const runButton = document.getElementById('run-button');
+    if (runButton) {
+        runButton.addEventListener('click', function() {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                evaluateCode(user);
+            } else {
+                console.error('User not authenticated.');
+                const outputElement = document.getElementById('output');
+                outputElement.textContent = 'Please sign in to run the code.';
+                outputElement.style.color = 'red';
+            }
+        });
+    }
+});
+
+async function evaluateCode(user) {
     const code = window.editor.getValue();
     const languageElement = document.getElementById('exercise-language');
     if (!languageElement) {
@@ -13,17 +30,17 @@ async function runCode(user) {
         return;
     }
 
-    outputElement.textContent = 'Running code...';
+    outputElement.textContent = 'Evaluating code...';
     outputElement.style.color = 'black';
 
     try {
         const idToken = await user.getIdToken();
         const payload = {
-            language: language,
-            code: code
+            code: code,
+            language: language
         };
 
-        const response = await fetch('http://localhost:5000/run_code', {  // Passe hier die URL zu deinem Backend an
+        const response = await fetch('https://codeduels.vercel.app/api/run_code', { // Verwende die tatsächliche URL
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -37,7 +54,7 @@ async function runCode(user) {
             outputElement.textContent = 'Error: ' + result.error;
             outputElement.style.color = 'red';
         } else {
-            outputElement.textContent = 'Output: ' + result.output;
+            outputElement.textContent = 'Feedback: ' + result.output;
             outputElement.style.color = 'green';
         }
     } catch (error) {
