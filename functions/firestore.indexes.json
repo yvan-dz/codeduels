@@ -1,0 +1,36 @@
+{
+    "indexes": [
+      {
+        "collectionGroup": "users",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "username", "order": "ASCENDING" },
+          { "fieldPath": "email", "order": "ASCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "posts",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "authorId", "order": "ASCENDING" },
+          { "fieldPath": "createdAt", "order": "DESCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "comments",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "postId", "order": "ASCENDING" },
+          { "fieldPath": "createdAt", "order": "DESCENDING" }
+        ]
+      }
+    ],
+    "fieldOverrides": [
+      {
+        "collectionGroup": "users",
+        "fieldPath": "email",
+        "indexes": []
+      }
+    ]
+  }
+  

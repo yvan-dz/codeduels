@@ -1,65 +1,74 @@
 document.addEventListener("DOMContentLoaded", function() {
     const runButton = document.getElementById('run-button');
     if (runButton) {
-        runButton.addEventListener('click', function() {
-            const user = firebase.auth().currentUser;
-            if (user) {
-                evaluateCode(user);
-            } else {
-                console.error('User not authenticated.');
-                const outputElement = document.getElementById('output');
-                outputElement.textContent = 'Please sign in to run the code.';
-                outputElement.style.color = 'red';
-            }
-        });
+        runButton.addEventListener('click', runCode);
     }
 });
 
-async function evaluateCode(user) {
+async function runCode() {
+    console.log('Run code button clicked');
     const code = window.editor.getValue();
+    console.log('Code:', code);
     const languageElement = document.getElementById('exercise-language');
     if (!languageElement) {
         console.error('Language element not found.');
         return;
     }
 
-    const language = languageElement.textContent.split(': ')[1].toLowerCase();
+    const language = languageElement.textContent.split(': ')[1];
+    console.log('Language:', language);
+
     const outputElement = document.getElementById('output');
     if (!outputElement) {
         console.error('Output element not found.');
         return;
     }
 
-    outputElement.textContent = 'Evaluating code...';
+    outputElement.textContent = 'Running code...';
     outputElement.style.color = 'black';
 
-    try {
-        const idToken = await user.getIdToken();
-        const payload = {
-            code: code,
-            language: language
-        };
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        console.error('User not authenticated.');
+        return;
+    }
 
-        const response = await fetch('https://codeduels.vercel.app/api/run_code', { // Verwende die tatsächliche URL
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${idToken}`
-            },
-            body: JSON.stringify(payload)
-        });
+    const idToken = await user.getIdToken();
 
-        const result = await response.json();
+    const payload = {
+        language: language,
+        code: code,
+        idToken: idToken
+    };
+
+    console.log('Payload:', payload);
+
+    fetch('https://codeduels-dkocozwjw-yvan-dzefaks-projects.vercel.app/api/execute', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(result => {
+        console.log('Result:', result);
         if (result.error) {
             outputElement.textContent = 'Error: ' + result.error;
             outputElement.style.color = 'red';
         } else {
-            outputElement.textContent = 'Feedback: ' + result.output;
+            outputElement.textContent = 'Output: ' + result.output;
             outputElement.style.color = 'green';
         }
-    } catch (error) {
-        console.error('Error:', error);
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
         outputElement.textContent = 'Error: ' + error.message;
         outputElement.style.color = 'red';
-    }
+    });
 }
