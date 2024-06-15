@@ -28,7 +28,7 @@ async function runCode(user) {
         return;
     }
 
-    const language = languageElement.textContent.split(': ')[1];
+    const language = languageElement.textContent.split(': ')[1].toLowerCase();
     console.log('Language:', language);
 
     const outputElement = document.getElementById('output');
@@ -44,23 +44,20 @@ async function runCode(user) {
         const idToken = await user.getIdToken();
 
         const payload = {
-            script: code,
             language: language,
-            versionIndex: "0", // Stelle sicher, dass die Version korrekt ist
-            clientId: "yourClientId",
-            clientSecret: "yourClientSecret",
-            stdin: "" // Wenn du Eingabewerte hast, kannst du sie hier einfügen
+            files: [{ name: "main", content: code }]
         };
 
         console.log('Payload:', payload);
 
         const proxyUrl = "http://localhost:3000/proxy"; // Verwende deinen eigenen Proxy-Server
-        const targetUrl = "https://api.jdoodle.com/v1/execute";
+        const targetUrl = "https://glot.io/api/run/" + language;
         fetch(proxyUrl, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': '3a03d656-e2cc-4af6-b277-5cf3df6e47e4' // Ersetze durch deinen Glot.io-Token
             },
             body: JSON.stringify({ url: targetUrl, options: { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json' } } })
         })
@@ -76,7 +73,7 @@ async function runCode(user) {
                 outputElement.textContent = 'Error: ' + result.error;
                 outputElement.style.color = 'red';
             } else {
-                outputElement.textContent = 'Output: ' + result.output;
+                outputElement.textContent = 'Output: ' + result.stdout;
                 outputElement.style.color = 'green';
             }
         })
