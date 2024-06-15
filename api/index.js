@@ -4,7 +4,11 @@ const cors = require('cors');
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Access-Control-Allow-Private-Network']
+}));
 
 const configuration = new Configuration({
   apiKey: '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',  // Ersetze durch deinen tatsächlichen API-Schlüssel
