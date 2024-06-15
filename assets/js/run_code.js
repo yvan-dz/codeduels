@@ -4,24 +4,19 @@ document.addEventListener("DOMContentLoaded", function() {
         runButton.addEventListener('click', function() {
             const user = firebase.auth().currentUser;
             if (user) {
-                runCode(user);
+                evaluateCode(user);
             } else {
                 console.error('User not authenticated.');
+                const outputElement = document.getElementById('output');
+                outputElement.textContent = 'Please sign in to run the code.';
+                outputElement.style.color = 'red';
             }
         });
     }
 });
 
-async function runCode(user) {
-    console.log('Run code button clicked');
-
-    if (!user) {
-        console.error('User object is undefined.');
-        return;
-    }
-
+async function evaluateCode(user) {
     const code = window.editor.getValue();
-    console.log('Code:', code);
     const languageElement = document.getElementById('exercise-language');
     if (!languageElement) {
         console.error('Language element not found.');
@@ -29,60 +24,42 @@ async function runCode(user) {
     }
 
     const language = languageElement.textContent.split(': ')[1].toLowerCase();
-    console.log('Language:', language);
-
     const outputElement = document.getElementById('output');
     if (!outputElement) {
         console.error('Output element not found.');
         return;
     }
 
-    outputElement.textContent = 'Running code...';
+    outputElement.textContent = 'Evaluating code...';
     outputElement.style.color = 'black';
 
     try {
         const idToken = await user.getIdToken();
-
         const payload = {
-            language: language,
-            files: [{ name: "main", content: code }]
+            code: code,
+            language: language
         };
 
-        console.log('Payload:', payload);
-
-        const proxyUrl = "http://localhost:3000/proxy"; // Verwende deinen eigenen Proxy-Server
-        const targetUrl = "https://glot.io/api/run/" + language;
-        fetch(proxyUrl, {
+        const response = await fetch('https://codeduels-6pkt9jy0q-yvan-dzefaks-projects.vercel.app/', { // Stelle sicher, dass die URL korrekt ist
             method: 'POST',
             headers: {
-                'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': '3a03d656-e2cc-4af6-b277-5cf3df6e47e4' // Ersetze durch deinen Glot.io-Token
+                'Authorization': `Bearer ${idToken}`
             },
-            body: JSON.stringify({ url: targetUrl, options: { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json' } } })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            return response.json();
-        })
-        .then(result => {
-            console.log('Result:', result);
-            if (result.error) {
-                outputElement.textContent = 'Error: ' + result.error;
-                outputElement.style.color = 'red';
-            } else {
-                outputElement.textContent = 'Output: ' + result.stdout;
-                outputElement.style.color = 'green';
-            }
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-            outputElement.textContent = 'Error: ' + error.message;
-            outputElement.style.color = 'red';
+            body: JSON.stringify(payload)
         });
+
+        const result = await response.json();
+        if (result.error) {
+            outputElement.textContent = 'Error: ' + result.error;
+            outputElement.style.color = 'red';
+        } else {
+            outputElement.textContent = 'Feedback: ' + result.output;
+            outputElement.style.color = 'green';
+        }
     } catch (error) {
-        console.error('Error getting ID token:', error);
+        console.error('Error:', error);
+        outputElement.textContent = 'Error: ' + error.message;
+        outputElement.style.color = 'red';
     }
 }

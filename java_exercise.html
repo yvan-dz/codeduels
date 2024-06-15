@@ -74,13 +74,11 @@
             const logoutButton = document.getElementById('logout-button');
             const userStatus = document.getElementById('user-status');
             if (user) {
-                console.log('User is authenticated:', user);
                 loginButton.style.display = 'none';
                 signupButton.style.display = 'none';
                 logoutButton.style.display = 'block';
                 userStatus.innerText = `Signed in as: ${user.email}`;
             } else {
-                console.log('User is not authenticated');
                 loginButton.style.display = 'block';
                 signupButton.style.display = 'block';
                 logoutButton.style.display = 'none';
