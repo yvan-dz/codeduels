@@ -2,6 +2,7 @@
     "routes": [
       {
         "src": "/api/.*",
+        "dest": "/api/index.js",
         "headers": {
           "Access-Control-Allow-Private-Network": "true"
         }
