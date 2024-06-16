@@ -2,8 +2,8 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/run_code.js"
-    
+      "src": "api/run_code.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
