@@ -1,15 +1,13 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/run_code.js",
-      "use": "@vercel/node"
-    }
-  ],
+  
   "routes": [
     {
       "src": "/api/run_code",
-      "dest": "/api/run_code.js"
+      "dest": "/api/run_code.js",
+      "headers": {
+          "Access-Control-Allow-Private-Network": "true"
     }
+  } 
   ]
 }
