@@ -9,7 +9,10 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/run_code.js"
+      "dest": "/api/run_code.js",
+      "headers": {
+        "Access-Control-Allow-Private-Network": "true"
+      }
     }
   ]
 }

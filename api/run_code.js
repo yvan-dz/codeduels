@@ -5,7 +5,7 @@ const app = express();
 app.use(express.json());
 
 const configuration = new Configuration({
-  apiKey: process.env.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,
+  apiKey: process.env.OPENAI_API_KEY, // Stellt sicher, dass die Umgebungsvariable verwendet wird
 });
 const openai = new OpenAIApi(configuration);
 
