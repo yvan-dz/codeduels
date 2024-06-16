@@ -1,63 +1,37 @@
-document.addEventListener("DOMContentLoaded", function() {
-  const runButton = document.getElementById('run-button');
-  if (runButton) {
-      runButton.addEventListener('click', function() {
-          const user = firebase.auth().currentUser;
-          if (user) {
-              evaluateCode(user);
-          } else {
-              console.error('User not authenticated.');
-              const outputElement = document.getElementById('output');
-              outputElement.textContent = 'Please sign in to run the code.';
-              outputElement.style.color = 'red';
-          }
-      });
+const { Configuration, OpenAIApi } = require('openai');
+const express = require('express');
+const serverless = require('serverless-http');
+const cors = require('cors');
+
+const app = express();
+app.use(express.json());
+app.use(cors({
+  origin: '*',
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Access-Control-Allow-Private-Network']
+}));
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+app.post('/api/run_code', async (req, res) => {
+  const { language, code } = req.body;
+
+  const prompt = `Bitte analysiere und führe den folgenden ${language}-Code aus. Wenn es inkorrekt ist, sag bitte "Code Inkorrekt" + die Antwort und sag kurz warum es inkorrekt ist. Wenn es korrekt ist, sagt bitte "Code korrekt: " und gibt eine Note auf 10 zu der Lösung. :\n\n${code}`;
+  try {
+    const response = await openai.createCompletion({
+      model: 'text-davinci-003',
+      prompt: prompt,
+      max_tokens: 150,
+    });
+
+    const result = response.data.choices[0].text.trim();
+    res.json({ output: result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
-async function evaluateCode(user) {
-  const code = window.editor.getValue();
-  const languageElement = document.getElementById('exercise-language');
-  if (!languageElement) {
-      console.error('Language element not found.');
-      return;
-  }
-
-  const language = languageElement.textContent.split(': ')[1].toLowerCase();
-  const outputElement = document.getElementById('output');
-  if (!outputElement) {
-      console.error('Output element not found.');
-      return;
-  }
-
-  outputElement.textContent = 'Evaluating code...';
-  outputElement.style.color = 'black';
-
-  try {
-      const payload = {
-          code: code,
-          language: language
-      };
-
-      const response = await fetch('/api/run_code', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-          outputElement.textContent = 'Feedback: ' + result.output;
-          outputElement.style.color = 'green';
-      } else {
-          outputElement.textContent = 'Error: ' + (result.error || 'Unknown error');
-          outputElement.style.color = 'red';
-      }
-  } catch (error) {
-      console.error('Error:', error);
-      outputElement.textContent = 'Error: ' + error.message;
-      outputElement.style.color = 'red';
-  }
-}
+module.exports.handler = serverless(app);
