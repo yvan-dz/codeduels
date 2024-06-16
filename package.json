@@ -7,9 +7,6 @@
     "build": "echo 'Building application...' && npm install",
     "start": "node netlify/functions/run_code.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
     "serverless-http": "^2.7.0",
