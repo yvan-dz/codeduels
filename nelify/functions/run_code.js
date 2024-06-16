@@ -1,5 +1,6 @@
 const { Configuration, OpenAIApi } = require('openai');
 const express = require('express');
+const serverless = require('serverless-http');
 const cors = require('cors');
 
 const app = express();
@@ -11,7 +12,7 @@ app.use(cors({
 }));
 
 const configuration = new Configuration({
-  apiKey: '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',  // Ersetze durch deinen tatsächlichen API-Schlüssel
+  apiKey: process.env.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,  // API-Schlüssel über Umgebungsvariablen
 });
 const openai = new OpenAIApi(configuration);
 
@@ -33,9 +34,4 @@ app.post('/api/run_code', async (req, res) => {
   }
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server läuft auf http://localhost:${port}`);
-});
-
-module.exports = app;
+module.exports.handler = serverless(app);

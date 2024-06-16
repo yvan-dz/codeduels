@@ -2,15 +2,17 @@
   "name": "codeduels",
   "version": "1.0.0",
   "description": "A coding battle platform",
-  "main": "index.js",
+  "main": "netlify/functions/run_code.js",
   "scripts": {
-    "start": "node api/index.js"
+    "build": "echo 'Building application...' && npm install",
+    "start": "node netlify/functions/run_code.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
+    "serverless-http": "^2.7.0",
     "cors": "^2.8.5",
     "openai": "^3.0.0"
   }
