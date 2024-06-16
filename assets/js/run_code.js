@@ -39,7 +39,7 @@ async function evaluateCode(user) {
             language: language
         };
 
-        const response = await fetch('/api/run_code', {
+        const response = await fetch('/.netlify/functions/run_code', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

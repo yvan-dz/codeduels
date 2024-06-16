@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Singleplayer Exercise - Java</title>
     <link rel="stylesheet" href="assets/css/java_exercise.css">
-    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
@@ -48,13 +46,10 @@
             <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
         </div>
     </footer>
-    <!-- Your custom scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
     <script src="assets/js/java_exercise.js"></script>
     <script src="assets/js/run_code.js"></script>
-    <!-- Firebase initialization script -->
     <script>
-        // Your Firebase configuration
         var firebaseConfig = {
             apiKey: "AIzaSyAIwf6RVzexCZ0LMfmEFIFBq5YsHm5-lnM",
             authDomain: "codeduels-1b79f.firebaseapp.com",
@@ -64,10 +59,7 @@
             appId: "1:927315184082:web:e115d2bdc6465ffea6a00b",
             measurementId: "G-6Z7PS1DT05"
         };
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-
-        // Check the authentication state
         firebase.auth().onAuthStateChanged(function(user) {
             const loginButton = document.getElementById('login-button');
             const signupButton = document.getElementById('signup-button');
@@ -85,8 +77,6 @@
                 userStatus.innerText = 'Not signed in';
             }
         });
-
-        // Logout function
         function logout() {
             firebase.auth().signOut().then(() => {
                 console.log('User signed out');
