@@ -34,26 +34,28 @@ async function evaluateCode(user) {
     outputElement.style.color = 'black';
 
     try {
+        const idToken = await user.getIdToken();
         const payload = {
             code: code,
             language: language
         };
 
-        const response = await fetch('/.netlify/functions/run_code', {
+        const response = await fetch('https://codeduels.vercel.app/api/run_code', { // Verwende die tatsächliche URL
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
             },
             body: JSON.stringify(payload)
         });
 
         const result = await response.json();
-        if (response.ok) {
+        if (result.error) {
+            outputElement.textContent = 'Error: ' + result.error;
+            outputElement.style.color = 'red';
+        } else {
             outputElement.textContent = 'Feedback: ' + result.output;
             outputElement.style.color = 'green';
-        } else {
-            outputElement.textContent = 'Error: ' + (result.error || 'Unknown error');
-            outputElement.style.color = 'red';
         }
     } catch (error) {
         console.error('Error:', error);
