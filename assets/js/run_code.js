@@ -34,13 +34,12 @@ async function evaluateCode(user) {
     outputElement.style.color = 'black';
 
     try {
-        const idToken = await user.getIdToken();
         const payload = {
             code: code,
             language: language
         };
 
-        const response = await fetch('https://codeduels.vercel.app/api/run_code', {  // Stelle sicher, dass die URL korrekt ist
+        const response = await fetch('/api/run_code', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
