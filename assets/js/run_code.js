@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function() {
-    setupSocket();
     const runButton = document.getElementById('run-button');
     if (runButton) {
         runButton.addEventListener('click', function() {
@@ -15,31 +14,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
-
-let socket;
-
-function setupSocket() {
-    socket = io();
-
-    socket.on('connect', () => {
-        console.log('Connected to server');
-    });
-
-    socket.on('code_result', (data) => {
-        const outputElement = document.getElementById('output');
-        if (data.error) {
-            outputElement.textContent = 'Error: ' + data.error;
-            outputElement.style.color = 'red';
-        } else {
-            outputElement.textContent = 'Feedback: ' + data.output;
-            outputElement.style.color = 'green';
-        }
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Disconnected from server');
-    });
-}
 
 async function evaluateCode(user) {
     const code = window.editor.getValue();
@@ -63,11 +37,26 @@ async function evaluateCode(user) {
         const idToken = await user.getIdToken();
         const payload = {
             code: code,
-            language: language,
-            idToken: idToken
+            language: language
         };
 
-        socket.emit('run_code', payload);
+        const response = await fetch('https://codeduels.vercel.app/api/run_code', { // Verwende die tatsächliche URL
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (result.error) {
+            outputElement.textContent = 'Error: ' + result.error;
+            outputElement.style.color = 'red';
+        } else {
+            outputElement.textContent = 'Feedback: ' + result.output;
+            outputElement.style.color = 'green';
+        }
     } catch (error) {
         console.error('Error:', error);
         outputElement.textContent = 'Error: ' + error.message;
