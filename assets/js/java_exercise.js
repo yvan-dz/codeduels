@@ -82,6 +82,7 @@ async function runCode() {
     }*/
 
         // start.js
+        const spawn = require('child_process').spawn;
         var { exec } = require('child_process'); // native in nodeJs
 
         const childProcess_ = exec('javac test.java');
