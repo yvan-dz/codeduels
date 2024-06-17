@@ -1,7 +1,30 @@
 document.addEventListener("DOMContentLoaded", function() {
     loadRandomExercise();
     document.getElementById('run-button').addEventListener('click', runCode);
+    setupSocket();
 });
+
+let socket;
+
+function setupSocket() {
+    socket = io();
+
+    socket.on('connect', () => {
+        console.log('Connected to server');
+    });
+
+    socket.on('code_result', (data) => {
+        if (data.error) {
+            document.getElementById('output').textContent = 'Error: ' + data.error;
+        } else {
+            document.getElementById('output').textContent = data.output;
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+    });
+}
 
 function loadRandomExercise() {
     fetch('assets/js/java_exercises.json')
@@ -56,28 +79,10 @@ function initializeMonaco(language) {
     });
 }
 
-async function runCode() {
+function runCode() {
     const code = window.editor.getValue();
     const languageElement = document.getElementById('exercise-language');
     const language = languageElement ? languageElement.textContent.split(': ')[1] : 'java';
 
-    try {
-        const response = await fetch('/api/run_code', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ language, code }),
-        });
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-
-        const result = await response.json();
-        document.getElementById('output').textContent = result.output;
-    } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('output').textContent = 'Error running code';
-    }
+    socket.emit('run_code', { language, code });
 }
