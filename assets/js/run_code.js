@@ -1,65 +1,34 @@
 document.addEventListener("DOMContentLoaded", function() {
-    const runButton = document.getElementById('run-button');
-    if (runButton) {
-        runButton.addEventListener('click', function() {
-            const user = firebase.auth().currentUser;
-            if (user) {
-                evaluateCode(user);
-            } else {
-                console.error('User not authenticated.');
-                const outputElement = document.getElementById('output');
-                outputElement.textContent = 'Please sign in to run the code.';
-                outputElement.style.color = 'red';
-            }
-        });
-    }
+    setupSocket();
+    document.getElementById('run-button').addEventListener('click', runCode);
 });
 
-async function evaluateCode(user) {
+let socket;
+
+function setupSocket() {
+    socket = io();
+
+    socket.on('connect', () => {
+        console.log('Connected to server');
+    });
+
+    socket.on('code_result', (data) => {
+        if (data.error) {
+            document.getElementById('output').textContent = 'Error: ' + data.error;
+        } else {
+            document.getElementById('output').textContent = data.output;
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+    });
+}
+
+function runCode() {
     const code = window.editor.getValue();
     const languageElement = document.getElementById('exercise-language');
-    if (!languageElement) {
-        console.error('Language element not found.');
-        return;
-    }
+    const language = languageElement ? languageElement.textContent.split(': ')[1] : 'java';
 
-    const language = languageElement.textContent.split(': ')[1].toLowerCase();
-    const outputElement = document.getElementById('output');
-    if (!outputElement) {
-        console.error('Output element not found.');
-        return;
-    }
-
-    outputElement.textContent = 'Evaluating code...';
-    outputElement.style.color = 'black';
-
-    try {
-        const idToken = await user.getIdToken();
-        const payload = {
-            code: code,
-            language: language
-        };
-
-        const response = await fetch('https://codeduels.vercel.app/api/run_code', { // Verwende die tatsächliche URL
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${idToken}`
-            },
-            body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-        if (result.error) {
-            outputElement.textContent = 'Error: ' + result.error;
-            outputElement.style.color = 'red';
-        } else {
-            outputElement.textContent = 'Feedback: ' + result.output;
-            outputElement.style.color = 'green';
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        outputElement.textContent = 'Error: ' + error.message;
-        outputElement.style.color = 'red';
-    }
+    socket.emit('run_code', { language, code });
 }
