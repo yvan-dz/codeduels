@@ -82,20 +82,9 @@ async function runCode() {
     }*/
 
         // start.js
-const express = require('express');
-const app = express();
+        var { exec } = require('child_process'); // native in nodeJs
 
-app.listen(3000, () => {
-    console.log('Server running on port 3000');
-});
-
-app.get('/name', (req, res) => {
-    const spawn = require('child_process').spawn;
-    const process = spawn('java', ['./Hello', req.query.firstname, req.query.lastname]);
-
-    process.stdout.on('data', (data) => {
-        res.send(data.toString());
-    });
-});
+        const childProcess_ = exec('javac test.java');
+        const childProcess= exec('java test');
 
 }
