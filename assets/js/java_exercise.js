@@ -62,7 +62,7 @@ async function runCode() {
     const language = languageElement ? languageElement.textContent.split(': ')[1] : 'java';
 
     try {
-        const response = await fetch('/api/run_code', {
+        const response = await fetch('coderun', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

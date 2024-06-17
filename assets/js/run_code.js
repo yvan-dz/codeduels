@@ -40,7 +40,7 @@ async function evaluateCode(user) {
             language: language
         };
 
-        const response = await fetch('https://codeduels.vercel.app/api/run_code', { // Verwende die tatsächliche URL
+        const response = await fetch('https://codeduels.vercel.app/coderun', { // Verwende die tatsächliche URL
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -9,7 +9,7 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-app.post('coderun', async (req, res) => {
+app.post('/api/run_code', async (req, res) => {
   const { language, code } = req.body;
 
   const prompt = `Bitte analysiere und führe den folgenden ${language}-Code aus. Wenn es inkorrekt ist, sag bitte "Code Inkorrekt" + die Antwort und sag kurz warum es inkorrekt ist. Wenn es korrekt ist, sagt bitte "Code korrekt" und gibt eine Note auf 10 zu der Lösung:\n\n${code}`;

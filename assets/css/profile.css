@@ -1,20 +1,28 @@
+/* profile.css */
+
 body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #1f1f1f;
-    color: #ffffff;
+    background-color: #f4f4f4;
+    color: #333;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
 header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background-color: #272727;
+    padding: 0 20px;
 }
 
 .logo {
@@ -22,57 +30,60 @@ header {
     align-items: center;
 }
 
+.logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
 .logo img {
-    height: 60px;
+    height: 50px;
     margin-right: 10px;
 }
 
 .logo span {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
 }
 
 nav ul {
     list-style: none;
-    display: flex;
     margin: 0;
     padding: 0;
+    display: flex;
+    gap: 15px;
 }
 
-nav ul li {
-    margin: 0 15px;
-}
-
-nav ul li a {
+nav a {
+    color: white;
     text-decoration: none;
-    color: #ffffff;
     font-weight: 500;
     transition: color 0.3s;
 }
 
-nav ul li a:hover {
-    color: #ff914d;
+nav a:hover {
+    color: #1abc9c;
 }
 
 .auth-buttons {
     display: flex;
+    gap: 10px;
 }
 
 .auth-buttons .button {
-    background-color: #ff914d;
+    background-color: #1abc9c;
+    color: white;
     border: none;
-    color: #ffffff;
     padding: 10px 20px;
-    margin-left: 10px;
-    cursor: pointer;
     text-decoration: none;
     border-radius: 5px;
     transition: background-color 0.3s;
 }
 
 .auth-buttons .button:hover {
-    background-color: #ff7a2d;
+    background-color: #16a085;
 }
 
 .profile-section {
@@ -81,16 +92,16 @@ nav ul li a:hover {
     justify-content: center;
     align-items: center;
     padding: 50px 20px;
-    background-color: #272727;
+    background-color: #f4f4f4;
 }
 
 .profile-container {
-    background-color: #1e1e2d;
+    background-color: #fff;
     border-radius: 10px;
     padding: 20px;
     width: 100%;
     max-width: 600px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .profile-header {
@@ -112,11 +123,11 @@ nav ul li a:hover {
 
 .profile-header p {
     font-size: 1em;
-    color: #ff914d;
+    color: #666;
 }
 
 .profile-details {
-    background-color: #333;
+    background-color: #f9f9f9;
     padding: 20px;
     border-radius: 10px;
 }
@@ -124,7 +135,7 @@ nav ul li a:hover {
 .profile-details h3 {
     margin-top: 0;
     font-size: 1.5em;
-    color: #ff914d;
+    color: #333;
     margin-bottom: 15px;
 }
 
@@ -134,7 +145,7 @@ nav ul li a:hover {
 }
 
 .profile-details button {
-    background-color: #ff914d;
+    background-color: #1abc9c;
     border: none;
     color: #ffffff;
     padding: 10px 20px;
@@ -144,12 +155,12 @@ nav ul li a:hover {
 }
 
 .profile-details button:hover {
-    background-color: #ff7a2d;
+    background-color: #16a085;
 }
 
 footer {
-    background-color: #1e1e2d;
-    color: #ffffff;
+    background-color: #2c3e50;
+    color: #fff;
     text-align: center;
     padding: 20px 0;
     margin-top: auto;
@@ -162,9 +173,14 @@ footer {
 }
 
 .footer-bottom a {
-    color: #ff914d;
+    color: #1abc9c;
     text-decoration: none;
     margin: 0 5px;
+    font-size: 1em;
+}
+
+.footer-bottom a:hover {
+    color: #16a085;
 }
 
 /* Responsive Design */
@@ -179,15 +195,6 @@ footer {
     }
 
     nav ul li {
-        margin: 10px 0;
-    }
-
-    .auth-buttons {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .auth-buttons .button {
         margin: 10px 0;
     }
 
