@@ -61,7 +61,7 @@ async function runCode() {
     const languageElement = document.getElementById('exercise-language');
     const language = languageElement ? languageElement.textContent.split(': ')[1] : 'java';
 
-    try {
+    /*try {
         const response = await fetch('coderun', {
             method: 'POST',
             headers: {
@@ -79,5 +79,23 @@ async function runCode() {
     } catch (error) {
         console.error('Error:', error);
         document.getElementById('output').textContent = 'Error running code';
-    }
+    }*/
+
+        // start.js
+const express = require('express');
+const app = express();
+
+app.listen(3000, () => {
+    console.log('Server running on port 3000');
+});
+
+app.get('/name', (req, res) => {
+    const spawn = require('child_process').spawn;
+    const process = spawn('java', ['./Hello', req.query.firstname, req.query.lastname]);
+
+    process.stdout.on('data', (data) => {
+        res.send(data.toString());
+    });
+});
+
 }
