@@ -5,23 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms and Conditions - CodeDuels</title>
     <link rel="stylesheet" href="assets/css/terms.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="assets/js/auth.js" defer></script>
 </head>
 <body>
     <header>
         <div class="logo">
-            <img src="assets/img/logo.png" alt="Logo">
-            <span><a href="index.html" id="webname"> CodeDuels</a></span>
+            <a href="index.html" class="logo-link">
+                <img src="assets/img/logo.png" alt="Logo">
+                <span id="webname">CodeDuels</span>
+            </a>
         </div>
         <nav>
             <ul>
-                <li><a href="#">Play with friends</a></li>
-                <li><a href="#">Play online</a></li>
-                <li><a href="#">Hackathons</a></li>
+                <li><a href="multiplayer_battle.html" id="friends-link">Play with friends</a></li>
+                <li><a href="#" id="online-link">Play online</a></li>
+                <li><a href="#" id="hackathons-link">Hackathons</a></li>
+                <li><a href="profile.html" id="profile-link" style="display: none;">Profile</a></li>
+                <li><a href="settings.html" id="settings-link" style="display: none;">Settings</a></li>
             </ul>
         </nav>
         <div class="auth-buttons">
-            <button><a href="login.html" class="log">Sign in</a></button>
-            <button><a href="signup.html" class="log">Join</a></button>
+            <a href="login.html" class="button log" id="login-button">Sign in</a>
+            <a href="signup.html" class="button log" id="signup-button">Join</a>
+            <button class="button log" id="logout-button" onclick="logout()" style="display: none;">Logout</button>
         </div>
     </header>
     <main>
@@ -69,5 +78,64 @@
             <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
         </div>
     </footer>
+    <script>
+        // Firebase Configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyAIwf6RVzexCZ0LMfmEFIFBq5YsHm5-lnM",
+            authDomain: "codeduels-1b79f.firebaseapp.com",
+            projectId: "codeduels-1b79f",
+            storageBucket: "codeduels-1b79f.appspot.com",
+            messagingSenderId: "927315184082",
+            appId: "1:927315184082:web:e115d2bdc6465ffea6a00b",
+            measurementId: "G-6Z7PS1DT05"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Firebase Authentication and Firestore
+        var auth = firebase.auth();
+        var db = firebase.firestore();
+
+        // Check auth state and update UI
+        auth.onAuthStateChanged(function (user) {
+            if (user) {
+                // User is signed in
+                var docRef = db.collection("users").doc(user.uid);
+                docRef.get().then(function (doc) {
+                    if (doc.exists) {
+                        var userData = doc.data();
+                        document.getElementById('login-button').style.display = 'none';
+                        document.getElementById('signup-button').style.display = 'none';
+                        document.getElementById('logout-button').style.display = 'block';
+                        document.getElementById('profile-link').style.display = 'inline';
+                        document.getElementById('settings-link').style.display = 'inline';
+                    } else {
+                        console.log('No such document!');
+                    }
+                }).catch(function (error) {
+                    console.error('Error getting document:', error);
+                });
+            } else {
+                // No user is signed in
+                document.getElementById('login-button').style.display = 'inline';
+                document.getElementById('signup-button').style.display = 'inline';
+                document.getElementById('logout-button').style.display = 'none';
+                document.getElementById('profile-link').style.display = 'none';
+                document.getElementById('settings-link').style.display = 'none';
+            }
+        });
+
+        // Logout function
+        function logout() {
+            auth.signOut().then(function () {
+                console.log('User signed out');
+                window.location.href = 'index.html';  // Redirect to homepage after logout
+            }).catch(function (error) {
+                console.error('Error signing out:', error);
+                alert('Error signing out: ' + error.message); // Display error message
+            });
+        }
+    </script>
 </body>
 </html>

@@ -1,17 +1,28 @@
+/* settings.css */
+
 body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #1f1f1f;
-    color: #ffffff;
+    background-color: #f4f4f4;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background-color: #272727;
+    padding: 0 20px;
 }
 
 .logo {
@@ -19,57 +30,67 @@ header {
     align-items: center;
 }
 
+.logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
 .logo img {
-    height: 60px;
+    height: 50px;
     margin-right: 10px;
 }
 
 .logo span {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
 }
 
 nav ul {
     list-style: none;
-    display: flex;
     margin: 0;
     padding: 0;
+    display: flex;
+    gap: 15px;
 }
 
-nav ul li {
-    margin: 0 15px;
-}
-
-nav ul li a {
+nav a {
+    color: white;
     text-decoration: none;
-    color: #ffffff;
     font-weight: 500;
     transition: color 0.3s;
 }
 
-nav ul li a:hover {
-    color: #ff914d;
+nav a:hover {
+    color: #1abc9c;
 }
 
 .auth-buttons {
     display: flex;
+    gap: 10px;
 }
 
 .auth-buttons .button {
-    background-color: #ff914d;
+    background-color: #1abc9c;
+    color: white;
     border: none;
-    color: #ffffff;
     padding: 10px 20px;
-    margin-left: 10px;
-    cursor: pointer;
     text-decoration: none;
     border-radius: 5px;
     transition: background-color 0.3s;
 }
 
 .auth-buttons .button:hover {
-    background-color: #ff7a2d;
+    background-color: #16a085;
+}
+
+main {
+    flex: 1;
+    padding: 40px 20px;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .settings-section {
@@ -84,19 +105,22 @@ nav ul li a:hover {
 .settings-section h2 {
     font-size: 2em;
     color: #ff914d;
+    margin-bottom: 20px;
 }
 
 .form-group {
     margin-bottom: 20px;
+    text-align: left;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 5px;
+    font-weight: 500;
 }
 
 .form-group input {
-    width: 100%;
+    width: calc(100% - 22px);
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -106,14 +130,18 @@ nav ul li a:hover {
 .form-group img {
     max-height: 150px;
     margin-top: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .form-actions {
     margin-top: 20px;
+    text-align: center;
 }
 
 .form-actions button {
-    background-color: #ff914d;
+    background-color: #1abc9c;
     border: none;
     color: #ffffff;
     padding: 15px 30px;
@@ -125,24 +153,24 @@ nav ul li a:hover {
 }
 
 .form-actions button:hover {
-    background-color: #ff7a2d;
+    background-color: #16a085;
 }
 
 footer {
-    background-color: #1e1e2d;
-    color: #ffffff;
-    text-align: center;
-    padding: 20px 0;
-}
-
-.footer-bottom {
     background-color: #333;
     color: #fff;
-    padding: 10px 0;
+    text-align: center;
+    padding: 15px 0;
+    margin-top: auto;
 }
 
-.footer-bottom a {
-    color: #ff914d;
+footer a {
+    color: #007bff;
     text-decoration: none;
     margin: 0 5px;
+    font-size: 1em;
+}
+
+footer a:hover {
+    color: #0056b3;
 }

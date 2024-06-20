@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Singleplayer Exercise - Java</title>
-    <link rel="stylesheet" href="assets/css/java_exercise.css">
+    <link rel="stylesheet" href="assets/css/exercise.css">
     <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <!-- Add Firebase products that you want to use -->
@@ -22,6 +22,8 @@
                 <li><a href="#">Play with friends</a></li>
                 <li><a href="#">Play online</a></li>
                 <li><a href="#">Hackathons</a></li>
+                <li><a href="profile.html" id="profile-link" style="display: none;">Profile</a></li>
+                <li><a href="settings.html" id="settings-link" style="display: none;">Settings</a></li>
             </ul>
         </nav>
         <div class="auth-buttons">
@@ -73,16 +75,22 @@
             const signupButton = document.getElementById('signup-button');
             const logoutButton = document.getElementById('logout-button');
             const userStatus = document.getElementById('user-status');
+            const profileLink = document.getElementById('profile-link');
+            const settingsLink = document.getElementById('settings-link');
             if (user) {
                 loginButton.style.display = 'none';
                 signupButton.style.display = 'none';
                 logoutButton.style.display = 'block';
                 userStatus.innerText = `Signed in as: ${user.email}`;
+                profileLink.style.display = 'inline';
+                settingsLink.style.display = 'inline';
             } else {
                 loginButton.style.display = 'block';
                 signupButton.style.display = 'block';
                 logoutButton.style.display = 'none';
                 userStatus.innerText = 'Not signed in';
+                profileLink.style.display = 'none';
+                settingsLink.style.display = 'none';
             }
         });
 

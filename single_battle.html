@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="assets/js/auth.js" defer></script>
 </head>
 
 <body>
@@ -20,12 +21,13 @@
                 <span id="webname">CodeDuels</span>
             </a>
         </div>
-        
         <nav>
             <ul>
-                <li><a href="#" id="friends-link">Play with friends</a></li>
+                <li><a href="multiplayer_battle.html" id="friends-link">Play with friends</a></li>
                 <li><a href="#" id="online-link">Play online</a></li>
                 <li><a href="#" id="hackathons-link">Hackathons</a></li>
+                <li><a href="profile.html" id="profile-link" style="display: none;">Profile</a></li>
+                <li><a href="settings.html" id="settings-link" style="display: none;">Settings</a></li>
             </ul>
         </nav>
         <div class="auth-buttons">
@@ -34,7 +36,6 @@
             <button class="button log" id="logout-button" onclick="logout()" style="display: none;">Logout</button>
         </div>
     </header>
-    
     <main>
         <section class="intro">
             <h1>Welcome to Singleplayer Exercises!</h1>
@@ -104,12 +105,12 @@
                 var docRef = db.collection("users").doc(user.uid);
                 docRef.get().then(function (doc) {
                     if (doc.exists) {
-                        document.getElementById('logout-button').style.display = 'block';
+                        var userData = doc.data();
                         document.getElementById('login-button').style.display = 'none';
                         document.getElementById('signup-button').style.display = 'none';
-                        document.getElementById('friends-link').href = "multiplayer_battle.html";
-                        document.getElementById('online-link').href = "#";
-                        document.getElementById('hackathons-link').href = "#";
+                        document.getElementById('logout-button').style.display = 'block';
+                        document.getElementById('profile-link').style.display = 'inline';
+                        document.getElementById('settings-link').style.display = 'inline';
                     } else {
                         console.log('No such document!');
                     }
@@ -118,12 +119,11 @@
                 });
             } else {
                 // No user is signed in
-                document.getElementById('logout-button').style.display = 'none';
                 document.getElementById('login-button').style.display = 'inline';
                 document.getElementById('signup-button').style.display = 'inline';
-                document.getElementById('friends-link').href = "login.html";
-                document.getElementById('online-link').href = "login.html";
-                document.getElementById('hackathons-link').href = "login.html";
+                document.getElementById('logout-button').style.display = 'none';
+                document.getElementById('profile-link').style.display = 'none';
+                document.getElementById('settings-link').style.display = 'none';
             }
         });
 
@@ -138,6 +138,7 @@
             });
         }
 
+        // Start exercise function
         function startExercise(language) {
             const pages = {
                 'javascript': 'javascript_exercise.html',
@@ -150,5 +151,4 @@
         }
     </script>
 </body>
-
 </html>
