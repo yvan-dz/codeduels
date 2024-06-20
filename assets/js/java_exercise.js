@@ -61,13 +61,18 @@ async function runCode() {
     const languageElement = document.getElementById('exercise-language');
     const language = languageElement ? languageElement.textContent.split(': ')[1] : 'java';
 
-    /*try {
-        const response = await fetch('coderun', {
+    if (language !== 'java') {
+        document.getElementById('output').textContent = 'Currently only Java is supported.';
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/runJavaCode', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ language, code }),
+            body: JSON.stringify({ code }),
         });
 
         if (!response.ok) {
@@ -79,13 +84,6 @@ async function runCode() {
     } catch (error) {
         console.error('Error:', error);
         document.getElementById('output').textContent = 'Error running code';
-    }*/
-
-        // start.js
-        const spawn = require('child_process').spawn;
-        var { exec } = require('child_process'); // native in nodeJs
-
-        const childProcess_ = exec('javac test.java');
-        const childProcess= exec('java test');
-
+    }
 }
+

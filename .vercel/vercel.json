@@ -1,13 +1,7 @@
 {
-  "version": 2,
-  
-  "routes": [
-    {
-      "src": "/api/run_code",
-      "dest": "/api/run_code.js",
-      "headers": {
-          "Access-Control-Allow-Private-Network": "true"
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs14.x"
     }
-  } 
-  ]
+  }
 }
