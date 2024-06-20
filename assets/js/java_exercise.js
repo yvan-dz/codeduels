@@ -86,4 +86,3 @@ async function runCode() {
         document.getElementById('output').textContent = 'Error running code';
     }
 }
-
