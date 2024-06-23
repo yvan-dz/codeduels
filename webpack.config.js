@@ -1,6 +1,5 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './src/index.js',
@@ -9,16 +8,24 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     clean: true
   },
+
   module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+      }
+    ]
+  },
+  
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html',
       filename: 'index.html'
-    }),
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: 'public', to: '' } // Kopiert alle Dateien aus dem public-Verzeichnis ins dist-Verzeichnis
-      ]
     })
   ],
   devServer: {
@@ -26,5 +33,4 @@ module.exports = {
     compress: true,
     port: 9000
   }
-}
-}
+};
