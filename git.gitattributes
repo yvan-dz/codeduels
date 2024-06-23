@@ -1,0 +1,8 @@
+# Setze die Zeilenendungen für alle Dateien
+* text=auto
+
+# Setze explizit LF für bestimmte Dateitypen (optional)
+*.sh text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+*.html text eol=lf
