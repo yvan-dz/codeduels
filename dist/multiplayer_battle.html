@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Exercises - CodeDuels</title>
+    <link rel="stylesheet" href="assets/css/multiplayer_battle.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="assets/js/auth.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <a href="index.html" class="logo-link">
+                <img src="assets/img/logo.png" alt="Logo">
+                <span id="webname">CodeDuels</span>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="multiplayer_battle.html" id="friends-link">Play with friends</a></li>
+                <li><a href="#" id="online-link">Play online</a></li>
+                <li><a href="#" id="hackathons-link">Hackathons</a></li>
+                <li><a href="profile.html" id="profile-link" style="display: none;">Profile</a></li>
+                <li><a href="settings.html" id="settings-link" style="display: none;">Settings</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <a href="login.html" class="button log" id="login-button">Sign in</a>
+            <a href="signup.html" class="button log" id="signup-button">Join</a>
+            <button class="button log" id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+        </div>
+    </header>
+    <main>
+        <section class="intro">
+            <h1>Welcome to Multiplayer Exercises!</h1>
+            <p>Challenge your friends or compete online with others. Choose a language and start your coding battle now.</p>
+        </section>
+        <section class="exercise-options">
+            <div class="exercise-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png" alt="JavaScript">
+                <h2>JavaScript</h2>
+                <p>Interactive web applications and more.</p>
+                <button onclick="startExercise('javascript')">Start JavaScript Battle</button>
+            </div>
+            <div class="exercise-card">
+                <img src="https://upload.wikimedia.org/wikipedia/en/3/30/Java_programming_language_logo.svg" alt="Java">
+                <h2>Java</h2>
+                <p>Robust applications and solutions.</p>
+                <button onclick="startExercise('java')">Start Java Battle</button>
+            </div>
+            <div class="exercise-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="Python">
+                <h2>Python</h2>
+                <p>Simple and powerful programming.</p>
+                <button onclick="startExercise('python')">Start Python Battle</button>
+            </div>
+            <div class="exercise-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg" alt="C++">
+                <h2>C++</h2>
+                <p>High-performance applications.</p>
+                <button onclick="startExercise('cpp')">Start C++ Battle</button>
+            </div>
+            <div class="exercise-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" alt="C#">
+                <h2>C#</h2>
+                <p>Develop games and Windows apps.</p>
+                <button onclick="startExercise('csharp')">Start C# Battle</button>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
+        </div>
+    </footer>
+    <script>
+        // Firebase Configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyAIwf6RVzexCZ0LMfmEFIFBq5YsHm5-lnM",
+            authDomain: "codeduels-1b79f.firebaseapp.com",
+            projectId: "codeduels-1b79f",
+            storageBucket: "codeduels-1b79f.appspot.com",
+            messagingSenderId: "927315184082",
+            appId: "1:927315184082:web:e115d2bdc6465ffea6a00b",
+            measurementId: "G-6Z7PS1DT05"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Firebase Authentication and Firestore
+        var auth = firebase.auth();
+        var db = firebase.firestore();
+
+        // Check auth state and update UI
+        auth.onAuthStateChanged(function (user) {
+            if (user) {
+                // User is signed in
+                var docRef = db.collection("users").doc(user.uid);
+                docRef.get().then(function (doc) {
+                    if (doc.exists) {
+                        var userData = doc.data();
+                        document.getElementById('login-button').style.display = 'none';
+                        document.getElementById('signup-button').style.display = 'none';
+                        document.getElementById('logout-button').style.display = 'block';
+                        document.getElementById('profile-link').style.display = 'inline';
+                        document.getElementById('settings-link').style.display = 'inline';
+                    } else {
+                        console.log('No such document!');
+                    }
+                }).catch(function (error) {
+                    console.error('Error getting document:', error);
+                });
+            } else {
+                // No user is signed in
+                document.getElementById('login-button').style.display = 'inline';
+                document.getElementById('signup-button').style.display = 'inline';
+                document.getElementById('logout-button').style.display = 'none';
+                document.getElementById('profile-link').style.display = 'none';
+                document.getElementById('settings-link').style.display = 'none';
+            }
+        });
+
+        // Logout function
+        function logout() {
+            auth.signOut().then(function () {
+                console.log('User signed out');
+                window.location.href = 'index.html';  // Redirect to homepage after logout
+            }).catch(function (error) {
+                console.error('Error signing out:', error);
+                alert('Error signing out: ' + error.message); // Display error message
+            });
+        }
+
+        // Start exercise function
+        function startExercise(language) {
+            const pages = {
+                'javascript': 'play_with_friends_javascript/friends.html',
+                'java': 'play_with_friends_java/friends.html',
+                'python': 'play_with_friends_python/friends.html',
+                'cpp': 'play_with_friends_cpp/friends.html',
+                'csharp': 'play_with_friends_csharp/friends.html'
+            };
+            window.location.href = pages[language];
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking - CodeDuels</title>
+    <link rel="stylesheet" href="assets/css/ranking.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="assets/js/auth.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="index.html" class="logo-link">
+                <img src="assets/img/logo.png" alt="Logo">
+                <span id="webname">CodeDuels</span>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="multiplayer_battle.html" id="friends-link">Play with friends</a></li>
+                <li><a href="#" id="online-link">Play online</a></li>
+                <li><a href="#" id="hackathons-link">Hackathons</a></li>
+                <li><a href="profile.html" id="profile-link" style="display: none;">Profile</a></li>
+                <li><a href="settings.html" id="settings-link" style="display: none;">Settings</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <a href="login.html" class="button log" id="login-button">Sign in</a>
+            <a href="signup.html" class="button log" id="signup-button">Join</a>
+            <button class="button log" id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+        </div>
+    </header>
+    <main>
+        <section class="ranks">
+            <h1>Ranking System</h1>
+            <div class="rank-cards">
+                <div class="rank-card">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3943/3943611.png" alt="Unranked">
+                    <h2>Unranked</h2>
+                    <p>Duelies gained/lost per match: +50 -25</p>
+                </div>
+                <div class="rank-card">
+                    <img src="https://th.bing.com/th/id/OIG3.aljc_h0bmjfCH78IPTDY?w=1024&h=1024&rs=1&pid=ImgDetMain" alt="Novice">
+                    <h2>Novice</h2>
+                    <p>Duelies needed: 100</p>
+                    <p>Duelies gained/lost per match: +50 -25</p>
+                </div>
+                <div class="rank-card">
+                    <img src="https://preview.redd.it/the-birth-of-a-great-ninja-v0-lxo6ppfjff9c1.jpg?width=640&crop=smart&auto=webp&s=f8a1c1b4c3faf19cba7219523148bf11fffe8e3c" alt="Junior">
+                    <h2>Junior</h2>
+                    <p>Duelies needed: 200</p>
+                    <p>Duelies gained/lost per match: +50 -25</p>
+                </div>
+                <div class="rank-card">
+                    <img src="https://via.placeholder.com/250?text=Apprentice" alt="Apprentice">
+                    <h2>Apprentice</h2>
+                    <p>Duelies needed: 400</p>
+                    <p>Duelies gained/lost per match: +35 -20</p>
+                </div>
+                <div class="rank-card">
+                    <img src="https://via.placeholder.com/250?text=Developer" alt="Developer">
+                    <h2>Developer</h2>
+                    <p>Duelies needed: 700</p>
+                    <p>Duelies gained/lost per match: +35 -20</p>
+                </div>
+                <div class="rank-card">
+                    <img src="https://via.placeholder.com/250?text=Coder" alt="Coder">
+                    <h2>Coder</h2>
+                    <p>Duelies needed: 1000</p>
+                </div>
+                <div class="rank-card">
+                    <img src="https://via.placeholder.com/250?text=Expert" alt="Expert">
+                    <h2>Expert</h2>
+                    <p>Duelies needed: 1250</p>
+                </div>
+                <div class="rank-card">
+                    <img src="https://via.placeholder.com/250?text=Wizard" alt="Wizard">
+                    <h2>Wizard</h2>
+                    <p>Duelies needed: 1500</p>
+                </div>
+                <div class="rank-card">
+                    <img src="https://via.placeholder.com/250?text=Master" alt="Master">
+                    <h2>Master</h2>
+                    <p>Duelies needed: 1750</p>
+                </div>
+                <div class="rank-card">
+                    <img src="https://via.placeholder.com/250?text=Guru" alt="Guru">
+                    <h2>Guru</h2>
+                    <p>Duelies needed: 2000</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
+        </div>
+    </footer>
+    <script>
+        // Firebase Configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyAIwf6RVzexCZ0LMfmEFIFBq5YsHm5-lnM",
+            authDomain: "codeduels-1b79f.firebaseapp.com",
+            projectId: "codeduels-1b79f",
+            storageBucket: "codeduels-1b79f.appspot.com",
+            messagingSenderId: "927315184082",
+            appId: "1:927315184082:web:e115d2bdc6465ffea6a00b",
+            measurementId: "G-6Z7PS1DT05"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Firebase Authentication and Firestore
+        var auth = firebase.auth();
+        var db = firebase.firestore();
+
+        // Check auth state and update UI
+        auth.onAuthStateChanged(function (user) {
+            if (user) {
+                // User is signed in
+                var docRef = db.collection("users").doc(user.uid);
+                docRef.get().then(function (doc) {
+                    if (doc.exists) {
+                        var userData = doc.data();
+                        document.getElementById('login-button').style.display = 'none';
+                        document.getElementById('signup-button').style.display = 'none';
+                        document.getElementById('logout-button').style.display = 'block';
+                        document.getElementById('profile-link').style.display = 'inline';
+                        document.getElementById('settings-link').style.display = 'inline';
+                    } else {
+                        console.log('No such document!');
+                    }
+                }).catch(function (error) {
+                    console.error('Error getting document:', error);
+                });
+            } else {
+                // No user is signed in
+                document.getElementById('login-button').style.display = 'inline';
+                document.getElementById('signup-button').style.display = 'inline';
+                document.getElementById('logout-button').style.display = 'none';
+                document.getElementById('profile-link').style.display = 'none';
+                document.getElementById('settings-link').style.display = 'none';
+            }
+        });
+
+        // Logout function
+        function logout() {
+            auth.signOut().then(function () {
+                console.log('User signed out');
+                window.location.href = 'index.html';  // Redirect to homepage after logout
+            }).catch(function (error) {
+                console.error('Error signing out:', error);
+                alert('Error signing out: ' + error.message); // Display error message
+            });
+        }
+    </script>
+</body>
+</html>

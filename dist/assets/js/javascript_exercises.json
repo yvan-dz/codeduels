@@ -1,0 +1,63 @@
+[
+    {
+        "title": "Anagram Checker",
+        "language": "JavaScript",
+        "difficulty": "Medium",
+        "description": "Write a function that checks if two strings are anagrams."
+    },
+    {
+        "title": "Palindrome Checker",
+        "language": "JavaScript",
+        "difficulty": "Easy",
+        "description": "Write a function that checks if a string is a palindrome."
+    },
+    {
+        "title": "Prime Numbers",
+        "language": "JavaScript",
+        "difficulty": "Hard",
+        "description": "Write a function that prints all prime numbers up to a given number."
+    },
+    {
+        "title": "Fibonacci Sequence",
+        "language": "JavaScript",
+        "difficulty": "Easy",
+        "description": "Write a function that generates the first n numbers of the Fibonacci sequence."
+    },
+    {
+        "title": "Factorial Calculation",
+        "language": "JavaScript",
+        "difficulty": "Medium",
+        "description": "Write a function that calculates the factorial of a given number."
+    },
+    {
+        "title": "Bubble Sort",
+        "language": "JavaScript",
+        "difficulty": "Medium",
+        "description": "Implement the bubble sort algorithm to sort an array of integers."
+    },
+    {
+        "title": "Binary Search",
+        "language": "JavaScript",
+        "difficulty": "Hard",
+        "description": "Implement the binary search algorithm to find an element in a sorted array."
+    },
+    {
+        "title": "String Reversal",
+        "language": "JavaScript",
+        "difficulty": "Easy",
+        "description": "Write a function that reverses a given string."
+    },
+    {
+        "title": "Matrix Multiplication",
+        "language": "JavaScript",
+        "difficulty": "Hard",
+        "description": "Write a function that multiplies two matrices."
+    },
+    {
+        "title": "GCD Calculation",
+        "language": "JavaScript",
+        "difficulty": "Medium",
+        "description": "Write a function that calculates the greatest common divisor (GCD) of two numbers."
+    }
+]
+       

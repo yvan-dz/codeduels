@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - CodeDuels</title>
+    <link rel="stylesheet" href="assets/css/profile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="assets/js/profile.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="index.html" class="logo-link">
+                <img src="assets/img/logo.png" alt="Logo">
+                <span id="webname">CodeDuels</span>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="multiplayer_battle.html" id="friends-link">Play with friends</a></li>
+                <li><a href="#" id="online-link">Play online</a></li>
+                <li><a href="#" id="hackathons-link">Hackathons</a></li>
+                <li><a href="profile.html" id="profile-link" style="display: none;">Profile</a></li>
+                <li><a href="settings.html" id="settings-link" style="display: none;">Settings</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <a href="login.html" class="button log" id="login-button">Sign in</a>
+            <a href="signup.html" class="button log" id="signup-button">Join</a>
+            <button class="button log" id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+        </div>
+    </header>
+    <main>
+        <section class="profile-section">
+            <div class="profile-container">
+                <div class="profile-header">
+                    <img src="https://img-9gag-fun.9cache.com/photo/a6ELVLe_460s.jpg" alt="Profile Picture" id="profile-picture">
+                    <h2 id="username">Username</h2>
+                    <p id="email">user@example.com</p>
+                </div>
+                <div class="profile-details">
+                    <h3>Profile Details</h3>
+                    <p><strong>Joined:</strong> <span id="join-date">Date</span></p>
+                    <p><strong>Completed Challenges:</strong> <span id="completed-challenges">0</span></p>
+                    <p><strong>Rank:</strong> <span id="user-rank">Newbie</span></p>
+                    <button class="button" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
+        </div>
+    </footer>
+</body>
+</html>

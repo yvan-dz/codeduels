@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Singleplayer Exercise - C#</title>
+    <link rel="stylesheet" href="assets/css/exercise.css">
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="index.html" class="logo-link">
+                <img src="assets/img/logo.png" alt="Logo">
+                <span id="webname">CodeDuels</span>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" id="friends-link">Play with friends</a></li>
+                <li><a href="#" id="online-link">Play online</a></li>
+                <li><a href="#" id="hackathons-link">Hackathons</a></li>
+                <li><a href="profile.html" id="profile-link" style="display: none;">Profile</a></li>
+                <li><a href="settings.html" id="settings-link" style="display: none;">Settings</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <a href="login.html" class="button log" id="login-button">Sign in</a>
+            <a href="signup.html" class="button log" id="signup-button">Join</a>
+            <button class="button log" id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+            <span id="user-status"></span>
+        </div>
+    </header>
+    <main>
+        <section class="exercise-container">
+            <div class="exercise-info" id="exercise-info">
+                <!-- Random exercise will be inserted here -->
+            </div>
+            <div class="code-editor-container">
+                <div id="code-editor"></div>
+                <button id="run-button" class="run-button">Run code!</button>
+                <div id="output" style="margin-top: 20px; font-weight: bold;"></div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
+        </div>
+    </footer>
+    <!-- Your custom scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <script src="assets/js/csharp_exercise.js"></script>
+    <script src="assets/js/run_code.js"></script>
+    <!-- Firebase initialization script -->
+    <script>
+        // Your Firebase configuration
+        var firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Check the authentication state
+        firebase.auth().onAuthStateChanged(function(user) {
+            const loginButton = document.getElementById('login-button');
+            const signupButton = document.getElementById('signup-button');
+            const logoutButton = document.getElementById('logout-button');
+            const userStatus = document.getElementById('user-status');
+            if (user) {
+                loginButton.style.display = 'none';
+                signupButton.style.display = 'none';
+                logoutButton.style.display = 'block';
+                userStatus.innerText = `Signed in as: ${user.email}`;
+            } else {
+                loginButton.style.display = 'block';
+                signupButton.style.display = 'block';
+                logoutButton.style.display = 'none';
+                userStatus.innerText = 'Not signed in';
+            }
+        });
+
+        // Logout function
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                console.log('User signed out');
+            }).catch((error) => {
+                console.error('Error signing out:', error);
+            });
+        }
+    </script>
+</body>
+</html>
