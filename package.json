@@ -1,18 +1,19 @@
 {
   "name": "codeduels",
   "version": "1.0.0",
-  "description": "A coding battle platform",
-  "main": "api/run_code.js",
+  "description": "A coding battle application",
+  "main": "index.js",
   "scripts": {
-    "start": "node api/run_code.js"
+    "start": "node index.js",
+    "build": "webpack --mode production"
   },
+  "author": "Ihr Name",
+  "license": "MIT",
   "dependencies": {
-    "child_process": "^1.0.2",
-    "express": "^4.19.2",
-    "fs": "^0.0.1-security",
-    "node": "^22.3.0",
-    "openai": "^3.3.0",
-    "socket.io": "^4.7.5",
-    "socket.io-client": "^4.7.5"
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "webpack": "^5.0.0",
+    "webpack-cli": "^4.0.0"
   }
 }
