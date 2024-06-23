@@ -1,27 +1,17 @@
 {
-  "hosting": {
-    "public": "dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ],
-    "headers": [
-      {
-        "source": "/dist/**",
-        "headers": [
-          {
-            "key": "Access-Control-Allow-Private-Network",
-            "value": "true"
-          }
-        ]
-      }
-    ]
+    "hosting": {
+      "public": "public", 
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
   }
-}
+  
