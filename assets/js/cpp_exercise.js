@@ -68,8 +68,8 @@ async function runCode() {
     const language = languageElement.innerText.split(': ')[1].toLowerCase();
 
     try {
-        console.log(`Sending code to be executed in language: cpp`);
-                const response = await fetch('/api/execute', {
+        console.log(`Sending code to be executed in language: ${language}`)
+        const response = await fetch('/api/execute', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -78,8 +78,6 @@ async function runCode() {
         });
 
         const data = await response.json();
-        console.log('Server response:', data);
-
         const outputElement = document.getElementById('output');
         if (response.ok) {
             outputElement.textContent = data.output;
@@ -87,12 +85,11 @@ async function runCode() {
             outputElement.textContent = `Error: ${data.output}`;
         }
     } catch (error) {
-        console.error('Error executing code:', error);
         const outputElement = document.getElementById('output');
         if (outputElement) {
             outputElement.textContent = `Error: ${error.message}`;
         } else {
-            console.error('Element mit ID output not found');
+            console.error('Element with ID output not found');
         }
     }
 }

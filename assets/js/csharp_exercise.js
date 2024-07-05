@@ -69,7 +69,7 @@ async function runCode() {
     const language = languageElement.innerText.split(': ')[1].toLowerCase();
 
     try {
-        console.log(`Sending code to be executed in language: csharp`);
+        console.log(`Sending code to be executed in language: ${language}`)
         const response = await fetch('/api/execute', {
             method: 'POST',
             headers: {
@@ -79,8 +79,6 @@ async function runCode() {
         });
 
         const data = await response.json();
-        console.log('Server response:', data);
-
         const outputElement = document.getElementById('output');
         if (response.ok) {
             outputElement.textContent = data.output;
@@ -88,7 +86,6 @@ async function runCode() {
             outputElement.textContent = `Error: ${data.output}`;
         }
     } catch (error) {
-        console.error('Error executing code:', error);
         const outputElement = document.getElementById('output');
         if (outputElement) {
             outputElement.textContent = `Error: ${error.message}`;
