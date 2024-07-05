@@ -58,7 +58,7 @@ function initializeMonaco(language) {
 
 async function runCode() {
     const code = window.editor.getValue();
-    const language = document.getElementById('exercise-language').innerText.split(': ')[1].toLowerCase();
+    const language = document.getElementById('java').innerText.split(': ')[1].toLowerCase();
 
     try {
         const response = await fetch('/api/execute', {
