@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadRandomExercise() {
-    fetch('assets/js/csharp_exercises.json')
+    fetch('assets/js/c_exercises.json')
         .then(response => response.json())
         .then(data => {
             const randomIndex = Math.floor(Math.random() * data.length);
@@ -16,7 +16,7 @@ function loadRandomExercise() {
                 <p id="exercise-description">${exercise.description}</p>
             `;
             document.getElementById('exercise-info').innerHTML = exerciseInfo;
-            initializeMonaco('csharp');
+            initializeMonaco(exercise.language.toLowerCase());
         })
         .catch(error => console.error('Error loading exercises:', error));
 }
@@ -31,30 +31,28 @@ function initializeMonaco(language) {
 
         window.editor = monaco.editor.create(document.getElementById('code-editor'), {
             value: '// your code here',
-            language: language.toLowerCase(),
+            language: language,
             theme: 'vs-dark',
             automaticLayout: true
         });
 
-        if (language === 'csharp') {
-        monaco.languages.registerCompletionItemProvider('csharp', {
-            provideCompletionItems: function() {
-                return {
-                    suggestions: [
-                        {
-                            label: 'Console.WriteLine',
-                            kind: monaco.languages.CompletionItemKind.Function,
-                            insertText: 'Console.WriteLine(${1:object});',
-                            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                            documentation: 'Prints the given object to the console.'
-                        }
-                    ]
-                };
-            }
-        });
-
-    }
-
+        if (language === 'c') {
+            monaco.languages.registerCompletionItemProvider('c', {
+                provideCompletionItems: function() {
+                    return {
+                        suggestions: [
+                            {
+                                label: 'printf',
+                                kind: monaco.languages.CompletionItemKind.Function,
+                                insertText: 'printf("${1:format}", ${2:args});',
+                                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                                documentation: 'Prints formatted output to stdout.'
+                            }
+                        ]
+                    };
+                }
+            });
+        }
     });
 }
 
@@ -69,7 +67,6 @@ async function runCode() {
     const language = languageElement.innerText.split(': ')[1].toLowerCase();
 
     try {
-        console.log(`Sending code to be executed in language: ${language}`)
         const response = await fetch('/api/execute', {
             method: 'POST',
             headers: {

@@ -22,7 +22,8 @@ const languageMap = {
     python: { language: 'python3', versionIndex: '3' },
     javascript: { language: 'nodejs', versionIndex: '3' },
     cpp: { language: 'cpp', versionIndex: '5' },
-    csharp: { language: 'csharp', versionIndex: '3' }
+    csharp: { language: 'csharp', versionIndex: '3' },
+    c: { language: 'c', versionIndex: '4' } // Hinzufügen der Unterstützung für C
 };
 
 app.post('/api/execute', async (req, res) => {
@@ -56,7 +57,8 @@ app.post('/api/execute', async (req, res) => {
         if (data.output) {
             res.status(200).json({ output: data.output });
         } else {
-            res.status(500).json({ output: 'No output generated', error: data });
+            const errorMessage = data.error ? data.error : 'No output generated';
+            res.status(500).json({ output: errorMessage, error: data });
         }
     } catch (error) {
         console.error('Error executing code:', error);
