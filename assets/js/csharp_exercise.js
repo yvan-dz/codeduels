@@ -69,7 +69,7 @@ async function runCode() {
     const language = languageElement.innerText.split(': ')[1].toLowerCase();
 
     try {
-        console.log(`Sending code to be executed in language: ${language}`);
+        console.log(`Sending code to be executed in language: csharp`);
         const response = await fetch('/api/execute', {
             method: 'POST',
             headers: {
