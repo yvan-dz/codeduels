@@ -20,7 +20,8 @@ const JDoodleClientSecret = process.env.JDOODLE_CLIENT_SECRET;
 const languageMap = {
     java: { language: 'java', versionIndex: '3' },
     python: { language: 'python3', versionIndex: '3' },
-    javascript: { language: 'nodejs', versionIndex: '3' }
+    javascript: { language: 'nodejs', versionIndex: '3' },
+    cpp: { language: 'cpp', versionIndex: '5' }
 };
 
 app.post('/api/execute', async (req, res) => {
