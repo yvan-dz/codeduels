@@ -1,20 +1,54 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const fetch = require('node-fetch');
 const path = require('path');
+const cors = require('cors');
+
 const app = express();
+app.use(bodyParser.json());
+app.use(cors());
 
-// Middleware, um JSON-Anfragen zu verarbeiten
-app.use(express.json());
+const JDoodleClientId = process.env.JDOODLE_CLIENT_ID;
+const JDoodleClientSecret = process.env.JDOODLE_CLIENT_SECRET;
 
-// Statische Dateien aus dem 'public' Verzeichnis bereitstellen
-app.use(express.static(path.join(__dirname, 'public')));
+app.post('/api/execute', async (req, res) => {
+    const { code } = req.body;
 
-// Standardroute, um die index.html zurückzugeben
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    try {
+        const response = await fetch('https://api.jdoodle.com/v1/execute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                script: code,
+                language: "java",
+                versionIndex: "3",
+                clientId: JDoodleClientId,
+                clientSecret: JDoodleClientSecret
+            })
+        });
+
+        const data = await response.json();
+        if (data.output) {
+            res.status(200).json({ output: data.output });
+        } else {
+            res.status(500).json({ output: 'No output generated' });
+        }
+    } catch (error) {
+        res.status(500).json({ output: error.message });
+    }
 });
 
-// Starten des Servers
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Route for root URL
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
