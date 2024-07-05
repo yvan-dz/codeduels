@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
     loadRandomExercise();
-    document.getElementById('run-button').addEventListener('click', runCode);
 });
 
 function loadRandomExercise() {
@@ -55,5 +54,3 @@ function initializeMonaco(language) {
         }
     });
 }
-
-
