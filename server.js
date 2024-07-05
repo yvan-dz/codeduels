@@ -8,7 +8,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname)));
 
@@ -62,7 +61,6 @@ app.post('/api/execute', async (req, res) => {
         res.status(500).json({ output: error.message });
     }
 });
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
