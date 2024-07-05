@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const fetch = require('node-fetch');
+const path = require('path');
 
 const app = express();
 app.use(bodyParser.json());
@@ -59,6 +61,41 @@ app.put('/profile', async (req, res) => {
     res.send({ message: 'Profile updated successfully' });
 });
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
+app.post('/api/execute', async (req, res) => {
+    const { language, versionIndex, code } = req.body;
+    const program = {
+        script: code,
+        language: language,
+        versionIndex: versionIndex,
+        clientId: process.env.JDOODLE_CLIENT_ID,
+        clientSecret: process.env.JDOODLE_CLIENT_SECRET
+    };
+
+    try {
+        const response = await fetch('https://api.jdoodle.com/v1/execute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(program)
+        });
+
+        const data = await response.json();
+        res.json({ output: data.output });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Route for root URL
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'java_exercise.html'));
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
