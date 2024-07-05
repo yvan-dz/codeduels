@@ -16,7 +16,7 @@ function loadRandomExercise() {
                 <p id="exercise-description">${exercise.description}</p>
             `;
             document.getElementById('exercise-info').innerHTML = exerciseInfo;
-            initializeMonaco('c#');
+            initializeMonaco('csharp');
         })
         .catch(error => console.error('Error loading exercises:', error));
 }
