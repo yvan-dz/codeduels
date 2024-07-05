@@ -111,20 +111,24 @@
         const code = document.getElementById('code-editor').value;
         const language = document.getElementById('java').innerText.split(': ')[1].toLowerCase();
         try {
-            const response = await fetch('/api/execute', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ code })
-            });
+        const response = await fetch('/api/execute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ code, language })
+        });
 
-            const data = await response.json();
-
-            document.getElementById('output').innerText = data.output || 'Error: ' + (data.error || 'Unknown error');
-        } catch (error) {
-            document.getElementById('output').innerText = 'Error: ' + error.message;
+        const data = await response.json();
+        const outputElement = document.getElementById('output');
+        if (response.ok) {
+            outputElement.textContent = data.output;
+        } else {
+            outputElement.textContent = `Error: ${data.output}`;
         }
+    } catch (error) {
+        document.getElementById('output').textContent = `Error: ${error.message}`;
+    }
     }
 </script>
 
