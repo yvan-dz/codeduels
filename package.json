@@ -1,17 +1,18 @@
 {
-  "name": "simple-app",
+  "name": "online-code-execution",
   "version": "1.0.0",
-  "description": "A simple Express server for Heroku deployment",
+  "description": "",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.1"
   },
   "engines": {
-    "node": ">=12.0.0"
-  },
-  "author": "Your Name",
-  "license": "MIT"
+    "node": "14.x"
+  }
 }
