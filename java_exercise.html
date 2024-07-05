@@ -40,7 +40,7 @@
             </div>
             <div class="code-editor-container">
                 <div id="code-editor"></div>
-                <button onclick="executeCode()">Run code!</button>
+                <button id="run-button" class="run-button">Run code!</button>
                 <div id="output" style="margin-top: 20px; font-weight: bold;"></div>
             </div>
         </section>
@@ -54,7 +54,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
     <script src="assets/js/java_exercise.js"></script>
     
-
     <!-- Firebase initialization script -->
     <script>
         // Your Firebase configuration
@@ -105,27 +104,5 @@
             });
         }
     </script>
-
-<script>
-    async function executeCode() {
-        const code = document.getElementById('code-editor').value;
-        try {
-            const response = await fetch('/api/execute', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ code })
-            });
-
-            const data = await response.json();
-
-            document.getElementById('output').innerText = data.output || 'Error: ' + (data.error || 'Unknown error');
-        } catch (error) {
-            document.getElementById('output').innerText = 'Error: ' + error.message;
-        }
-    }
-</script>
-
 </body>
 </html>

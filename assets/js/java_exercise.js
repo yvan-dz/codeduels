@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     loadRandomExercise();
+    document.getElementById('run-button').addEventListener('click', runCode);
 });
 
 function loadRandomExercise() {
@@ -53,4 +54,29 @@ function initializeMonaco(language) {
             });
         }
     });
+}
+
+async function runCode() {
+    const code = window.editor.getValue();
+    const language = document.getElementById('exercise-language').innerText.split(': ')[1].toLowerCase();
+
+    try {
+        const response = await fetch('/api/execute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ code, language })
+        });
+
+        const data = await response.json();
+        const outputElement = document.getElementById('output');
+        if (response.ok) {
+            outputElement.textContent = data.output;
+        } else {
+            outputElement.textContent = `Error: ${data.output}`;
+        }
+    } catch (error) {
+        document.getElementById('output').textContent = `Error: ${error.message}`;
+    }
 }
