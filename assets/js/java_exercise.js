@@ -31,7 +31,7 @@ function initializeMonaco(language) {
 
         window.editor = monaco.editor.create(document.getElementById('code-editor'), {
             value: '// your code here',
-            language: language,
+            language: java,
             theme: 'vs-dark',
             automaticLayout: true
         });
@@ -58,7 +58,7 @@ function initializeMonaco(language) {
 
 async function runCode() {
     const code = window.editor.getValue();
-    const languageElement = document.getElementById('java');
+    const languageElement = document.getElementById('exercise-language');
     const language = languageElement ? languageElement.textContent.split(': ')[1] : 'java';
 
     if (language !== 'java') {
