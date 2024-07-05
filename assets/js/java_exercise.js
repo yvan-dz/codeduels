@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     loadRandomExercise();
-    document.getElementById('run-button').addEventListener('onclick', runCode);
+    document.getElementById('run-button').addEventListener('click', runCode);
 });
 
 function loadRandomExercise() {
@@ -31,7 +31,7 @@ function initializeMonaco(language) {
 
         window.editor = monaco.editor.create(document.getElementById('code-editor'), {
             value: '// your code here',
-            language: java,
+            language: language,
             theme: 'vs-dark',
             automaticLayout: true
         });
@@ -59,30 +59,35 @@ function initializeMonaco(language) {
 async function runCode() {
     const code = window.editor.getValue();
     const languageElement = document.getElementById('exercise-language');
-    const language = languageElement ? languageElement.textContent.split(': ')[1] : 'java';
-
-    if (language !== 'java') {
-        document.getElementById('output').textContent = 'Currently only Java is supported.';
+    if (!languageElement) {
+        console.error('Element with ID exercise-language not found');
         return;
     }
 
+    const language = languageElement.innerText.split(': ')[1].toLowerCase();
+
     try {
-        const response = await fetch('/api/runJavaCode', {
+        const response = await fetch('/api/execute', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ code }),
+            body: JSON.stringify({ code, language })
         });
 
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        const data = await response.json();
+        const outputElement = document.getElementById('output');
+        if (response.ok) {
+            outputElement.textContent = data.output;
+        } else {
+            outputElement.textContent = `Error: ${data.output}`;
         }
-
-        const result = await response.json();
-        document.getElementById('output').textContent = result.output;
     } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('output').textContent = 'Error running code';
+        const outputElement = document.getElementById('output');
+        if (outputElement) {
+            outputElement.textContent = `Error: ${error.message}`;
+        } else {
+            console.error('Element with ID output not found');
+        }
     }
 }
