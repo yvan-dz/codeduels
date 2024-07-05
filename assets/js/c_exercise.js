@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadRandomExercise() {
-    fetch('assets/js/c_exercises.json')
+    fetch('assets/js/csharp_exercises.json')
         .then(response => response.json())
         .then(data => {
             const randomIndex = Math.floor(Math.random() * data.length);
