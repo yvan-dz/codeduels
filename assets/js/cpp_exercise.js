@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadRandomExercise() {
-    fetch('assets/js/cpp_exercises.json')
+    fetch('assets/js/csharp_exercises.json')
         .then(response => response.json())
         .then(data => {
             const randomIndex = Math.floor(Math.random() * data.length);
@@ -16,7 +16,7 @@ function loadRandomExercise() {
                 <p id="exercise-description">${exercise.description}</p>
             `;
             document.getElementById('exercise-info').innerHTML = exerciseInfo;
-            initializeMonaco('cpp');
+            initializeMonaco('csharp');
         })
         .catch(error => console.error('Error loading exercises:', error));
 }
@@ -36,15 +36,15 @@ function initializeMonaco(language) {
             automaticLayout: true
         });
 
-        // Enable IntelliSense for C++
-        monaco.languages.registerCompletionItemProvider('cpp', {
+        // Enable IntelliSense for C#
+        monaco.languages.registerCompletionItemProvider('csharp', {
             provideCompletionItems: function() {
                 return {
                     suggestions: [
                         {
-                            label: 'std::cout',
+                            label: 'Console.WriteLine',
                             kind: monaco.languages.CompletionItemKind.Function,
-                            insertText: 'std::cout << ${1:object} << std::endl;',
+                            insertText: 'Console.WriteLine(${1:object});',
                             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                             documentation: 'Prints the given object to the console.'
                         }
