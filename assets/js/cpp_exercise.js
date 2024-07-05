@@ -66,7 +66,7 @@ async function runCode() {
 
     try {
         console.log(`Sending code to be executed in language: ${language}`);
-        const response = await fetch('/api/execute', {
+                const response = await fetch('/api/execute', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
