@@ -58,31 +58,25 @@ function initializeMonaco(language) {
 
 async function runCode() {
     const code = window.editor.getValue();
-    const languageElement = document.getElementById('exercise-language');
-    const language = languageElement ? languageElement.textContent.split(': ')[1] : 'java';
-
-    if (language !== 'java') {
-        document.getElementById('output').textContent = 'Currently only Java is supported.';
-        return;
-    }
+    const language = document.getElementById('exercise-language').innerText.split(': ')[1].toLowerCase();
 
     try {
-        const response = await fetch('/api/runJavaCode', {
+        const response = await fetch('/api/execute', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ code }),
+            body: JSON.stringify({ code, language })
         });
 
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        const data = await response.json();
+        const outputElement = document.getElementById('output');
+        if (response.ok) {
+            outputElement.textContent = data.output;
+        } else {
+            outputElement.textContent = `Error: ${data.output}`;
         }
-
-        const result = await response.json();
-        document.getElementById('output').textContent = result.output;
     } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('output').textContent = 'Error running code';
+        document.getElementById('output').textContent = `Error: ${error.message}`;
     }
 }
