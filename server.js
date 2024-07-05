@@ -19,7 +19,8 @@ const JDoodleClientSecret = process.env.JDOODLE_CLIENT_SECRET;
 
 const languageMap = {
     java: { language: 'java', versionIndex: '3' },
-    python: { language: 'python3', versionIndex: '3' }
+    python: { language: 'python3', versionIndex: '3' },
+    javascript: { language: 'nodejs', versionIndex: '3' }
 };
 
 app.post('/api/execute', async (req, res) => {
@@ -61,3 +62,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
