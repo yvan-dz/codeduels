@@ -16,7 +16,7 @@ function loadRandomExercise() {
                 <p id="exercise-description">${exercise.description}</p>
             `;
             document.getElementById('exercise-info').innerHTML = exerciseInfo;
-            initializeMonaco('csharp');
+            initializeMonaco('c#');
         })
         .catch(error => console.error('Error loading exercises:', error));
 }
@@ -36,6 +36,7 @@ function initializeMonaco(language) {
             automaticLayout: true
         });
 
+        if (language === 'csharp') {
         monaco.languages.registerCompletionItemProvider('csharp', {
             provideCompletionItems: function() {
                 return {
@@ -51,6 +52,9 @@ function initializeMonaco(language) {
                 };
             }
         });
+
+    }
+
     });
 }
 
