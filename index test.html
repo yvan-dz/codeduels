@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Java Code Editor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+</head>
+<body>
+    <div id="editor" style="height: 300px; width: 600px;">public class Example { public static void main(String[] args) { System.out.println("Hello, World!"); } }</div>
+    <button onclick="executeCode()">Run Code</button>
+    <pre id="output"></pre>
+
+    <script>
+        var editor = ace.edit("editor");
+        editor.session.setMode("ace/mode/java");
+
+        function executeCode() {
+            var code = editor.getValue();
+            var clientId = "3706ea5453e54a739123564dd68b94eb"; // Füge hier deinen JDoodle clientId ein
+            var clientSecret = "450644a69c2babf10bdb3e93419935e34d39eb78f7b013e7ad3bafa77e05b8c7"; // Füge hier deinen JDoodle clientSecret ein
+
+            fetch('https://api.jdoodle.com/v1/execute', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    script: code,
+                    language: "java",
+                    versionIndex: "3",
+                    clientId: clientId,
+                    clientSecret: clientSecret
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('output').innerText = data.output;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('output').innerText = 'Error executing code';
+            });
+        }
+    </script>
+</body>
+</html>

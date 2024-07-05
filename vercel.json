@@ -1,0 +1,11 @@
+{
+    "routes": [
+      {
+        "src": "/dist/.*",
+        "headers": {
+          "Access-Control-Allow-Private-Network": "true"
+        }
+      }
+    ]
+  }
+  
