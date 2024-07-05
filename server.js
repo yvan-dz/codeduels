@@ -21,8 +21,8 @@ const languageMap = {
     java: { language: 'java', versionIndex: '3' },
     python: { language: 'python3', versionIndex: '3' },
     javascript: { language: 'nodejs', versionIndex: '3' },
-    cpp: { language: 'cpp17', versionIndex: '2' },
-    csharp: { language: 'csharp', versionIndex: '5' }
+    cpp: { language: 'cpp', versionIndex: '5' },
+    csharp: { language: 'csharp', versionIndex: '3' }
 };
 
 app.post('/api/execute', async (req, res) => {
