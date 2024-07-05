@@ -35,6 +35,7 @@ app.post('/api/execute', async (req, res) => {
     const { language: lang, versionIndex } = languageMap[language];
 
     try {
+        console.log(`Executing code in language: ${lang}`);
         const response = await fetch('https://api.jdoodle.com/v1/execute', {
             method: 'POST',
             headers: {
@@ -50,12 +51,15 @@ app.post('/api/execute', async (req, res) => {
         });
 
         const data = await response.json();
+        console.log('JDoodle API response:', data);
+
         if (data.output) {
             res.status(200).json({ output: data.output });
         } else {
-            res.status(500).json({ output: 'No output generated' });
+            res.status(500).json({ output: 'No output generated', error: data });
         }
     } catch (error) {
+        console.error('Error executing code:', error);
         res.status(500).json({ output: error.message });
     }
 });
@@ -64,4 +68,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
