@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     loadRandomExercise();
+    document.getElementById('run-button').addEventListener('click', runCode);
 });
 
 function loadRandomExercise() {
@@ -35,7 +36,6 @@ function initializeMonaco(language) {
             automaticLayout: true
         });
 
-        // Enable IntelliSense for Python
         monaco.languages.registerCompletionItemProvider('python', {
             provideCompletionItems: function() {
                 return {
@@ -54,12 +54,38 @@ function initializeMonaco(language) {
     });
 }
 
-function runCode() {
+async function runCode() {
     const code = window.editor.getValue();
+    const languageElement = document.getElementById('exercise-language');
+    if (!languageElement) {
+        console.error('Element with ID exercise-language not found');
+        return;
+    }
+
+    const language = languageElement.innerText.split(': ')[1].toLowerCase();
+
     try {
-        // Code execution for Python can be complex and typically requires a backend service
-        console.log('Code execution is not supported for Python in this example.');
+        const response = await fetch('/api/execute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ code, language })
+        });
+
+        const data = await response.json();
+        const outputElement = document.getElementById('output');
+        if (response.ok) {
+            outputElement.textContent = data.output;
+        } else {
+            outputElement.textContent = `Error: ${data.output}`;
+        }
     } catch (error) {
-        console.error('Error executing code:', error);
+        const outputElement = document.getElementById('output');
+        if (outputElement) {
+            outputElement.textContent = `Error: ${error.message}`;
+        } else {
+            console.error('Element with ID output not found');
+        }
     }
 }
