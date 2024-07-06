@@ -11,17 +11,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 friendRequestsList.innerHTML = '';
                 querySnapshot.forEach((doc) => {
                     const request = doc.data();
-                    db.collection('users').doc(request.from).get().then((userDoc) => {
-                        const fromUsername = userDoc.data().username;
-                        const listItem = document.createElement('div');
-                        listItem.classList.add('friend-request');
-                        listItem.innerHTML = `
-                            <p><strong>${fromUsername}</strong> wants to be your friend</p>
-                            <button class="accept-btn" onclick="acceptFriendRequest('${doc.id}', '${request.from}', this)">Accept</button>
-                            <button class="reject-btn" onclick="rejectFriendRequest('${doc.id}', this)">Reject</button>
-                        `;
-                        friendRequestsList.appendChild(listItem);
-                    });
+                    const listItem = document.createElement('div');
+                    listItem.classList.add('friend-request');
+                    listItem.innerHTML = `
+                        <p><strong>${request.fromUsername}</strong> wants to be your friend</p>
+                        <button onclick="acceptFriendRequest('${doc.id}', '${request.from}', this)">Accept</button>
+                        <button onclick="rejectFriendRequest('${doc.id}', this)">Reject</button>
+                    `;
+                    friendRequestsList.appendChild(listItem);
                 });
             })
             .catch((error) => {
@@ -77,16 +74,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 const friendDoc = querySnapshot.docs[0];
                 const friendId = friendDoc.id;
 
-                // Create a friend request
-                db.collection('friend_requests').add({
-                    from: user.uid,
-                    fromUsername: user.displayName,
-                    to: friendId
-                }).then(() => {
-                    showPopup('Friend request sent!');
-                }).catch((error) => {
-                    console.error('Error sending friend request: ', error);
-                    showPopup('Error sending friend request: ' + error.message);
+                // Check if they are already friends
+                db.collection('users').doc(user.uid).get().then(userDoc => {
+                    const userData = userDoc.data();
+                    if (userData.friends && userData.friends.includes(friendId)) {
+                        showPopup('You are already friends.');
+                        return;
+                    }
+
+                    // Create a friend request
+                    db.collection('friend_requests').add({
+                        from: user.uid,
+                        fromUsername: user.displayName,
+                        to: friendId
+                    }).then(() => {
+                        showPopup('Friend request sent!');
+                    }).catch((error) => {
+                        console.error('Error sending friend request: ', error);
+                        showPopup('Error sending friend request: ' + error.message);
+                    });
                 });
             }).catch((error) => {
                 console.error('Error finding user: ', error);
@@ -137,6 +143,21 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    // Show popup
+    function showPopup(message) {
+        const popup = document.getElementById('popup');
+        const popupMessage = document.getElementById('popup-message');
+        popupMessage.textContent = message;
+        popup.style.display = 'block';
+        document.querySelector('.popup-overlay').style.display = 'block';
+    }
+
+    // Close popup
+    window.closePopup = function () {
+        document.getElementById('popup').style.display = 'none';
+        document.querySelector('.popup-overlay').style.display = 'none';
+    };
+
     // Check the authentication state
     auth.onAuthStateChanged(function (user) {
         if (user) {
@@ -155,18 +176,4 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('settings-link').style.display = 'none';
         }
     });
-
-    // Show popup function
-    function showPopup(message) {
-        const popup = document.getElementById('popup');
-        const popupMessage = document.getElementById('popup-message');
-        popupMessage.innerText = message;
-        popup.style.display = 'block';
-    }
-
-    // Close popup function
-    window.closePopup = function () {
-        const popup = document.getElementById('popup');
-        popup.style.display = 'none';
-    };
 });

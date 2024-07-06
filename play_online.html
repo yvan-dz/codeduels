@@ -64,8 +64,8 @@
     </footer>
     <div id="popup" class="popup">
         <div class="popup-content">
-            <span class="close" onclick="closePopup()">&times;</span>
             <p id="popup-message"></p>
+            <button onclick="closePopup()">Close</button>
         </div>
     </div>
     <script src="assets/js/play_online.js"></script>
@@ -115,15 +115,6 @@
             }).catch((error) => {
                 console.error('Error signing out:', error);
             });
-        }
-
-        function showPopup(message) {
-            document.getElementById('popup-message').textContent = message;
-            document.getElementById('popup').style.display = 'block';
-        }
-
-        function closePopup() {
-            document.getElementById('popup').style.display = 'none';
         }
     </script>
 </body>
