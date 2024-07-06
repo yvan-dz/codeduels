@@ -11,14 +11,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 friendRequestsList.innerHTML = '';
                 querySnapshot.forEach((doc) => {
                     const request = doc.data();
-                    const listItem = document.createElement('div');
-                    listItem.classList.add('friend-request');
-                    listItem.innerHTML = `
-                        <p><strong>${request.fromUsername}</strong> wants to be your friend</p>
-                        <button onclick="acceptFriendRequest('${doc.id}', '${request.from}', this)">Accept</button>
-                        <button onclick="rejectFriendRequest('${doc.id}', this)">Reject</button>
-                    `;
-                    friendRequestsList.appendChild(listItem);
+                    db.collection('users').doc(request.from).get().then((userDoc) => {
+                        const fromUsername = userDoc.data().username;
+                        const listItem = document.createElement('div');
+                        listItem.classList.add('friend-request');
+                        listItem.innerHTML = `
+                            <p><strong>${fromUsername}</strong> wants to be your friend</p>
+                            <button class="accept-btn" onclick="acceptFriendRequest('${doc.id}', '${request.from}', this)">Accept</button>
+                            <button class="reject-btn" onclick="rejectFriendRequest('${doc.id}', this)">Reject</button>
+                        `;
+                        friendRequestsList.appendChild(listItem);
+                    });
                 });
             })
             .catch((error) => {
@@ -57,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault();
         const user = auth.currentUser;
         if (!user) {
-            alert('Please sign in to send a friend request.');
+            showPopup('Please sign in to send a friend request.');
             return;
         }
 
@@ -67,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
         db.collection('users').where('username', '==', friendUsername).get()
             .then((querySnapshot) => {
                 if (querySnapshot.empty) {
-                    alert('No user found with that username.');
+                    showPopup('No user found with that username.');
                     return;
                 }
 
@@ -80,10 +83,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     fromUsername: user.displayName,
                     to: friendId
                 }).then(() => {
-                    alert('Friend request sent!');
+                    showPopup('Friend request sent!');
                 }).catch((error) => {
                     console.error('Error sending friend request: ', error);
-                    alert('Error sending friend request: ' + error.message);
+                    showPopup('Error sending friend request: ' + error.message);
                 });
             }).catch((error) => {
                 console.error('Error finding user: ', error);
@@ -108,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const requestElement = button.parentElement;
                     requestElement.remove();
                     loadFriends(user.uid);
-                    alert('Friend request accepted!');
+                    showPopup('Friend request accepted!');
                 }).catch((error) => {
                     console.error('Error removing friend request: ', error);
                 });
@@ -128,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
         db.collection('friend_requests').doc(requestId).delete().then(() => {
             const requestElement = button.parentElement;
             requestElement.remove();
-            alert('Friend request rejected.');
+            showPopup('Friend request rejected.');
         }).catch((error) => {
             console.error('Error removing friend request: ', error);
         });
@@ -152,4 +155,18 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('settings-link').style.display = 'none';
         }
     });
+
+    // Show popup function
+    function showPopup(message) {
+        const popup = document.getElementById('popup');
+        const popupMessage = document.getElementById('popup-message');
+        popupMessage.innerText = message;
+        popup.style.display = 'block';
+    }
+
+    // Close popup function
+    window.closePopup = function () {
+        const popup = document.getElementById('popup');
+        popup.style.display = 'none';
+    };
 });
