@@ -34,20 +34,35 @@ document.addEventListener('DOMContentLoaded', function () {
         const teamName = document.getElementById('team-name').value;
         const teamMembers = document.getElementById('team-members').value.split(',').map(email => email.trim());
 
-        // Store registration data in Firebase
-        db.collection('hackathon_registrations').add({
-            hackathonId,
-            teamName,
-            teamMembers,
-            registeredBy: user.email,
-            registeredAt: firebase.firestore.Timestamp.now()
-        }).then(() => {
-            // Show success message
-            showSuccessPopup();
-        }).catch((error) => {
-            console.error('Error registering for hackathon: ', error);
-            alert('Error registering for hackathon: ' + error.message);
-        });
+        // Check if the team is already registered for the hackathon
+        db.collection('hackathon_registrations')
+            .where('hackathonId', '==', hackathonId)
+            .where('teamName', '==', teamName)
+            .get()
+            .then(querySnapshot => {
+                if (!querySnapshot.empty) {
+                    // Team is already registered
+                    showAlreadyRegisteredPopup();
+                } else {
+                    // Team is not registered, proceed with registration
+                    db.collection('hackathon_registrations').add({
+                        hackathonId,
+                        teamName,
+                        teamMembers,
+                        registeredBy: user.email,
+                        registeredAt: firebase.firestore.Timestamp.now()
+                    }).then(() => {
+                        // Show success message
+                        showSuccessPopup();
+                    }).catch((error) => {
+                        console.error('Error registering for hackathon: ', error);
+                        alert('Error registering for hackathon: ' + error.message);
+                    });
+                }
+            }).catch((error) => {
+                console.error('Error checking registration: ', error);
+                alert('Error checking registration: ' + error.message);
+            });
     });
 
     // Function to show success popup
@@ -63,9 +78,22 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.appendChild(popup);
     }
 
+    // Function to show already registered popup
+    function showAlreadyRegisteredPopup() {
+        const popup = document.createElement('div');
+        popup.classList.add('already-registered-popup');
+        popup.innerHTML = `
+            <div class="popup-content">
+                <p>This team is already registered for the selected hackathon.</p>
+                <button onclick="closePopup()">Close</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+    }
+
     // Function to close the popup
     window.closePopup = function () {
-        const popup = document.querySelector('.success-popup');
+        const popup = document.querySelector('.success-popup, .already-registered-popup');
         if (popup) {
             popup.remove();
         }
