@@ -1,0 +1,20 @@
+[
+    {
+        "id": "1",
+        "name": "CodeDuels Summer Hackathon",
+        "description": "Join us for an exciting summer hackathon where you can showcase your coding skills!",
+        "date": "2024-09-01"
+    },
+    {
+        "id": "2",
+        "name": "Winter Wonderland Hackathon",
+        "description": "A winter-themed hackathon to warm up your coding skills!",
+        "date": "2024-12-15"
+    },
+    {
+        "id": "3",
+        "name": "Winter Coding Fest",
+        "description": "Participate in our winter coding fest and win exciting prizes!",
+        "date": "2024-12-15"
+    }
+]

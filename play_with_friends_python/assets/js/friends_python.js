@@ -52,17 +52,4 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('Player 1 Code:', code1);
         console.log('Player 2 Code:', code2);
     });
-
-    // Adjust editors and chat box to fill available space
-    function adjustLayout() {
-        const gameContainer = document.querySelector('.game-container');
-        const availableHeight = window.innerHeight - gameContainer.offsetTop - 60; // Adjust for header and margins
-        document.querySelectorAll('.CodeMirror').forEach(editor => {
-            editor.style.height = (availableHeight / 2 - 40) + 'px'; // Adjust for padding and margins
-        });
-        chatBox.style.height = (availableHeight / 2 - 40) + 'px'; // Adjust for padding and margins
-    }
-
-    window.addEventListener('resize', adjustLayout);
-    adjustLayout();
 });

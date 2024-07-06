@@ -4,13 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Play with a Friend - CodeDuels</title>
-    <link rel="stylesheet" href="assets/css/friends.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/material-darker.min.css">
-    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <title>Hackathons - CodeDuels</title>
+    <link rel="stylesheet" href="assets/css/hackathon.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
@@ -18,16 +15,16 @@
 <body>
     <header>
         <div class="logo">
-            <a href="../index.html" class="logo-link">
+            <a href="index.html" class="logo-link">
                 <img src="assets/img/logo.png" alt="Logo">
                 <span id="webname">CodeDuels</span>
             </a>
         </div>
         <nav>
             <ul>
-                <li><a href="../multiplayer_battle.html" id="friends-link">Play with friends</a></li>
-                <li><a href="#" id="online-link">Play online</a></li>
-                <li><a href="../hackathon.html" id="hackathons-link">Hackathons</a></li>
+                <li><a href="friends.html">Play with friends</a></li>
+                <li><a href="multiplayer_battle.html">Play online</a></li>
+                <li><a href="hackathon.html">Hackathons</a></li>
                 <li><a href="profile.html" id="profile-link" style="display: none;">Profile</a></li>
                 <li><a href="settings.html" id="settings-link" style="display: none;">Settings</a></li>
             </ul>
@@ -35,42 +32,46 @@
         <div class="auth-buttons">
             <button id="login-button"><a href="login.html" class="log">Sign in</a></button>
             <button id="signup-button"><a href="signup.html" class="log">Join</a></button>
-            <button class="button log" id="logout-button" style="display: none;" onclick="logout()">Logout</button>
+            <button id="logout-button" style="display: none;" onclick="logout()">Logout</button>
             <span id="user-status"></span>
         </div>
     </header>
     <main>
-        <section class="task-container" id="task-container">
-            <!-- Task content will be loaded here -->
-        </section>
-        <section class="game-container">
-            <div class="editor-container">
-                <h3>Player 1</h3>
-                <textarea id="editor1"></textarea>
-            </div>
-            <div class="editor-container">
-                <h3>Player 2</h3>
-                <textarea id="editor2"></textarea>
-            </div>
-            <div class="chat-container">
-                <h3>Chat</h3>
-                <div id="chat-box"></div>
-                <input type="text" id="chat-input" placeholder="Be nice in chat!" />
-                <button id="send-btn">Send</button>
+        <section class="hackathon-info">
+            <h1>Upcoming Hackathons</h1>
+            <div class="hackathon-cards" id="hackathon-cards">
+                <!-- Hackathon cards will be inserted here -->
             </div>
         </section>
-        <button id="run-btn">Run code!</button>
+        <section class="hackathon-form">
+            <h2>Register for a Hackathon</h2>
+            <form id="hackathon-form">
+                <div class="form-group">
+                    <label for="hackathon-select">Choose a Hackathon:</label>
+                    <select id="hackathon-select" name="hackathon" required>
+                        <!-- Hackathon options will be populated here -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="team-name">Team Name:</label>
+                    <input type="text" id="team-name" name="teamName" required>
+                </div>
+                <div class="form-group">
+                    <label for="team-members">Team Members (comma-separated emails):</label>
+                    <input type="text" id="team-members" name="teamMembers" required>
+                </div>
+                <button type="submit">Register</button>
+            </form>
+        </section>
     </main>
     <footer>
         <div class="footer-bottom">
             <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
         </div>
     </footer>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
-    <script src="assets/js/friends_python.js"></script>
+    <script src="assets/js/hackathon.js"></script>
     <script>
-        // Your Firebase configuration
+        // Firebase configuration and initialization
         var firebaseConfig = {
             apiKey: "AIzaSyAIwf6RVzexCZ0LMfmEFIFBq5YsHm5-lnM",
             authDomain: "codeduels-1b79f.firebaseapp.com",
@@ -80,11 +81,10 @@
             appId: "1:927315184082:web:e115d2bdc6465ffea6a00b",
             measurementId: "G-6Z7PS1DT05"
         };
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
 
         // Check the authentication state
-        firebase.auth().onAuthStateChanged(function(user) {
+        firebase.auth().onAuthStateChanged(function (user) {
             const loginButton = document.getElementById('login-button');
             const signupButton = document.getElementById('signup-button');
             const logoutButton = document.getElementById('logout-button');
@@ -95,8 +95,8 @@
                 loginButton.style.display = 'none';
                 signupButton.style.display = 'none';
                 logoutButton.style.display = 'block';
-                profileLink.style.display = 'inline';
-                settingsLink.style.display = 'inline';
+                profileLink.style.display = 'block';
+                settingsLink.style.display = 'block';
             } else {
                 loginButton.style.display = 'block';
                 signupButton.style.display = 'block';
