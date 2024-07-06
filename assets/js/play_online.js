@@ -1,136 +1,155 @@
 document.addEventListener('DOMContentLoaded', function () {
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
     // Fetch and display friend requests
-    firebase.auth().onAuthStateChanged(user => {
-        if (user) {
-            db.collection('friend_requests').where('to', '==', user.uid)
-                .onSnapshot(querySnapshot => {
-                    const friendRequestsList = document.getElementById('friend-requests-list');
-                    friendRequestsList.innerHTML = '';
-                    querySnapshot.forEach(doc => {
-                        const request = doc.data();
-                        const requestElement = document.createElement('div');
-                        requestElement.classList.add('friend-request');
-                        requestElement.innerHTML = `
-                            <p>Friend request from: ${request.fromUsername}</p>
-                            <button data-request-id="${doc.id}" data-from="${request.from}" class="accept-request">Accept</button>
-                            <button data-request-id="${doc.id}" data-from="${request.from}" class="reject-request">Reject</button>
-                        `;
-                        friendRequestsList.appendChild(requestElement);
-                    });
-
-                    document.querySelectorAll('.accept-request').forEach(button => {
-                        button.addEventListener('click', function () {
-                            const requestId = this.dataset.requestId;
-                            const fromId = this.dataset.from;
-                            acceptFriendRequest(requestId, fromId, user.uid);
-                        });
-                    });
-
-                    document.querySelectorAll('.reject-request').forEach(button => {
-                        button.addEventListener('click', function () {
-                            const requestId = this.dataset.requestId;
-                            rejectFriendRequest(requestId);
-                        });
-                    });
+    function loadFriendRequests(userId) {
+        db.collection('friend_requests').where('to', '==', userId)
+            .get()
+            .then((querySnapshot) => {
+                const friendRequestsList = document.getElementById('friend-requests-list');
+                friendRequestsList.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const request = doc.data();
+                    const listItem = document.createElement('div');
+                    listItem.classList.add('friend-request');
+                    listItem.innerHTML = `
+                        <p><strong>${request.fromUsername}</strong> wants to be your friend</p>
+                        <button onclick="acceptFriendRequest('${doc.id}', '${request.from}', this)">Accept</button>
+                        <button onclick="rejectFriendRequest('${doc.id}', this)">Reject</button>
+                    `;
+                    friendRequestsList.appendChild(listItem);
                 });
+            })
+            .catch((error) => {
+                console.error('Error getting friend requests: ', error);
+            });
+    }
 
-            // Fetch and display friends list
-            db.collection('users').doc(user.uid).get().then(doc => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    const friendsList = document.getElementById('friends-list');
-                    friendsList.innerHTML = '';
-                    userData.friends.forEach(friendId => {
-                        db.collection('users').doc(friendId).get().then(friendDoc => {
-                            if (friendDoc.exists) {
-                                const friendData = friendDoc.data();
-                                const friendElement = document.createElement('div');
-                                friendElement.classList.add('friend');
-                                friendElement.innerHTML = `<p>${friendData.username}</p>`;
-                                friendsList.appendChild(friendElement);
-                            }
+    // Fetch and display friends
+    function loadFriends(userId) {
+        db.collection('users').doc(userId).get()
+            .then((doc) => {
+                const userData = doc.data();
+                const friendsList = document.getElementById('friends-list');
+                friendsList.innerHTML = '';
+                if (userData.friends && userData.friends.length > 0) {
+                    userData.friends.forEach((friendId) => {
+                        db.collection('users').doc(friendId).get().then((friendDoc) => {
+                            const friendData = friendDoc.data();
+                            const listItem = document.createElement('div');
+                            listItem.classList.add('friend');
+                            listItem.innerHTML = `<p>${friendData.username}</p>`;
+                            friendsList.appendChild(listItem);
                         });
                     });
                 } else {
-                    console.log('No such document!');
+                    friendsList.innerHTML = '<p>You have no friends yet.</p>';
                 }
-            }).catch(error => {
-                console.error('Error getting friends list:', error);
+            })
+            .catch((error) => {
+                console.error('Error getting friends list: ', error);
             });
-        }
-    });
+    }
 
-    // Handle sending friend requests
+    // Handle friend request form submission
     document.getElementById('send-request-form').addEventListener('submit', function (event) {
         event.preventDefault();
-        const user = firebase.auth().currentUser;
+        const user = auth.currentUser;
         if (!user) {
             alert('Please sign in to send a friend request.');
             return;
         }
 
-        const username = document.getElementById('username').value;
+        const friendUsername = document.getElementById('friend-username').value;
 
-        db.collection('users').where('username', '==', username).get().then(querySnapshot => {
-            if (!querySnapshot.empty) {
-                const recipient = querySnapshot.docs[0].data();
+        // Check if the user with the given username exists
+        db.collection('users').where('username', '==', friendUsername).get()
+            .then((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    alert('No user found with that username.');
+                    return;
+                }
+
+                const friendDoc = querySnapshot.docs[0];
+                const friendId = friendDoc.id;
+
+                // Create a friend request
                 db.collection('friend_requests').add({
                     from: user.uid,
                     fromUsername: user.displayName,
-                    to: recipient.uid,
-                    status: 'pending'
+                    to: friendId
                 }).then(() => {
                     alert('Friend request sent!');
-                }).catch(error => {
-                    console.error('Error sending friend request:', error);
+                }).catch((error) => {
+                    console.error('Error sending friend request: ', error);
                     alert('Error sending friend request: ' + error.message);
                 });
-            } else {
-                alert('User not found');
-            }
-        });
+            }).catch((error) => {
+                console.error('Error finding user: ', error);
+            });
     });
 
-    // Accept friend request function
-    function acceptFriendRequest(requestId, fromId, toId) {
-        db.collection('friend_requests').doc(requestId).update({
-            status: 'accepted'
+    // Accept friend request
+    window.acceptFriendRequest = function (requestId, fromId, button) {
+        const user = auth.currentUser;
+        const userRef = db.collection('users').doc(user.uid);
+        const fromUserRef = db.collection('users').doc(fromId);
+
+        // Add each other as friends
+        userRef.update({
+            friends: firebase.firestore.FieldValue.arrayUnion(fromId)
         }).then(() => {
-            alert('Friend request accepted!');
-            // Add to friends list
-            db.collection('users').doc(toId).update({
-                friends: firebase.firestore.FieldValue.arrayUnion(fromId)
+            fromUserRef.update({
+                friends: firebase.firestore.FieldValue.arrayUnion(user.uid)
+            }).then(() => {
+                // Remove the friend request
+                db.collection('friend_requests').doc(requestId).delete().then(() => {
+                    const requestElement = button.parentElement;
+                    requestElement.remove();
+                    loadFriends(user.uid);
+                    alert('Friend request accepted!');
+                }).catch((error) => {
+                    console.error('Error removing friend request: ', error);
+                });
+            }).catch((error) => {
+                console.error('Error adding friend: ', error);
             });
-            db.collection('users').doc(fromId).update({
-                friends: firebase.firestore.FieldValue.arrayUnion(toId)
-            });
-        }).catch(error => {
-            console.error('Error accepting friend request:', error);
-            alert('Error accepting friend request: ' + error.message);
+        }).catch((error) => {
+            console.error('Error adding friend: ', error);
         });
-    }
+    };
 
-    // Reject friend request function
-    function rejectFriendRequest(requestId) {
+    // Reject friend request
+    window.rejectFriendRequest = function (requestId, button) {
+        const user = auth.currentUser;
+
+        // Remove the friend request
         db.collection('friend_requests').doc(requestId).delete().then(() => {
+            const requestElement = button.parentElement;
+            requestElement.remove();
             alert('Friend request rejected.');
-        }).catch(error => {
-            console.error('Error rejecting friend request:', error);
-            alert('Error rejecting friend request: ' + error.message);
+        }).catch((error) => {
+            console.error('Error removing friend request: ', error);
         });
-    }
+    };
 
-    // Logout function
-    function logout() {
-        firebase.auth().signOut().then(() => {
-            console.log('User signed out');
-        }).catch(error => {
-            console.error('Error signing out:', error);
-        });
-    }
-
-    // Expose the logout function to the global scope
-    window.logout = logout;
+    // Check the authentication state
+    auth.onAuthStateChanged(function (user) {
+        if (user) {
+            document.getElementById('login-button').style.display = 'none';
+            document.getElementById('signup-button').style.display = 'none';
+            document.getElementById('logout-button').style.display = 'block';
+            document.getElementById('profile-link').style.display = 'block';
+            document.getElementById('settings-link').style.display = 'block';
+            loadFriendRequests(user.uid);
+            loadFriends(user.uid);
+        } else {
+            document.getElementById('login-button').style.display = 'block';
+            document.getElementById('signup-button').style.display = 'block';
+            document.getElementById('logout-button').style.display = 'none';
+            document.getElementById('profile-link').style.display = 'none';
+            document.getElementById('settings-link').style.display = 'none';
+        }
+    });
 });
