@@ -161,6 +161,7 @@ footer a:hover {
 }
 
 /* Popup styles */
+
 .popup {
     display: none;
     position: fixed;
@@ -196,7 +197,6 @@ footer a:hover {
     background-color: #16a085;
 }
 
-/* Overlay for popup */
 .popup-overlay {
     display: none;
     position: fixed;
