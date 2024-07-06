@@ -9,7 +9,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="assets/js/play_online.js"></script>
 </head>
 
 <body>
@@ -24,15 +23,15 @@
             <ul>
                 <li><a href="friends.html">Play with friends</a></li>
                 <li><a href="multiplayer_battle.html">Play online</a></li>
-                <li><a href="hackathon.html">Hackathons</a></li>
+                <li><a href="hackathons.html">Hackathons</a></li>
                 <li><a href="profile.html" id="profile-link" style="display: none;">Profile</a></li>
                 <li><a href="settings.html" id="settings-link" style="display: none;">Settings</a></li>
             </ul>
         </nav>
         <div class="auth-buttons">
-            <button id="login-button"><a href="login.html" class="log">Sign in</a></button>
-            <button id="signup-button"><a href="signup.html" class="log">Join</a></button>
-            <button id="logout-button" style="display: none;" onclick="logout()">Logout</button>
+            <a href="login.html" class="button log" id="login-button">Sign in</a>
+            <a href="signup.html" class="button log" id="signup-button">Join</a>
+            <button class="button log" id="logout-button" style="display: none;" onclick="logout()">Logout</button>
             <span id="user-status"></span>
         </div>
     </header>
@@ -47,8 +46,8 @@
             <h2>Send Friend Request</h2>
             <form id="send-request-form">
                 <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
+                    <label for="friend-username">Friend's Username:</label>
+                    <input type="text" id="friend-username" required>
                 </div>
                 <button type="submit">Send Request</button>
             </form>
@@ -56,7 +55,7 @@
         <section class="friends-list">
             <h2>Your Friends</h2>
             <div id="friends-list">
-                <!-- Friends list will be displayed here -->
+                <!-- Friends will be displayed here -->
             </div>
         </section>
     </main>
@@ -65,6 +64,55 @@
             <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
         </div>
     </footer>
+    <script src="assets/js/play_online.js"></script>
+    <script>
+        // Firebase configuration and initialization
+        var firebaseConfig = {
+            apiKey: "AIzaSyAIwf6RVzexCZ0LMfmEFIFBq5YsHm5-lnM",
+            authDomain: "codeduels-1b79f.firebaseapp.com",
+            projectId: "codeduels-1b79f",
+            storageBucket: "codeduels-1b79f.appspot.com",
+            messagingSenderId: "927315184082",
+            appId: "1:927315184082:web:e115d2bdc6465ffea6a00b",
+            measurementId: "G-6Z7PS1DT05"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Check the authentication state
+        firebase.auth().onAuthStateChanged(function (user) {
+            const loginButton = document.getElementById('login-button');
+            const signupButton = document.getElementById('signup-button');
+            const logoutButton = document.getElementById('logout-button');
+            const userStatus = document.getElementById('user-status');
+            const profileLink = document.getElementById('profile-link');
+            const settingsLink = document.getElementById('settings-link');
+            if (user) {
+                loginButton.style.display = 'none';
+                signupButton.style.display = 'none';
+                logoutButton.style.display = 'block';
+                profileLink.style.display = 'block';
+                settingsLink.style.display = 'block';
+                loadFriendRequests(user.uid);
+                loadFriends(user.uid);
+            } else {
+                loginButton.style.display = 'block';
+                signupButton.style.display = 'block';
+                logoutButton.style.display = 'none';
+                userStatus.innerText = 'Not signed in';
+                profileLink.style.display = 'none';
+                settingsLink.style.display = 'none';
+            }
+        });
+
+        // Logout function
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                console.log('User signed out');
+            }).catch((error) => {
+                console.error('Error signing out:', error);
+            });
+        }
+    </script>
 </body>
 
 </html>
