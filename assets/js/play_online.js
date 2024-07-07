@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         listItem.classList.add('friend-request');
                         listItem.innerHTML = `
                             <p><strong>${fromUsername}</strong> wants to be your friend</p>
-                            <button onclick="acceptFriendRequest('${doc.id}', '${request.from}', this)">Accept</button>
-                            <button onclick="rejectFriendRequest('${doc.id}', this)">Reject</button>
+                            <button class="btn accept-btn" onclick="acceptFriendRequest('${doc.id}', '${request.from}', this)">Accept</button>
+                            <button class="btn reject-btn" onclick="rejectFriendRequest('${doc.id}', this)">Reject</button>
                         `;
                         friendRequestsList.appendChild(listItem);
                     }).catch((error) => {
@@ -30,6 +30,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error getting friend requests: ', error);
             });
     }
+
+    // Delete all friend requests
+    window.deleteAllRequests = function () {
+        const user = auth.currentUser;
+        if (!user) {
+            showPopup('Please sign in to delete friend requests.');
+            return;
+        }
+
+        db.collection('friend_requests').where('to', '==', user.uid).get()
+            .then((querySnapshot) => {
+                const batch = db.batch();
+                querySnapshot.forEach((doc) => {
+                    batch.delete(doc.ref);
+                });
+                return batch.commit();
+            })
+            .then(() => {
+                loadFriendRequests(user.uid);
+                showPopup('All friend requests deleted.');
+            })
+            .catch((error) => {
+                console.error('Error deleting friend requests: ', error);
+            });
+    };
 
     // Fetch and display friends
     function loadFriends(userId) {
@@ -45,8 +70,11 @@ document.addEventListener('DOMContentLoaded', function () {
                             const listItem = document.createElement('div');
                             listItem.classList.add('friend');
                             listItem.innerHTML = `
-                                <p>${friendData.username}</p>
-                                <button onclick="removeFriend('${friendId}', this)">Remove</button>
+                                <div class="friend-info">
+                                    <img src="assets/img/user-icon.png" alt="Avatar" class="avatar">
+                                    <p>${friendData.username}</p>
+                                </div>
+                                <button class="btn remove-btn" onclick="removeFriend('${friendId}', this)">Remove</button>
                             `;
                             friendsList.appendChild(listItem);
                         });
@@ -90,17 +118,32 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
 
-                    // Create a friend request
-                    db.collection('friend_requests').add({
-                        from: user.uid,
-                        fromUsername: user.displayName,
-                        to: friendId
-                    }).then(() => {
-                        showPopup('Friend request sent!');
-                    }).catch((error) => {
-                        console.error('Error sending friend request: ', error);
-                        showPopup('Error sending friend request: ' + error.message);
-                    });
+                    // Check if there is already a pending or rejected friend request
+                    db.collection('friend_requests')
+                        .where('from', '==', user.uid)
+                        .where('to', '==', friendId)
+                        .get()
+                        .then((existingRequests) => {
+                            if (!existingRequests.empty) {
+                                showPopup('You have already sent a friend request to this user.');
+                                return;
+                            }
+
+                            // Create a friend request
+                            db.collection('friend_requests').add({
+                                from: user.uid,
+                                fromUsername: user.displayName,
+                                to: friendId,
+                                status: 'pending'
+                            }).then(() => {
+                                showPopup('Friend request sent!');
+                            }).catch((error) => {
+                                console.error('Error sending friend request: ', error);
+                                showPopup('Error sending friend request: ' + error.message);
+                            });
+                        }).catch((error) => {
+                            console.error('Error checking existing friend requests: ', error);
+                        });
                 });
             }).catch((error) => {
                 console.error('Error finding user: ', error);
@@ -215,3 +258,4 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
