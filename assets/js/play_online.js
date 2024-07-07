@@ -11,14 +11,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 friendRequestsList.innerHTML = '';
                 querySnapshot.forEach((doc) => {
                     const request = doc.data();
-                    const listItem = document.createElement('div');
-                    listItem.classList.add('friend-request');
-                    listItem.innerHTML = `
-                        <p><strong>${request.fromUsername}</strong> wants to be your friend</p>
-                        <button onclick="acceptFriendRequest('${doc.id}', '${request.from}', this)">Accept</button>
-                        <button onclick="rejectFriendRequest('${doc.id}', this)">Reject</button>
-                    `;
-                    friendRequestsList.appendChild(listItem);
+                    db.collection('users').doc(request.from).get().then((userDoc) => {
+                        const fromUsername = userDoc.data().username;
+                        const listItem = document.createElement('div');
+                        listItem.classList.add('friend-request');
+                        listItem.innerHTML = `
+                            <p><strong>${fromUsername}</strong> wants to be your friend</p>
+                            <button onclick="acceptFriendRequest('${doc.id}', '${request.from}', this)">Accept</button>
+                            <button onclick="rejectFriendRequest('${doc.id}', this)">Reject</button>
+                        `;
+                        friendRequestsList.appendChild(listItem);
+                    }).catch((error) => {
+                        console.error('Error getting user data: ', error);
+                    });
                 });
             })
             .catch((error) => {
