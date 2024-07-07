@@ -121,6 +121,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     requestElement.remove();
                     loadFriends(user.uid);
                     showPopup('Friend request accepted!');
+                    // Notify the other user
+                    socket.send(JSON.stringify({
+                        type: 'friendAccepted',
+                        userId: fromId
+                    }));
                 }).catch((error) => {
                     console.error('Error removing friend request: ', error);
                 });
@@ -163,6 +168,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 const friendElement = button.parentElement;
                 friendElement.remove();
                 showPopup('Friend removed.');
+                // Notify the other user
+                socket.send(JSON.stringify({
+                    type: 'friendRemoved',
+                    userId: friendId
+                }));
             }).catch((error) => {
                 console.error('Error removing friend: ', error);
             });
@@ -190,6 +200,24 @@ document.addEventListener('DOMContentLoaded', function () {
         popup.style.display = 'none';
         overlay.style.display = 'none';
     };
+
+    // WebSocket connection
+    const socket = new WebSocket('ws://localhost:5000');
+
+    socket.addEventListener('open', (event) => {
+        console.log('Connected to WebSocket server');
+    });
+
+    socket.addEventListener('message', (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'friendRequest') {
+            loadFriendRequests(auth.currentUser.uid);
+        } else if (data.type === 'friendAccepted') {
+            loadFriends(auth.currentUser.uid);
+        } else if (data.type === 'friendRemoved') {
+            loadFriends(auth.currentUser.uid);
+        }
+    });
 
     // Check the authentication state
     auth.onAuthStateChanged(function (user) {
