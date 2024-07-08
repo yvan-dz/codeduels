@@ -1,26 +1,22 @@
 [
     {
-        "title": "Anagram Checker",
-        "description": "Write a function that checks if two strings are anagrams.",
+        "title": "Third Law of Motion",
+        "description": "Write a program that, given a force being exerted, returns the force exerted on the object who exerted the argument force. More commonly known as: Newton's third law of motion.",
         "examples": [
-            "true == solution('listen', 'silent')",
-            "false == solution('hello', 'world')"
-        ]
+            "Input: thirdLaw(100)",
+            "Output: -100"
+        ],
+        "expected_output": "-100",
+        "code_template": "public class ThirdLaw {\n    public static int thirdLaw(int force) {\n        // your code here\n    }\n}"
     },
     {
-        "title": "Palindrome Checker",
-        "description": "Write a function that checks if a string is a palindrome.",
+        "title": "Multiply Two Numbers",
+        "description": "Write a program that takes two numbers as input and returns their product.",
         "examples": [
-            "true == solution('racecar')",
-            "false == solution('hello')"
-        ]
-    },
-    {
-        "title": "Sum of Array",
-        "description": "Write a function that returns the sum of all numbers in an array.",
-        "examples": [
-            "6 == solution([1, 2, 3])",
-            "10 == solution([2, 3, 5])"
-        ]
+            "Input: product(4, 4)",
+            "Output: 16"
+        ],
+        "expected_output": "16",
+        "code_template": "public class MultiplyTwo {\n    public static int product(int number1, int number2) {\n        // your code here\n    }\n}"
     }
 ]

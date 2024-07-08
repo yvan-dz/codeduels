@@ -2,29 +2,52 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize Firebase Firestore
     const db = firebase.firestore();
 
-    // Load Java exercises
-    fetch('assets/js/java_exercises.json')
-        .then(response => response.json())
-        .then(exercises => {
-            // Select a random exercise
-            const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
-            // Display the exercise
-            const taskContainer = document.getElementById('task-container');
-            taskContainer.innerHTML = `
-                <h1>Task: ${randomExercise.title}</h1>
-                <p>${randomExercise.description}</p>
-                <h3>Examples:</h3>
-                <ul>
-                    ${randomExercise.examples.map(example => `<li>${example}</li>`).join('')}
-                </ul>
-            `;
+    // Function to load the same exercise for both friends
+    function loadExerciseForFriends(userId) {
+        db.collection('users').doc(userId).get().then((userDoc) => {
+            const userData = userDoc.data();
+            if (userData.friends && userData.friends.length > 0) {
+                const friendId = userData.friends[0]; // Assume only one friend for simplicity
+                const taskContainer = document.getElementById('task-container');
+
+                db.collection('tasks').doc(userId).get().then((taskDoc) => {
+                    if (taskDoc.exists) {
+                        const taskData = taskDoc.data();
+                        displayTask(taskData);
+                    } else {
+                        fetch('assets/js/java_exercises.json')
+                            .then(response => response.json())
+                            .then(exercises => {
+                                const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
+                                db.collection('tasks').doc(userId).set(randomExercise);
+                                db.collection('tasks').doc(friendId).set(randomExercise);
+                                displayTask(randomExercise);
+                            });
+                    }
+                });
+            }
         });
+    }
+
+    function displayTask(task) {
+        const taskContainer = document.getElementById('task-container');
+        taskContainer.innerHTML = `
+            <h1>Task: ${task.title}</h1>
+            <p>${task.description}</p>
+            <h3>Examples:</h3>
+            <ul>
+                ${task.examples.map(example => `<li>${example}</li>`).join('')}
+            </ul>
+        `;
+        window.expectedOutput = task.expected_output;
+        window.codeTemplate = task.code_template;
+    }
 
     // Initialize Monaco Editor
-    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs' }});
-    require(['vs/editor/editor.main'], function() {
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs' } });
+    require(['vs/editor/editor.main'], function () {
         var editor1 = monaco.editor.create(document.getElementById('editor1'), {
-            value: '// your code here',
+            value: '',
             language: 'java',
             theme: 'vs-dark',
             automaticLayout: true
@@ -38,10 +61,12 @@ document.addEventListener('DOMContentLoaded', function () {
             readOnly: true
         });
 
-        // Sync editors with Firestore
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 const userId = user.uid;
+
+                // Load the exercise for both friends
+                loadExerciseForFriends(userId);
 
                 // Save editor1 content to Firestore
                 editor1.onDidChangeModelContent(() => {
@@ -63,47 +88,105 @@ document.addEventListener('DOMContentLoaded', function () {
                         });
                     }
                 });
-            }
-        });
 
-        const chatInput = document.getElementById('chat-input');
-        const chatBox = document.getElementById('chat-box');
-        const sendBtn = document.getElementById('send-btn');
-        const runBtn = document.getElementById('run-btn');
-        const outputElement = document.getElementById('output');
+                // Real-time chat functionality
+                const chatInput = document.getElementById('chat-input');
+                const chatBox = document.getElementById('chat-box');
+                const sendBtn = document.getElementById('send-btn');
+                const runBtn = document.getElementById('run-btn');
+                const outputElement = document.getElementById('output');
 
-        sendBtn.addEventListener('click', function () {
-            const message = chatInput.value;
-            if (message.trim()) {
-                const messageElement = document.createElement('div');
-                messageElement.textContent = message;
-                chatBox.appendChild(messageElement);
-                chatInput.value = '';
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
-        });
-
-        runBtn.addEventListener('click', async function () {
-            const code1 = editor1.getValue();
-            console.log('Player 1 Code:', code1);
-
-            try {
-                const response1 = await fetch('/api/execute', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ code: code1, language: 'java' })
+                sendBtn.addEventListener('click', function () {
+                    const message = chatInput.value;
+                    if (message.trim()) {
+                        db.collection('chats').add({
+                            from: userId,
+                            message: message,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        chatInput.value = '';
+                    }
                 });
-                const result1 = await response1.json();
 
-                outputElement.innerHTML = `
-                    <h3>Player 1 Output:</h3>
-                    <pre>${result1.output}</pre>
-                `;
-            } catch (error) {
-                console.error('Error executing code:', error);
-                outputElement.textContent = `Error: ${error.message}`;
+                // Listen for chat messages
+                db.collection('chats').orderBy('timestamp').onSnapshot((snapshot) => {
+                    chatBox.innerHTML = '';
+                    snapshot.forEach((doc) => {
+                        const chatData = doc.data();
+                        const messageElement = document.createElement('div');
+                        messageElement.textContent = chatData.message;
+                        chatBox.appendChild(messageElement);
+                    });
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                });
+
+                runBtn.addEventListener('click', async function () {
+                    const code1 = editor1.getValue();
+                    console.log('Player 1 Code:', code1);
+
+                    try {
+                        const response1 = await fetch('/api/execute', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ code: code1, language: 'java' })
+                        });
+                        const result1 = await response1.json();
+
+                        outputElement.innerHTML = `
+                            <h3>Player 1 Output:</h3>
+                            <pre>${result1.output}</pre>
+                        `;
+
+                        if (result1.output.trim() === window.expectedOutput) {
+                            showPopup('You won!', 'success');
+                            notifyFriend(user.uid, true);
+                        } else {
+                            showPopup('You lost!', 'error');
+                            notifyFriend(user.uid, false);
+                        }
+
+                    } catch (error) {
+                        console.error('Error executing code:', error);
+                        outputElement.textContent = `Error: ${error.message}`;
+                    }
+                });
+
+                function showPopup(message, type) {
+                    const popup = document.createElement('div');
+                    popup.classList.add('popup', type);
+                    popup.innerHTML = `
+                        <div class="popup-content">
+                            <p>${message}</p>
+                            <button onclick="closePopup()">Close</button>
+                        </div>
+                    `;
+                    document.body.appendChild(popup);
+                }
+
+                window.closePopup = function () {
+                    const popup = document.querySelector('.popup');
+                    if (popup) {
+                        document.body.removeChild(popup);
+                        window.location.href = 'index.html'; // Redirect to homepage
+                    }
+                };
+
+                function notifyFriend(userId, won) {
+                    db.collection('users').doc(userId).get().then((userDoc) => {
+                        const userData = userDoc.data();
+                        if (userData.friends && userData.friends.length > 0) {
+                            userData.friends.forEach((friendId) => {
+                                db.collection('notifications').add({
+                                    to: friendId,
+                                    message: won ? 'You lost! Your friend won!' : 'You won! Your friend lost!',
+                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                            });
+                        }
+                    });
+                }
             }
         });
     });
