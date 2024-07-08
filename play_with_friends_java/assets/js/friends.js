@@ -17,39 +17,63 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
         });
 
-    var editor1 = CodeMirror.fromTextArea(document.getElementById('editor1'), {
-        lineNumbers: true,
-        mode: 'text/x-java',
-        theme: 'material-darker'
-    });
+    // Initialize Monaco Editor
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs' }});
+    require(['vs/editor/editor.main'], function() {
+        var editor1 = monaco.editor.create(document.getElementById('editor1'), {
+            value: '// your code here',
+            language: 'java',
+            theme: 'vs-dark',
+            automaticLayout: true
+        });
 
-    var editor2 = CodeMirror.fromTextArea(document.getElementById('editor2'), {
-        lineNumbers: true,
-        mode: 'text/x-java',
-        theme: 'material-darker'
-    });
+        var editor2 = monaco.editor.create(document.getElementById('editor2'), {
+            value: '// this is player 2\'s code\n// you cannot edit this',
+            language: 'java',
+            theme: 'vs-dark',
+            automaticLayout: true,
+            readOnly: true
+        });
 
-    const chatInput = document.getElementById('chat-input');
-    const chatBox = document.getElementById('chat-box');
-    const sendBtn = document.getElementById('send-btn');
-    const runBtn = document.getElementById('run-btn');
+        const chatInput = document.getElementById('chat-input');
+        const chatBox = document.getElementById('chat-box');
+        const sendBtn = document.getElementById('send-btn');
+        const runBtn = document.getElementById('run-btn');
+        const outputElement = document.getElementById('output');
 
-    sendBtn.addEventListener('click', function () {
-        const message = chatInput.value;
-        if (message.trim()) {
-            const messageElement = document.createElement('div');
-            messageElement.textContent = message;
-            chatBox.appendChild(messageElement);
-            chatInput.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    });
+        sendBtn.addEventListener('click', function () {
+            const message = chatInput.value;
+            if (message.trim()) {
+                const messageElement = document.createElement('div');
+                messageElement.textContent = message;
+                chatBox.appendChild(messageElement);
+                chatInput.value = '';
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        });
 
-    runBtn.addEventListener('click', function () {
-        // Here you can add logic to run the code from the editors
-        const code1 = editor1.getValue();
-        const code2 = editor2.getValue();
-        console.log('Player 1 Code:', code1);
-        console.log('Player 2 Code:', code2);
+        runBtn.addEventListener('click', async function () {
+            const code1 = editor1.getValue();
+            console.log('Player 1 Code:', code1);
+
+            try {
+                const response1 = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code: code1, language: 'java' })
+                });
+                const result1 = await response1.json();
+
+                outputElement.innerHTML = `
+                    <h3>Player 1 Output:</h3>
+                    <pre>${result1.output}</pre>
+                `;
+            } catch (error) {
+                console.error('Error executing code:', error);
+                outputElement.textContent = `Error: ${error.message}`;
+            }
+        });
     });
 });
