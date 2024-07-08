@@ -41,7 +41,9 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
         window.expectedOutput = task.expected_output;
         window.codeTemplate = task.code_template;
+        initializeEditors(task.code_template);
     }
+
 
     // Initialize Monaco Editor
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs' } });
@@ -169,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const popup = document.querySelector('.popup');
                     if (popup) {
                         document.body.removeChild(popup);
-                        window.location.href = 'index.html'; // Redirect to homepage
+                        window.location.href = '../index.html'; // Redirect to homepage
                     }
                 };
 
