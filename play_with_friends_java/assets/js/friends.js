@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Initialize Firebase Firestore
+    const db = firebase.firestore();
+
     // Load Java exercises
     fetch('assets/js/java_exercises.json')
         .then(response => response.json())
@@ -33,6 +36,34 @@ document.addEventListener('DOMContentLoaded', function () {
             theme: 'vs-dark',
             automaticLayout: true,
             readOnly: true
+        });
+
+        // Sync editors with Firestore
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                const userId = user.uid;
+
+                // Save editor1 content to Firestore
+                editor1.onDidChangeModelContent(() => {
+                    const code = editor1.getValue();
+                    db.collection('code-editors').doc(userId).set({ code });
+                });
+
+                // Listen for changes in Firestore and update editor2
+                db.collection('users').doc(userId).get().then((userDoc) => {
+                    const userData = userDoc.data();
+                    if (userData.friends && userData.friends.length > 0) {
+                        userData.friends.forEach((friendId) => {
+                            db.collection('code-editors').doc(friendId).onSnapshot((doc) => {
+                                const data = doc.data();
+                                if (data && data.code) {
+                                    editor2.setValue(data.code);
+                                }
+                            });
+                        });
+                    }
+                });
+            }
         });
 
         const chatInput = document.getElementById('chat-input');
