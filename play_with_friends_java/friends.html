@@ -84,41 +84,40 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
 
-// Check the authentication state
-firebase.auth().onAuthStateChanged(function(user) {
-    const loginButton = document.getElementById('login-button');
-    const signupButton = document.getElementById('signup-button');
-    const logoutButton = document.getElementById('logout-button');
-    const userStatus = document.getElementById('user-status');
-    const profileLink = document.getElementById('profile-link');
-    const settingsLink = document.getElementById('settings-link');
-    if (user) {
-        loginButton.style.display = 'none';
-        signupButton.style.display = 'none';
-        logoutButton.style.display = 'block';
-        profileLink.style.display = 'inline';
-        settingsLink.style.display = 'inline';
-        userStatus.innerText = `Signed in as: ${user.email}`;
-    } else {
-        loginButton.style.display = 'block';
-        signupButton.style.display = 'block';
-        logoutButton.style.display = 'none';
-        userStatus.innerText = 'Not signed in';
-        profileLink.style.display = 'none';
-        settingsLink.style.display = 'none';
-    }
-});
+        // Check the authentication state
+        firebase.auth().onAuthStateChanged(function(user) {
+            const loginButton = document.getElementById('login-button');
+            const signupButton = document.getElementById('signup-button');
+            const logoutButton = document.getElementById('logout-button');
+            const userStatus = document.getElementById('user-status');
+            const profileLink = document.getElementById('profile-link');
+            const settingsLink = document.getElementById('settings-link');
+            if (user) {
+                loginButton.style.display = 'none';
+                signupButton.style.display = 'none';
+                logoutButton.style.display = 'block';
+                profileLink.style.display = 'inline';
+                settingsLink.style.display = 'inline';
+                userStatus.innerText = `Signed in as: ${user.email}`;
+            } else {
+                loginButton.style.display = 'block';
+                signupButton.style.display = 'block';
+                logoutButton.style.display = 'none';
+                userStatus.innerText = 'Not signed in';
+                profileLink.style.display = 'none';
+                settingsLink.style.display = 'none';
+            }
+        });
 
-// Logout function
-function logout() {
-    firebase.auth().signOut().then(() => {
-        console.log('User signed out');
-    }).catch((error) => {
-        console.error('Error signing out:', error);
-    });
-}
-</script>
+        // Logout function
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                console.log('User signed out');
+            }).catch((error) => {
+                console.error('Error signing out:', error);
+            });
+        }
+    </script>
 </body>
 
 </html>
-
