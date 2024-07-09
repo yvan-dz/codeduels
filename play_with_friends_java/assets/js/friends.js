@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize Firebase Firestore
     const db = firebase.firestore();
 
-    // Function to load the same exercise for both friends
     function loadExerciseForFriends(userId) {
         db.collection('users').doc(userId).get().then((userDoc) => {
             const userData = userDoc.data();
@@ -182,6 +181,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (userData.friends && userData.friends.length > 0) {
                                 const friendId = userData.friends[0];
 
+                                console.log('Notifying friend:', friendId);
+
                                 db.collection('notifications').add({
                                     to: friendId,
                                     message: won ? 'You lost! Your friend won!' : 'You won! Your friend lost!',
@@ -194,11 +195,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                 });
 
-                                db.collection('code-editors').doc(friendId).onSnapshot((doc) => {
-                                    const data = doc.data();
-                                    if (data) {
-                                        showPopup(message, type);
-                                    }
+                                db.collection('notifications').where('to', '==', friendId).orderBy('timestamp').onSnapshot((snapshot) => {
+                                    snapshot.forEach((doc) => {
+                                        const data = doc.data();
+                                        console.log('Notification for friend:', data);
+                                        if (data.message.includes('lost') || data.message.includes('won')) {
+                                            showPopup(message, type);
+                                        }
+                                    });
                                 });
                             }
                         });
