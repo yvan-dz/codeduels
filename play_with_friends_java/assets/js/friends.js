@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize Firebase Firestore
     const db = firebase.firestore();
 
+    // Function to load the same exercise for both friends
     function loadExerciseForFriends(userId) {
         db.collection('users').doc(userId).get().then((userDoc) => {
             const userData = userDoc.data();
@@ -146,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
 
                             notifyFriend(user.uid, won, message, type);
-                            showPopup(message, type, userId, friendId);
+                            showPopup(message, type);
 
                         } catch (error) {
                             console.error('Error executing code:', error);
@@ -154,101 +155,129 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     });
 
-                    function showPopup(message, type, userId, friendId) {
+                    function showPopup(message, type) {
                         const popup = document.createElement('div');
                         popup.classList.add('popup', type);
                         popup.innerHTML = `
                             <div class="popup-content">
                                 <p>${message}</p>
-                                <p id="timer">5</p>
+                                <button onclick="closePopup()">Close</button>
                             </div>
                         `;
                         document.body.appendChild(popup);
-
-                        let countdown = 5;
-                        const timerElement = document.getElementById('timer');
-                        const interval = setInterval(() => {
-                            countdown -= 1;
-                            timerElement.textContent = countdown;
-                            if (countdown === 0) {
-                                clearInterval(interval);
-                                window.location.href = '../index.html'; // Redirect to homepage
-                            }
-                        }, 1000);
-
-                        // Update friend's notification
-                        db.collection('notifications').add({
-                            to: friendId,
-                            message: message,
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                        });
+                        setTimeout(closePopup, 20000); // Timer for 20 seconds
                     }
+
+                    window.closePopup = function () {
+                        const popup = document.querySelector('.popup');
+                        if (popup) {
+                            document.body.removeChild(popup);
+                            window.location.href = '../index.html'; // Redirect to homepage
+                        }
+                    };
 
                     function notifyFriend(userId, won, message, type) {
                         db.collection('users').doc(userId).get().then((userDoc) => {
                             const userData = userDoc.data();
                             if (userData.friends && userData.friends.length > 0) {
                                 const friendId = userData.friends[0];
+
+                                db.collection('notifications').add({
+                                    to: friendId,
+                                    message: won ? 'You lost! Your friend won!' : 'You won! Your friend lost!',
+                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+
                                 db.collection('games').add({
                                     userId: friendId,
                                     result: won ? 'lost' : 'won',
                                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                 });
 
-                                // Real-time notification for the friend
-                                db.collection('notifications').where('to', '==', friendId).onSnapshot((snapshot) => {
-                                    snapshot.forEach((doc) => {
-                                        const data = doc.data();
-                                        if (data.message === message) {
-                                            showPopup(data.message, type, friendId, userId);
-                                        }
-                                    });
+                                db.collection('code-editors').doc(friendId).onSnapshot((doc) => {
+                                    const data = doc.data();
+                                    if (data) {
+                                        showPopup(message, type);
+                                    }
                                 });
                             }
                         });
                     }
-
-                    function showWaitingPopup() {
-                        const popup = document.createElement('div');
-                        popup.classList.add('popup', 'waiting');
-                        popup.innerHTML = `
-                            <div class="popup-content">
-                                <p>Waiting for your friend to join...</p>
-                            </div>
-                        `;
-                        document.body.appendChild(popup);
-                    }
-
-                    function removeWaitingPopup() {
-                        const popup = document.querySelector('.popup.waiting');
-                        if (popup) {
-                            document.body.removeChild(popup);
-                        }
-                    }
-
-                    // Check if friend is online
-                    db.collection('users').doc(userId).get().then((userDoc) => {
-                        const userData = userDoc.data();
-                        if (userData.friends && userData.friends.length > 0) {
-                            const friendId = userData.friends[0];
-                            db.collection('users').doc(friendId).onSnapshot((doc) => {
-                                if (doc.exists && doc.data().online) {
-                                    removeWaitingPopup();
-                                } else {
-                                    showWaitingPopup();
-                                }
-                            });
-                        }
-                    });
                 }
             });
         });
+    }
+
+    // Real-time opponent status check
+    function checkOpponentStatus(userId) {
+        db.collection('users').doc(userId).get().then((userDoc) => {
+            const userData = userDoc.data();
+            if (userData.friends && userData.friends.length > 0) {
+                const friendId = userData.friends[0];
+
+                db.collection('online-users').doc(friendId).get().then((friendDoc) => {
+                    if (!friendDoc.exists) {
+                        showWaitingPopup();
+                    } else {
+                        hideWaitingPopup();
+                    }
+                });
+
+                db.collection('online-users').doc(friendId).onSnapshot((doc) => {
+                    if (doc.exists) {
+                        hideWaitingPopup();
+                    } else {
+                        showWaitingPopup();
+                    }
+                });
+
+                window.addEventListener('beforeunload', () => {
+                    db.collection('online-users').doc(userId).delete();
+                });
+
+                db.collection('online-users').doc(userId).set({
+                    uid: userId,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                db.collection('online-users').doc(friendId).onSnapshot((doc) => {
+                    if (!doc.exists) {
+                        showPopup('You won! Your opponent left the game.', 'success');
+                        notifyFriend(userId, true, 'Your opponent left the game.', 'success');
+                    }
+                });
+            } else {
+                showWaitingPopup();
+            }
+        });
+    }
+
+    function showWaitingPopup() {
+        const popup = document.createElement('div');
+        popup.classList.add('popup', 'waiting');
+        popup.innerHTML = `
+            <div class="popup-content">
+                <p>Waiting for your opponent...</p>
+            </div>
+        `;
+        document.body.appendChild(popup);
+        document.body.classList.add('no-scroll'); // Prevent scrolling
+    }
+
+    function hideWaitingPopup() {
+        const popup = document.querySelector('.popup.waiting');
+        if (popup) {
+            document.body.removeChild(popup);
+        }
+        document.body.classList.remove('no-scroll'); // Allow scrolling
     }
 
     // Load the exercise for the user
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             loadExerciseForFriends(user.uid);
+            checkOpponentStatus(user.uid);
         }
     });
 });
+
