@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize Firebase Firestore
     const db = firebase.firestore();
 
-    // Function to load the same exercise for both friends
     function loadExerciseForFriends(userId) {
         db.collection('users').doc(userId).get().then((userDoc) => {
             const userData = userDoc.data();
@@ -12,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 db.collection('tasks').doc(userId).get().then((taskDoc) => {
                     if (taskDoc.exists) {
                         const taskData = taskDoc.data();
-                        displayTask(taskData, friendId);
+                        displayTask(taskData);
                     } else {
                         fetch('assets/js/java_exercises.json')
                             .then(response => response.json())
@@ -20,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
                                 db.collection('tasks').doc(userId).set(randomExercise);
                                 db.collection('tasks').doc(friendId).set(randomExercise);
-                                displayTask(randomExercise, friendId);
+                                displayTask(randomExercise);
                             });
                     }
                 });
@@ -28,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function displayTask(task, friendId) {
+    function displayTask(task) {
         const taskContainer = document.getElementById('task-container');
         taskContainer.innerHTML = `
             <h1>Task: ${task.title}</h1>
@@ -40,10 +39,10 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
         window.expectedOutput = task.expected_output;
         window.codeTemplate = task.code_template;
-        initializeEditors(task.code_template, friendId);
+        initializeEditors(task.code_template);
     }
 
-    function initializeEditors(codeTemplate, friendId) {
+    function initializeEditors(codeTemplate) {
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs' } });
         require(['vs/editor/editor.main'], function () {
             var editor1 = monaco.editor.create(document.getElementById('editor1'), {
@@ -146,8 +145,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
                             });
 
-                            notifyFriend(user.uid, friendId, won, message, type);
-                            showPopup(message, type);
+                            notifyFriend(user.uid, won, message, type);
+                            showPopup(message, type, userId, friendId);
 
                         } catch (error) {
                             console.error('Error executing code:', error);
@@ -155,60 +154,53 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     });
 
-                    function showPopup(message, type) {
+                    function showPopup(message, type, userId, friendId) {
                         const popup = document.createElement('div');
                         popup.classList.add('popup', type);
                         popup.innerHTML = `
                             <div class="popup-content">
                                 <p>${message}</p>
-                                <p id="countdown">Redirecting in 5 seconds...</p>
-                                <button onclick="closePopup()">Close</button>
+                                <p id="timer">5</p>
                             </div>
                         `;
                         document.body.appendChild(popup);
 
                         let countdown = 5;
-                        const countdownElement = document.getElementById('countdown');
-                        const countdownInterval = setInterval(() => {
-                            countdown--;
-                            countdownElement.textContent = `Redirecting in ${countdown} seconds...`;
+                        const timerElement = document.getElementById('timer');
+                        const interval = setInterval(() => {
+                            countdown -= 1;
+                            timerElement.textContent = countdown;
                             if (countdown === 0) {
-                                clearInterval(countdownInterval);
-                                closePopup();
+                                clearInterval(interval);
+                                window.location.href = '../index.html'; // Redirect to homepage
                             }
                         }, 1000);
+
+                        // Update friend's notification
+                        db.collection('notifications').add({
+                            to: friendId,
+                            message: message,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
                     }
 
-                    window.closePopup = function () {
-                        const popup = document.querySelector('.popup');
-                        if (popup) {
-                            document.body.removeChild(popup);
-                            window.location.href = '../index.html'; // Redirect to homepage
-                        }
-                    };
-
-                    function notifyFriend(userId, friendId, won, message, type) {
+                    function notifyFriend(userId, won, message, type) {
                         db.collection('users').doc(userId).get().then((userDoc) => {
                             const userData = userDoc.data();
                             if (userData.friends && userData.friends.length > 0) {
-                                userData.friends.forEach((friendId) => {
-                                    const notificationId = db.collection('notifications').doc().id;
-                                    db.collection('notifications').doc(notificationId).set({
-                                        to: friendId,
-                                        message: won ? 'You lost! Your friend won!' : 'You won! Your friend lost!',
-                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
+                                const friendId = userData.friends[0];
+                                db.collection('games').add({
+                                    userId: friendId,
+                                    result: won ? 'lost' : 'won',
+                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                });
 
-                                    db.collection('games').add({
-                                        userId: friendId,
-                                        result: won ? 'lost' : 'won',
-                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-
-                                    db.collection('notifications').doc(notificationId).onSnapshot((doc) => {
+                                // Real-time notification for the friend
+                                db.collection('notifications').where('to', '==', friendId).onSnapshot((snapshot) => {
+                                    snapshot.forEach((doc) => {
                                         const data = doc.data();
-                                        if (data) {
-                                            showPopup(message, type);
+                                        if (data.message === message) {
+                                            showPopup(data.message, type, friendId, userId);
                                         }
                                     });
                                 });
@@ -216,19 +208,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         });
                     }
 
-                    // Function to show waiting popup
                     function showWaitingPopup() {
                         const popup = document.createElement('div');
                         popup.classList.add('popup', 'waiting');
                         popup.innerHTML = `
                             <div class="popup-content">
-                                <p>Waiting for the other player...</p>
+                                <p>Waiting for your friend to join...</p>
                             </div>
                         `;
                         document.body.appendChild(popup);
                     }
 
-                    // Function to remove waiting popup
                     function removeWaitingPopup() {
                         const popup = document.querySelector('.popup.waiting');
                         if (popup) {
@@ -236,14 +226,18 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
 
-                    // Show waiting popup if friend is not online
-                    db.collection('online-users').doc(userId).set({ online: true });
-                    db.collection('online-users').doc(friendId).onSnapshot((doc) => {
-                        const data = doc.data();
-                        if (!data || !data.online) {
-                            showWaitingPopup();
-                        } else {
-                            removeWaitingPopup();
+                    // Check if friend is online
+                    db.collection('users').doc(userId).get().then((userDoc) => {
+                        const userData = userDoc.data();
+                        if (userData.friends && userData.friends.length > 0) {
+                            const friendId = userData.friends[0];
+                            db.collection('users').doc(friendId).onSnapshot((doc) => {
+                                if (doc.exists && doc.data().online) {
+                                    removeWaitingPopup();
+                                } else {
+                                    showWaitingPopup();
+                                }
+                            });
                         }
                     });
                 }
