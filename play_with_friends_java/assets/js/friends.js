@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 db.collection('tasks').doc(userId).get().then((taskDoc) => {
                     if (taskDoc.exists) {
                         const taskData = taskDoc.data();
-                        displayTask(taskData);
+                        displayTask(taskData, friendId);
                     } else {
                         fetch('assets/js/java_exercises.json')
                             .then(response => response.json())
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
                                 db.collection('tasks').doc(userId).set(randomExercise);
                                 db.collection('tasks').doc(friendId).set(randomExercise);
-                                displayTask(randomExercise);
+                                displayTask(randomExercise, friendId);
                             });
                     }
                 });
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function displayTask(task) {
+    function displayTask(task, friendId) {
         const taskContainer = document.getElementById('task-container');
         taskContainer.innerHTML = `
             <h1>Task: ${task.title}</h1>
@@ -40,10 +40,10 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
         window.expectedOutput = task.expected_output;
         window.codeTemplate = task.code_template;
-        initializeEditors(task.code_template);
+        initializeEditors(task.code_template, friendId);
     }
 
-    function initializeEditors(codeTemplate) {
+    function initializeEditors(codeTemplate, friendId) {
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs' } });
         require(['vs/editor/editor.main'], function () {
             var editor1 = monaco.editor.create(document.getElementById('editor1'), {
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
                             });
 
-                            notifyFriend(user.uid, won, message, type);
+                            notifyFriend(user.uid, friendId, won, message, type);
                             showPopup(message, type);
 
                         } catch (error) {
@@ -161,10 +161,22 @@ document.addEventListener('DOMContentLoaded', function () {
                         popup.innerHTML = `
                             <div class="popup-content">
                                 <p>${message}</p>
+                                <p id="countdown">Redirecting in 5 seconds...</p>
                                 <button onclick="closePopup()">Close</button>
                             </div>
                         `;
                         document.body.appendChild(popup);
+
+                        let countdown = 5;
+                        const countdownElement = document.getElementById('countdown');
+                        const countdownInterval = setInterval(() => {
+                            countdown--;
+                            countdownElement.textContent = `Redirecting in ${countdown} seconds...`;
+                            if (countdown === 0) {
+                                clearInterval(countdownInterval);
+                                closePopup();
+                            }
+                        }, 1000);
                     }
 
                     window.closePopup = function () {
@@ -175,12 +187,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     };
 
-                    function notifyFriend(userId, won, message, type) {
+                    function notifyFriend(userId, friendId, won, message, type) {
                         db.collection('users').doc(userId).get().then((userDoc) => {
                             const userData = userDoc.data();
                             if (userData.friends && userData.friends.length > 0) {
                                 userData.friends.forEach((friendId) => {
-                                    db.collection('notifications').add({
+                                    const notificationId = db.collection('notifications').doc().id;
+                                    db.collection('notifications').doc(notificationId).set({
                                         to: friendId,
                                         message: won ? 'You lost! Your friend won!' : 'You won! Your friend lost!',
                                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -192,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                     });
 
-                                    db.collection('code-editors').doc(friendId).onSnapshot((doc) => {
+                                    db.collection('notifications').doc(notificationId).onSnapshot((doc) => {
                                         const data = doc.data();
                                         if (data) {
                                             showPopup(message, type);
@@ -202,6 +215,37 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                         });
                     }
+
+                    // Function to show waiting popup
+                    function showWaitingPopup() {
+                        const popup = document.createElement('div');
+                        popup.classList.add('popup', 'waiting');
+                        popup.innerHTML = `
+                            <div class="popup-content">
+                                <p>Waiting for the other player...</p>
+                            </div>
+                        `;
+                        document.body.appendChild(popup);
+                    }
+
+                    // Function to remove waiting popup
+                    function removeWaitingPopup() {
+                        const popup = document.querySelector('.popup.waiting');
+                        if (popup) {
+                            document.body.removeChild(popup);
+                        }
+                    }
+
+                    // Show waiting popup if friend is not online
+                    db.collection('online-users').doc(userId).set({ online: true });
+                    db.collection('online-users').doc(friendId).onSnapshot((doc) => {
+                        const data = doc.data();
+                        if (!data || !data.online) {
+                            showWaitingPopup();
+                        } else {
+                            removeWaitingPopup();
+                        }
+                    });
                 }
             });
         });

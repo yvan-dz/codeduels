@@ -85,7 +85,7 @@
         firebase.initializeApp(firebaseConfig);
 
         // Check the authentication state
-        firebase.auth().onAuthStateChanged(function(user) {
+        firebase.auth().onAuthStateChanged(function (user) {
             const loginButton = document.getElementById('login-button');
             const signupButton = document.getElementById('signup-button');
             const logoutButton = document.getElementById('logout-button');
