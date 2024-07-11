@@ -34,13 +34,6 @@
         </div>
     </header>
     <main>
-        <section class="friend-requests">
-            <h2>Friend Requests</h2>
-            <div id="friend-requests-list">
-                <!-- Friend requests will be displayed here -->
-            </div>
-            <button id="delete-all-requests-button" onclick="deleteAllRequests()">Delete All Requests</button>
-        </section>
         <section class="send-request">
             <h2>Send Friend Request</h2>
             <form id="send-request-form">
@@ -51,10 +44,23 @@
                 <button type="submit">Send Request</button>
             </form>
         </section>
+        <section class="friend-requests">
+            <h2>Friend Requests</h2>
+            <div id="friend-requests-list">
+                <!-- Friend requests will be displayed here -->
+            </div>
+            <button id="delete-all-requests-button" onclick="deleteAllRequests()">Delete All Requests</button>
+        </section>
         <section class="friends-list">
             <h2>Your Friends</h2>
             <div id="friends-list">
                 <!-- Friends will be displayed here -->
+            </div>
+        </section>
+        <section class="duel-requests">
+            <h2>Duel Requests</h2>
+            <div id="duel-requests-list">
+                <!-- Duel requests will be displayed here -->
             </div>
         </section>
     </main>
@@ -100,6 +106,7 @@
                 settingsLink.style.display = 'block';
                 loadFriendRequests(user.uid);
                 loadFriends(user.uid);
+                loadDuelRequests(user.uid);
             } else {
                 loginButton.style.display = 'block';
                 signupButton.style.display = 'block';

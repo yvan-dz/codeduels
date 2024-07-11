@@ -71,10 +71,14 @@ document.addEventListener('DOMContentLoaded', function () {
                             listItem.classList.add('friend');
                             listItem.innerHTML = `
                                 <div class="friend-info">
-                                    <img src="assets/img/user-icon.png" alt="Avatar" class="avatar">
                                     <p>${friendData.username}</p>
                                 </div>
-                                <button class="btn remove-btn" onclick="removeFriend('${friendId}', this)">Remove</button>
+                                <div class="btn-group">
+                                    <button class="btn" onclick="requestDuel('${friendId}', 'java')">Request Java Duel 1v1</button>
+                                    <button class="btn" onclick="requestDuel('${friendId}', 'javascript')">Request JavaScript Duel 1v1</button>
+                                    <button class="btn" onclick="requestDuel('${friendId}', 'python')">Request Python Duel 1v1</button>
+                                    <button class="btn remove-btn" onclick="removeFriend('${friendId}', this)">Remove</button>
+                                </div>
                             `;
                             friendsList.appendChild(listItem);
                         });
@@ -87,6 +91,87 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error getting friends list: ', error);
             });
     }
+
+    // Request a duel
+    window.requestDuel = function (friendId, language) {
+        const user = auth.currentUser;
+        if (!user) {
+            showPopup('Please sign in to request a duel.');
+            return;
+        }
+
+        const duelRequest = {
+            from: user.uid,
+            to: friendId,
+            language: language,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        db.collection('duel-requests').add(duelRequest)
+            .then(() => {
+                showPopup('Duel request sent!');
+                startDuel(language);
+            })
+            .catch((error) => {
+                console.error('Error sending duel request: ', error);
+                showPopup('Error sending duel request: ' + error.message);
+            });
+    };
+
+    // Fetch and display duel requests
+    function loadDuelRequests(userId) {
+        db.collection('duel-requests').where('to', '==', userId)
+            .get()
+            .then((querySnapshot) => {
+                const duelRequestsList = document.getElementById('duel-requests-list');
+                duelRequestsList.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const request = doc.data();
+                    db.collection('users').doc(request.from).get().then((userDoc) => {
+                        const fromUsername = userDoc.data().username;
+                        const listItem = document.createElement('div');
+                        listItem.classList.add('duel-request');
+                        listItem.innerHTML = `
+                            <p><strong>${fromUsername}</strong> invited you to a ${request.language} duel</p>
+                            <button class="btn" onclick="startDuel('${request.language}', '${doc.id}')">Start ${request.language} Duel</button>
+                        `;
+                        duelRequestsList.appendChild(listItem);
+                    }).catch((error) => {
+                        console.error('Error getting user data: ', error);
+                    });
+                });
+            })
+            .catch((error) => {
+                console.error('Error getting duel requests: ', error);
+            });
+    }
+
+    // Start a duel and delete the request
+    window.startDuel = function (language, requestId) {
+        let duelPage;
+        switch (language) {
+            case 'java':
+                duelPage = 'play_with_friends_java/friends.html';
+                break;
+            case 'javascript':
+                duelPage = 'play_with_friends_javascript/friends.html';
+                break;
+            case 'python':
+                duelPage = 'play_with_friends_python/friends.html';
+                break;
+            default:
+                showPopup('Invalid language selected.');
+                return;
+        }
+
+        // Delete the duel request
+        db.collection('duel-requests').doc(requestId).delete().then(() => {
+            window.location.href = duelPage;
+        }).catch((error) => {
+            console.error('Error deleting duel request: ', error);
+            showPopup('Error starting duel: ' + error.message);
+        });
+    };
 
     // Handle friend request form submission
     document.getElementById('send-request-form').addEventListener('submit', function (event) {
@@ -208,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function () {
             friendRef.update({
                 friends: firebase.firestore.FieldValue.arrayRemove(user.uid)
             }).then(() => {
-                const friendElement = button.parentElement;
+                const friendElement = button.parentElement.parentElement;
                 friendElement.remove();
                 showPopup('Friend removed.');
             }).catch((error) => {
@@ -249,6 +334,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('settings-link').style.display = 'block';
             loadFriendRequests(user.uid);
             loadFriends(user.uid);
+            loadDuelRequests(user.uid);
         } else {
             document.getElementById('login-button').style.display = 'block';
             document.getElementById('signup-button').style.display = 'block';
@@ -258,4 +344,5 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
 
