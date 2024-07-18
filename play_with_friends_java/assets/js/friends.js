@@ -137,27 +137,16 @@ document.addEventListener('DOMContentLoaded', function () {
                                     });
                                     const result1 = await response1.json();
 
-                                    outputElement.innerHTML = `
-                                        <h3>Player 1 Output:</h3>
-                                        <pre>${result1.output}</pre>
-                                    `;
-
-                                    const won = result1.output.trim() === window.expectedOutput;
-                                    const result = won ? 'won' : 'lost';
-
-                                    // Update game result and notify both players
-                                    db.collection('games').add({
-                                        userId: user.uid,
-                                        friendId: friendId,
-                                        result: result,
+                                    await db.collection('submissions').doc(userId).set({
+                                        userId: userId,
+                                        code: code1,
+                                        output: result1.output,
                                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    }).then(() => {
-                                        if (won) {
-                                            notifyBothPlayers(user.uid, friendId, 'You won! Your opponent lost!', 'You lost! Your opponent won!', 'success', 'error');
-                                        } else {
-                                            notifyBothPlayers(user.uid, friendId, 'You lost! Your opponent won!', 'You won! Your opponent lost!', 'error', 'success');
-                                        }
                                     });
+
+                                    outputElement.innerHTML = `<p>Please wait for your opponent to submit their code.</p>`;
+
+                                    checkBothSubmitted(userId, friendId);
 
                                 } catch (error) {
                                     console.error('Error executing code:', error);
@@ -165,56 +154,33 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
                             });
 
-                            function notifyBothPlayers(playerId, opponentId, playerMessage, opponentMessage, playerType, opponentType) {
-                                db.collection('notifications').add({
-                                    to: playerId,
-                                    message: playerMessage,
-                                    type: playerType,
-                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                });
-
-                                db.collection('notifications').add({
-                                    to: opponentId,
-                                    message: opponentMessage,
-                                    type: opponentType,
-                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                });
-                            }
-
-                            // Listen for notifications in real-time
-                            db.collection('notifications')
-                                .where('to', '==', userId)
-                                .orderBy('timestamp', 'desc')
-                                .limit(1)
-                                .onSnapshot((snapshot) => {
-                                    snapshot.forEach((doc) => {
-                                        const notification = doc.data();
-                                        showPopup(notification.message, notification.type); // Display the notification
+                            function checkBothSubmitted(userId, friendId) {
+                                db.collection('submissions').where('userId', 'in', [userId, friendId])
+                                    .orderBy('timestamp', 'desc')
+                                    .limit(2)
+                                    .onSnapshot((snapshot) => {
+                                        if (snapshot.size === 2) {
+                                            const submissions = [];
+                                            snapshot.forEach(doc => {
+                                                submissions.push(doc.data());
+                                            });
+                                            processResults(submissions);
+                                        }
                                     });
-                                });
-
-                            function showPopup(message, type) {
-                                const popup = document.createElement('div');
-                                popup.classList.add('popup', type);
-                                popup.innerHTML = `
-                                    <div class="popup-content">
-                                        <p>${message}</p>
-                                        <button onclick="closePopup()">Close</button>
-                                    </div>
-                                `;
-                                document.body.appendChild(popup);
-
-                                setTimeout(() => {
-                                    closePopup();
-                                }, 10000); // Close the notification after 10 seconds
                             }
 
-                            window.closePopup = function () {
-                                const popup = document.querySelector('.popup');
-                                if (popup) {
-                                    document.body.removeChild(popup);
-                                }
-                            };
+                            async function processResults(submissions) {
+                                const [submission1, submission2] = submissions[0].userId === userId ? submissions : submissions.reverse();
+
+                                const won = submission1.output.trim() === window.expectedOutput;
+                                const resultData = {
+                                    player1: { userId: submission1.userId, output: submission1.output, won },
+                                    player2: { userId: submission2.userId, output: submission2.output, won: !won },
+                                };
+
+                                localStorage.setItem('resultData', JSON.stringify(resultData));
+                                window.location.href = 'result.html';
+                            }
 
                             function showWaitingPopup() {
                                 const popup = document.createElement('div');
@@ -288,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                             db.collection('games').add({
                                                 userId: userId,
                                                 result: 'lost',
-                                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                                timestamp: firebase.firestore.FieldValue.serverTimestamp
                                             });
 
                                             showPopup('You lost! You left the game!', 'error');
@@ -319,4 +285,3 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
-
