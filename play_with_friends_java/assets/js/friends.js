@@ -86,9 +86,9 @@ document.addEventListener('DOMContentLoaded', function () {
                             // Check if friend is online
                             db.collection('online-users').doc(friendId).onSnapshot((friendDoc) => {
                                 if (friendDoc.exists) {
-                                    hideWaitingNotification();
+                                    hideWaitingPopup();
                                 } else {
-                                    showWaitingNotification();
+                                    showWaitingPopup();
                                 }
                             });
                         }
@@ -145,17 +145,15 @@ document.addEventListener('DOMContentLoaded', function () {
                             `;
 
                             const won = result1.output.trim() === window.expectedOutput;
-                            const message = won ? 'You won! Your opponent lost!' : 'You lost! Your opponent won!';
-                            const type = won ? 'success' : 'error';
+                            const result = won ? 'won' : 'lost';
 
+                            // Update game result
                             db.collection('games').add({
                                 userId: user.uid,
-                                result: won ? 'won' : 'lost',
+                                friendId: userData.friends[0], // friendId
+                                result: result,
                                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
                             });
-
-                            notifyFriend(user.uid, won, message, type);
-                            showNotification(message, type);
 
                         } catch (error) {
                             console.error('Error executing code:', error);
@@ -163,51 +161,57 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     });
 
-                    function showNotification(message, type) {
-                        const notification = document.createElement('div');
-                        notification.classList.add('notification', type);
-                        notification.innerHTML = `<p>${message}</p>`;
-                        document.body.appendChild(notification);
+                    // Listen for notifications in real-time
+                    db.collection('notifications')
+                        .where('to', '==', userId)
+                        .orderBy('timestamp', 'desc')
+                        .limit(1)
+                        .onSnapshot((snapshot) => {
+                            snapshot.forEach((doc) => {
+                                const notification = doc.data();
+                                showPopup(notification.message, 'info'); // Display the notification
+                            });
+                        });
+
+                    function showPopup(message, type) {
+                        const popup = document.createElement('div');
+                        popup.classList.add('popup', type);
+                        popup.innerHTML = `
+                            <div class="popup-content">
+                                <p>${message}</p>
+                                <button onclick="closePopup()">Close</button>
+                            </div>
+                        `;
+                        document.body.appendChild(popup);
 
                         setTimeout(() => {
-                            notification.remove();
-                            loadExerciseForFriends(userId); // Load a new task for a new game
-                        }, 20000); // 20 seconds timer
+                            closePopup();
+                        }, 10000); // Close the notification after 10 seconds
                     }
 
-                    function notifyFriend(userId, won, message, type) {
-                        db.collection('users').doc(userId).get().then((userDoc) => {
-                            const userData = userDoc.data();
-                            if (userData.friends && userData.friends.length > 0) {
-                                userData.friends.forEach((friendId) => {
-                                    db.collection('notifications').add({
-                                        to: friendId,
-                                        message: won ? 'You lost! Your friend won!' : 'You won! Your friend lost!',
-                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
+                    window.closePopup = function () {
+                        const popup = document.querySelector('.popup');
+                        if (popup) {
+                            document.body.removeChild(popup);
+                        }
+                    };
 
-                                    db.collection('games').add({
-                                        userId: friendId,
-                                        result: won ? 'lost' : 'won',
-                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-                                });
-                            }
-                        });
-                    }
-
-                    function showWaitingNotification() {
-                        const notification = document.createElement('div');
-                        notification.classList.add('notification', 'waiting');
-                        notification.innerHTML = `<p>Waiting for your opponent...</p>`;
-                        document.body.appendChild(notification);
+                    function showWaitingPopup() {
+                        const popup = document.createElement('div');
+                        popup.classList.add('popup', 'waiting');
+                        popup.innerHTML = `
+                            <div class="popup-content">
+                                <p>Waiting for your opponent...</p>
+                            </div>
+                        `;
+                        document.body.appendChild(popup);
                         document.body.classList.add('no-scroll'); // Prevent scrolling
                     }
 
-                    function hideWaitingNotification() {
-                        const notification = document.querySelector('.notification.waiting');
-                        if (notification) {
-                            notification.remove();
+                    function hideWaitingPopup() {
+                        const popup = document.querySelector('.popup.waiting');
+                        if (popup) {
+                            document.body.removeChild(popup);
                         }
                         document.body.classList.remove('no-scroll'); // Allow scrolling
                     }
@@ -217,14 +221,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         userDocRef.onSnapshot((doc) => {
                             if (doc.exists) {
                                 const userData = doc.data();
-                                if (userData && userData.friends && userData.friends.length > 0) {
+                                if (userData.friends && userData.friends.length > 0) {
                                     const friendId = userData.friends[0]; // Assume only one friend for simplicity
                                     const friendDocRef = db.collection('online-users').doc(friendId);
                                     friendDocRef.onSnapshot((friendDoc) => {
                                         if (friendDoc.exists) {
-                                            hideWaitingNotification();
+                                            hideWaitingPopup();
                                         } else {
-                                            showWaitingNotification();
+                                            showWaitingPopup();
                                         }
                                     });
                                 }
@@ -265,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                     });
 
-                                    showNotification('You lost! You left the game!', 'error');
+                                    showPopup('You lost! You left the game!', 'error');
                                     notifyFriend(userId, false, 'You won! Your friend left the game!', 'success');
                                 }
                             });
