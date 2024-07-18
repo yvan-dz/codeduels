@@ -5,12 +5,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const http = require('http');
-const socketIo = require('socket.io');
+const WebSocket = require('ws');
 
 const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
-
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -64,24 +61,46 @@ app.put('/profile', async (req, res) => {
     res.send({ message: 'Profile updated successfully' });
 });
 
-// WebSocket connection
-io.on('connection', (socket) => {
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', (ws) => {
     console.log('New client connected');
 
-    socket.on('disconnect', () => {
+    ws.on('message', (message) => {
+        const data = JSON.parse(message);
+        const { type, userId, friendId, result } = data;
+
+        if (type === 'result') {
+            const friendSocket = [...wss.clients].find(client => client.userId === friendId);
+            if (friendSocket) {
+                friendSocket.send(JSON.stringify({
+                    type: 'notification',
+                    message: result === 'won' ? 'You lost! Your friend won!' : 'You won! Your friend lost!'
+                }));
+            }
+        }
+    });
+
+    ws.on('close', () => {
         console.log('Client disconnected');
     });
 });
 
-// Endpoint to notify players about the game result
 app.post('/notify-result', (req, res) => {
-    const { winnerId, loserId } = req.body;
-    io.to(winnerId).emit('gameResult', { message: 'You won! Your opponent lost!' });
-    io.to(loserId).emit('gameResult', { message: 'You lost! Your opponent won!' });
-    res.send({ message: 'Notification sent to both players' });
+    const { userId, friendId, result } = req.body;
+
+    const friendSocket = [...wss.clients].find(client => client.userId === friendId);
+    if (friendSocket) {
+        friendSocket.send(JSON.stringify({
+            type: 'notification',
+            message: result === 'won' ? 'You lost! Your friend won!' : 'You won! Your friend lost!'
+        }));
+    }
+
+    res.send({ message: 'Notification sent' });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+server.listen(3000, () => {
+    console.log('Server is running on port 3000');
 });
