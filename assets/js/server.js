@@ -8,6 +8,9 @@ const http = require('http');
 const WebSocket = require('ws');
 
 const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -61,46 +64,37 @@ app.put('/profile', async (req, res) => {
     res.send({ message: 'Profile updated successfully' });
 });
 
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
-
 wss.on('connection', (ws) => {
-    console.log('New client connected');
+    console.log('WebSocket connection opened');
 
     ws.on('message', (message) => {
         const data = JSON.parse(message);
-        const { type, userId, friendId, result } = data;
-
-        if (type === 'result') {
-            const friendSocket = [...wss.clients].find(client => client.userId === friendId);
-            if (friendSocket) {
-                friendSocket.send(JSON.stringify({
-                    type: 'notification',
-                    message: result === 'won' ? 'You lost! Your friend won!' : 'You won! Your friend lost!'
-                }));
-            }
+        if (data.type === 'join') {
+            ws.userId = data.userId;
+            console.log(`User ${data.userId} joined`);
+        } else if (data.type === 'result') {
+            const { userId, friendId, result } = data;
+            wss.clients.forEach((client) => {
+                if (client.readyState === WebSocket.OPEN && (client.userId === userId || client.userId === friendId)) {
+                    client.send(JSON.stringify({
+                        type: 'result',
+                        result: client.userId === userId ? result : (result === 'won' ? 'lost' : 'won')
+                    }));
+                }
+            });
         }
     });
 
     ws.on('close', () => {
-        console.log('Client disconnected');
+        console.log('WebSocket connection closed');
+    });
+
+    ws.on('error', (error) => {
+        console.log('WebSocket error:', error);
     });
 });
 
-app.post('/notify-result', (req, res) => {
-    const { userId, friendId, result } = req.body;
-
-    const friendSocket = [...wss.clients].find(client => client.userId === friendId);
-    if (friendSocket) {
-        friendSocket.send(JSON.stringify({
-            type: 'notification',
-            message: result === 'won' ? 'You lost! Your friend won!' : 'You won! Your friend lost!'
-        }));
-    }
-
-    res.send({ message: 'Notification sent' });
-});
-
-server.listen(3000, () => {
-    console.log('Server is running on port 3000');
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });

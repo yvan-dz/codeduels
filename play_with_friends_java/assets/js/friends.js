@@ -1,51 +1,55 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Initialize Firebase Firestore
     const db = firebase.firestore();
-    let userId, friendId;
+    let ws;
 
-    firebase.auth().onAuthStateChanged(async (user) => {
-        if (user) {
-            userId = user.uid;
-            const userDoc = await db.collection('users').doc(userId).get();
+    // Initialize WebSocket
+    function initializeWebSocket(userId) {
+        ws = new WebSocket('ws://localhost:8080');
+
+        ws.onopen = function () {
+            console.log('WebSocket connection opened');
+            ws.send(JSON.stringify({ type: 'join', userId: userId }));
+        };
+
+        ws.onmessage = function (event) {
+            const message = JSON.parse(event.data);
+            if (message.type === 'result') {
+                const popupMessage = message.result === 'won' ? 'You lost! Your friend won!' : 'You won! Your friend lost!';
+                showPopup(popupMessage, 'info');
+            }
+        };
+
+        ws.onclose = function () {
+            console.log('WebSocket connection closed');
+        };
+
+        ws.onerror = function (error) {
+            console.log('WebSocket error:', error);
+        };
+    }
+
+    // Function to load the same exercise for both friends
+    function loadExerciseForFriends(userId) {
+        db.collection('users').doc(userId).get().then((userDoc) => {
             const userData = userDoc.data();
             if (userData.friends && userData.friends.length > 0) {
-                friendId = userData.friends[0]; // Assume only one friend for simplicity
-                loadExerciseForFriends(userId);
-            }
-        }
-    });
+                const friendId = userData.friends[0]; // Assume only one friend for simplicity
 
-    const ws = new WebSocket('ws://localhost:3000');
-
-    ws.onopen = () => {
-        console.log('WebSocket connection established');
-    };
-
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === 'notification') {
-            showPopup(data.message, 'info');
-        }
-    };
-
-    ws.onclose = () => {
-        console.log('WebSocket connection closed');
-    };
-
-    function loadExerciseForFriends(userId) {
-        db.collection('tasks').doc(userId).get().then((taskDoc) => {
-            if (taskDoc.exists) {
-                const taskData = taskDoc.data();
-                displayTask(taskData);
-            } else {
-                fetch('assets/js/java_exercises.json')
-                    .then(response => response.json())
-                    .then(exercises => {
-                        const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
-                        db.collection('tasks').doc(userId).set(randomExercise);
-                        db.collection('tasks').doc(friendId).set(randomExercise);
-                        displayTask(randomExercise);
-                    });
+                db.collection('tasks').doc(userId).get().then((taskDoc) => {
+                    if (taskDoc.exists) {
+                        const taskData = taskDoc.data();
+                        displayTask(taskData);
+                    } else {
+                        fetch('assets/js/java_exercises.json')
+                            .then(response => response.json())
+                            .then(exercises => {
+                                const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
+                                db.collection('tasks').doc(userId).set(randomExercise);
+                                db.collection('tasks').doc(friendId).set(randomExercise);
+                                displayTask(randomExercise);
+                            });
+                    }
+                });
             }
         });
     }
@@ -68,14 +72,14 @@ document.addEventListener('DOMContentLoaded', function () {
     function initializeEditors(codeTemplate) {
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs' } });
         require(['vs/editor/editor.main'], function () {
-            const editor1 = monaco.editor.create(document.getElementById('editor1'), {
+            var editor1 = monaco.editor.create(document.getElementById('editor1'), {
                 value: codeTemplate,
                 language: 'java',
                 theme: 'vs-dark',
                 automaticLayout: true
             });
 
-            const editor2 = monaco.editor.create(document.getElementById('editor2'), {
+            var editor2 = monaco.editor.create(document.getElementById('editor2'), {
                 value: '// this is player 2\'s code\n// you cannot edit this',
                 language: 'java',
                 theme: 'vs-dark',
@@ -83,115 +87,145 @@ document.addEventListener('DOMContentLoaded', function () {
                 readOnly: true
             });
 
-            editor1.onDidChangeModelContent(() => {
-                const code = editor1.getValue();
-                db.collection('code-editors').doc(userId).set({ code });
-            });
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    const userId = user.uid;
+                    initializeWebSocket(userId);
 
-            db.collection('code-editors').doc(friendId).onSnapshot((doc) => {
-                const data = doc.data();
-                if (data && data.code) {
-                    editor2.setValue(data.code);
-                }
-            });
-
-            const chatInput = document.getElementById('chat-input');
-            const chatBox = document.getElementById('chat-box');
-            const sendBtn = document.getElementById('send-btn');
-            const runBtn = document.getElementById('run-btn');
-            const outputElement = document.getElementById('output');
-
-            sendBtn.addEventListener('click', function () {
-                const message = chatInput.value;
-                if (message.trim()) {
-                    db.collection('chats').add({
-                        from: userId,
-                        message: message,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    chatInput.value = '';
-                }
-            });
-
-            db.collection('chats').orderBy('timestamp').onSnapshot((snapshot) => {
-                chatBox.innerHTML = '';
-                snapshot.forEach((doc) => {
-                    const chatData = doc.data();
-                    const messageElement = document.createElement('div');
-                    messageElement.textContent = chatData.message;
-                    chatBox.appendChild(messageElement);
-                });
-                chatBox.scrollTop = chatBox.scrollHeight;
-            });
-
-            runBtn.addEventListener('click', async function () {
-                const code1 = editor1.getValue();
-                console.log('Player 1 Code:', code1);
-
-                try {
-                    const response1 = await fetch('/api/execute', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ code: code1, language: 'java' })
-                    });
-                    const result1 = await response1.json();
-
-                    outputElement.innerHTML = `
-                        <h3>Player 1 Output:</h3>
-                        <pre>${result1.output}</pre>
-                    `;
-
-                    const won = result1.output.trim() === window.expectedOutput;
-                    const message = won ? 'You won! Your opponent lost!' : 'You lost! Your opponent won!';
-                    const type = won ? 'success' : 'error';
-
-                    db.collection('games').add({
-                        userId: userId,
-                        result: won ? 'won' : 'lost',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    // Save editor1 content to Firestore
+                    editor1.onDidChangeModelContent(() => {
+                        const code = editor1.getValue();
+                        db.collection('code-editors').doc(userId).set({ code });
                     });
 
-                    ws.send(JSON.stringify({
-                        type: 'result',
-                        userId: userId,
-                        friendId: friendId,
-                        result: won ? 'won' : 'lost'
-                    }));
+                    // Listen for changes in Firestore and update editor2
+                    db.collection('users').doc(userId).get().then((userDoc) => {
+                        const userData = userDoc.data();
+                        if (userData.friends && userData.friends.length > 0) {
+                            const friendId = userData.friends[0];
+                            db.collection('code-editors').doc(friendId).onSnapshot((doc) => {
+                                const data = doc.data();
+                                if (data && data.code) {
+                                    editor2.setValue(data.code);
+                                }
+                            });
 
-                    showPopup(message, type);
+                            // Check if friend is online
+                            db.collection('online-users').doc(friendId).onSnapshot((friendDoc) => {
+                                if (friendDoc.exists) {
+                                    hideWaitingPopup();
+                                } else {
+                                    showWaitingPopup();
+                                }
+                            });
+                        }
+                    });
 
-                } catch (error) {
-                    console.error('Error executing code:', error);
-                    outputElement.textContent = `Error: ${error.message}`;
+                    // Real-time chat functionality
+                    const chatInput = document.getElementById('chat-input');
+                    const chatBox = document.getElementById('chat-box');
+                    const sendBtn = document.getElementById('send-btn');
+                    const runBtn = document.getElementById('run-btn');
+                    const outputElement = document.getElementById('output');
+
+                    sendBtn.addEventListener('click', function () {
+                        const message = chatInput.value;
+                        if (message.trim()) {
+                            db.collection('chats').add({
+                                from: userId,
+                                message: message,
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            chatInput.value = '';
+                        }
+                    });
+
+                    // Listen for chat messages
+                    db.collection('chats').orderBy('timestamp').onSnapshot((snapshot) => {
+                        chatBox.innerHTML = '';
+                        snapshot.forEach((doc) => {
+                            const chatData = doc.data();
+                            const messageElement = document.createElement('div');
+                            messageElement.textContent = chatData.message;
+                            chatBox.appendChild(messageElement);
+                        });
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    });
+
+                    runBtn.addEventListener('click', async function () {
+                        const code1 = editor1.getValue();
+                        console.log('Player 1 Code:', code1);
+
+                        try {
+                            const response1 = await fetch('/api/execute', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ code: code1, language: 'java' })
+                            });
+                            const result1 = await response1.json();
+
+                            outputElement.innerHTML = `
+                                <h3>Player 1 Output:</h3>
+                                <pre>${result1.output}</pre>
+                            `;
+
+                            const won = result1.output.trim() === window.expectedOutput;
+                            const message = won ? 'You won! Your opponent lost!' : 'You lost! Your opponent won!';
+                            const type = won ? 'success' : 'error';
+
+                            db.collection('games').add({
+                                userId: userId,
+                                result: won ? 'won' : 'lost',
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+
+                            if (ws.readyState === WebSocket.OPEN) {
+                                ws.send(JSON.stringify({
+                                    type: 'result',
+                                    userId: userId,
+                                    friendId: friendId,
+                                    result: won ? 'won' : 'lost'
+                                }));
+                            } else {
+                                console.error('WebSocket is not open');
+                            }
+
+                            showPopup(message, type);
+
+                        } catch (error) {
+                            console.error('Error executing code:', error);
+                            outputElement.textContent = `Error: ${error.message}`;
+                        }
+                    });
+
+                    function showPopup(message, type) {
+                        const popup = document.createElement('div');
+                        popup.classList.add('popup', type);
+                        popup.innerHTML = `
+                            <div class="popup-content">
+                                <p>${message}</p>
+                                <button onclick="closePopup()">Close</button>
+                            </div>
+                        `;
+                        document.body.appendChild(popup);
+
+                        setTimeout(() => {
+                            closePopup();
+                            loadExerciseForFriends(userId); // Load a new task for a new game
+                        }, 20000); // 20 seconds timer
+                    }
+
+                    window.closePopup = function () {
+                        const popup = document.querySelector('.popup');
+                        if (popup) {
+                            document.body.removeChild(popup);
+                            window.location.href = '../index.html'; // Redirect to homepage
+                        }
+                    };
                 }
             });
-
-            function showPopup(message, type) {
-                const popup = document.createElement('div');
-                popup.classList.add('popup', type);
-                popup.innerHTML = `
-                    <div class="popup-content">
-                        <p>${message}</p>
-                        <button onclick="closePopup()">Close</button>
-                    </div>
-                `;
-                document.body.appendChild(popup);
-
-                setTimeout(() => {
-                    closePopup();
-                    loadExerciseForFriends(userId); // Load a new task for a new game
-                }, 20000); // 20 seconds timer
-            }
-
-            window.closePopup = function () {
-                const popup = document.querySelector('.popup');
-                if (popup) {
-                    document.body.removeChild(popup);
-                    window.location.href = '../index.html'; // Redirect to homepage
-                }
-            };
         });
     }
 
@@ -215,50 +249,51 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    checkOpponentStatus(userId);
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            const userId = user.uid;
+            loadExerciseForFriends(userId);
+            checkOpponentStatus (userId);
+        }
+    });
+
+    function showWaitingPopup() {
+        const popup = document.createElement('div');
+        popup.classList.add('popup', 'waiting');
+        popup.innerHTML = `
+            <div class="popup-content">
+                <p>Waiting for your opponent...</p>
+            </div>
+        `;
+        document.body.appendChild(popup);
+        document.body.classList.add('no-scroll'); // Prevent scrolling
+    }
+
+    function hideWaitingPopup() {
+        const popup = document.querySelector('.popup.waiting');
+        if (popup) {
+            document.body.removeChild(popup);
+        }
+        document.body.classList.remove('no-scroll'); // Allow scrolling
+    }
 
     window.addEventListener('beforeunload', function (e) {
         // Notify opponent if user leaves the page
-        db.collection('online-users').doc(userId).delete().then(() => {
-            db.collection('users').doc(userId).get().then((userDoc) => {
-                const userData = userDoc.data();
-                if (userData.friends && userData.friends.length > 0) {
-                    const friendId = userData.friends[0]; // Assume only one friend for simplicity
-                    db.collection('notifications').add({
-                        to: friendId,
-                        message: 'You won! Your friend left the game!',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
-                    db.collection('games').add({
-                        userId: friendId,
-                        result: 'won',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
-                    db.collection('notifications').add({
-                        to: userId,
-                        message: 'You lost! You left the game!',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
-                    db.collection('games').add({
-                        userId: userId,
-                        result: 'lost',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
-                    showPopup('You lost! You left the game!', 'error');
-                }
-            });
-        });
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.close();
+        }
     });
 
     window.addEventListener('load', function () {
-        // Add user to online-users collection
-        db.collection('online-users').doc(userId).set({
-            online: true,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                const userId = user.uid;
+                // Add user to online-users collection
+                db.collection('online-users').doc(userId).set({
+                    online: true,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
         });
     });
 });
