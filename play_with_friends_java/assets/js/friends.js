@@ -91,197 +91,196 @@ document.addEventListener('DOMContentLoaded', function () {
                                     showWaitingPopup();
                                 }
                             });
-                        }
-                    });
 
-                    // Real-time chat functionality
-                    const chatInput = document.getElementById('chat-input');
-                    const chatBox = document.getElementById('chat-box');
-                    const sendBtn = document.getElementById('send-btn');
-                    const runBtn = document.getElementById('run-btn');
-                    const outputElement = document.getElementById('output');
+                            // Real-time chat functionality
+                            const chatInput = document.getElementById('chat-input');
+                            const chatBox = document.getElementById('chat-box');
+                            const sendBtn = document.getElementById('send-btn');
+                            const runBtn = document.getElementById('run-btn');
+                            const outputElement = document.getElementById('output');
 
-                    sendBtn.addEventListener('click', function () {
-                        const message = chatInput.value;
-                        if (message.trim()) {
-                            db.collection('chats').add({
-                                from: userId,
-                                message: message,
-                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                            chatInput.value = '';
-                        }
-                    });
-
-                    // Listen for chat messages
-                    db.collection('chats').orderBy('timestamp').onSnapshot((snapshot) => {
-                        chatBox.innerHTML = '';
-                        snapshot.forEach((doc) => {
-                            const chatData = doc.data();
-                            const messageElement = document.createElement('div');
-                            messageElement.textContent = chatData.message;
-                            chatBox.appendChild(messageElement);
-                        });
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                    });
-
-                    runBtn.addEventListener('click', async function () {
-                        const code1 = editor1.getValue();
-                        console.log('Player 1 Code:', code1);
-
-                        try {
-                            const response1 = await fetch('/api/execute', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({ code: code1, language: 'java' })
-                            });
-                            const result1 = await response1.json();
-
-                            outputElement.innerHTML = `
-                                <h3>Player 1 Output:</h3>
-                                <pre>${result1.output}</pre>
-                            `;
-
-                            const won = result1.output.trim() === window.expectedOutput;
-                            const result = won ? 'won' : 'lost';
-
-                            // Update game result
-                            db.collection('games').add({
-                                userId: user.uid,
-                                friendId: userData.friends[0], // friendId
-                                result: result,
-                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                            sendBtn.addEventListener('click', function () {
+                                const message = chatInput.value;
+                                if (message.trim()) {
+                                    db.collection('chats').add({
+                                        from: userId,
+                                        message: message,
+                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
+                                    chatInput.value = '';
+                                }
                             });
 
-                        } catch (error) {
-                            console.error('Error executing code:', error);
-                            outputElement.textContent = `Error: ${error.message}`;
-                        }
-                    });
-
-                    // Listen for notifications in real-time
-                    db.collection('notifications')
-                        .where('to', '==', userId)
-                        .orderBy('timestamp', 'desc')
-                        .limit(1)
-                        .onSnapshot((snapshot) => {
-                            snapshot.forEach((doc) => {
-                                const notification = doc.data();
-                                showPopup(notification.message, 'info'); // Display the notification
+                            // Listen for chat messages
+                            db.collection('chats').orderBy('timestamp').onSnapshot((snapshot) => {
+                                chatBox.innerHTML = '';
+                                snapshot.forEach((doc) => {
+                                    const chatData = doc.data();
+                                    const messageElement = document.createElement('div');
+                                    messageElement.textContent = chatData.message;
+                                    chatBox.appendChild(messageElement);
+                                });
+                                chatBox.scrollTop = chatBox.scrollHeight;
                             });
-                        });
 
-                    function showPopup(message, type) {
-                        const popup = document.createElement('div');
-                        popup.classList.add('popup', type);
-                        popup.innerHTML = `
-                            <div class="popup-content">
-                                <p>${message}</p>
-                                <button onclick="closePopup()">Close</button>
-                            </div>
-                        `;
-                        document.body.appendChild(popup);
+                            runBtn.addEventListener('click', async function () {
+                                const code1 = editor1.getValue();
+                                console.log('Player 1 Code:', code1);
 
-                        setTimeout(() => {
-                            closePopup();
-                        }, 10000); // Close the notification after 10 seconds
-                    }
+                                try {
+                                    const response1 = await fetch('/api/execute', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ code: code1, language: 'java' })
+                                    });
+                                    const result1 = await response1.json();
 
-                    window.closePopup = function () {
-                        const popup = document.querySelector('.popup');
-                        if (popup) {
-                            document.body.removeChild(popup);
-                        }
-                    };
+                                    outputElement.innerHTML = `
+                                        <h3>Player 1 Output:</h3>
+                                        <pre>${result1.output}</pre>
+                                    `;
 
-                    function showWaitingPopup() {
-                        const popup = document.createElement('div');
-                        popup.classList.add('popup', 'waiting');
-                        popup.innerHTML = `
-                            <div class="popup-content">
-                                <p>Waiting for your opponent...</p>
-                            </div>
-                        `;
-                        document.body.appendChild(popup);
-                        document.body.classList.add('no-scroll'); // Prevent scrolling
-                    }
+                                    const won = result1.output.trim() === window.expectedOutput;
+                                    const result = won ? 'won' : 'lost';
 
-                    function hideWaitingPopup() {
-                        const popup = document.querySelector('.popup.waiting');
-                        if (popup) {
-                            document.body.removeChild(popup);
-                        }
-                        document.body.classList.remove('no-scroll'); // Allow scrolling
-                    }
+                                    // Update game result
+                                    db.collection('games').add({
+                                        userId: user.uid,
+                                        friendId: friendId, // friendId
+                                        result: result,
+                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
 
-                    function checkOpponentStatus(userId) {
-                        const userDocRef = db.collection('online-users').doc(userId);
-                        userDocRef.onSnapshot((doc) => {
-                            if (doc.exists) {
-                                const userData = doc.data();
-                                if (userData.friends && userData.friends.length > 0) {
-                                    const friendId = userData.friends[0]; // Assume only one friend for simplicity
-                                    const friendDocRef = db.collection('online-users').doc(friendId);
-                                    friendDocRef.onSnapshot((friendDoc) => {
-                                        if (friendDoc.exists) {
-                                            hideWaitingPopup();
-                                        } else {
-                                            showWaitingPopup();
+                                } catch (error) {
+                                    console.error('Error executing code:', error);
+                                    outputElement.textContent = `Error: ${error.message}`;
+                                }
+                            });
+
+                            // Listen for notifications in real-time
+                            db.collection('notifications')
+                                .where('to', '==', userId)
+                                .orderBy('timestamp', 'desc')
+                                .limit(1)
+                                .onSnapshot((snapshot) => {
+                                    snapshot.forEach((doc) => {
+                                        const notification = doc.data();
+                                        showPopup(notification.message, 'info'); // Display the notification
+                                    });
+                                });
+
+                            function showPopup(message, type) {
+                                const popup = document.createElement('div');
+                                popup.classList.add('popup', type);
+                                popup.innerHTML = `
+                                    <div class="popup-content">
+                                        <p>${message}</p>
+                                        <button onclick="closePopup()">Close</button>
+                                    </div>
+                                `;
+                                document.body.appendChild(popup);
+
+                                setTimeout(() => {
+                                    closePopup();
+                                }, 10000); // Close the notification after 10 seconds
+                            }
+
+                            window.closePopup = function () {
+                                const popup = document.querySelector('.popup');
+                                if (popup) {
+                                    document.body.removeChild(popup);
+                                }
+                            };
+
+                            function showWaitingPopup() {
+                                const popup = document.createElement('div');
+                                popup.classList.add('popup', 'waiting');
+                                popup.innerHTML = `
+                                    <div class="popup-content">
+                                        <p>Waiting for your opponent...</p>
+                                    </div>
+                                `;
+                                document.body.appendChild(popup);
+                                document.body.classList.add('no-scroll'); // Prevent scrolling
+                            }
+
+                            function hideWaitingPopup() {
+                                const popup = document.querySelector('.popup.waiting');
+                                if (popup) {
+                                    document.body.removeChild(popup);
+                                }
+                                document.body.classList.remove('no-scroll'); // Allow scrolling
+                            }
+
+                            function checkOpponentStatus(userId) {
+                                const userDocRef = db.collection('online-users').doc(userId);
+                                userDocRef.onSnapshot((doc) => {
+                                    if (doc.exists) {
+                                        const userData = doc.data();
+                                        if (userData.friends && userData.friends.length > 0) {
+                                            const friendId = userData.friends[0]; // Assume only one friend for simplicity
+                                            const friendDocRef = db.collection('online-users').doc(friendId);
+                                            friendDocRef.onSnapshot((friendDoc) => {
+                                                if (friendDoc.exists) {
+                                                    hideWaitingPopup();
+                                                } else {
+                                                    showWaitingPopup();
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+
+                            checkOpponentStatus(userId);
+
+                            window.addEventListener('beforeunload', function (e) {
+                                // Notify opponent if user leaves the page
+                                db.collection('online-users').doc(userId).delete().then(() => {
+                                    db.collection('users').doc(userId).get().then((userDoc) => {
+                                        const userData = userDoc.data();
+                                        if (userData.friends && userData.friends.length > 0) {
+                                            const friendId = userData.friends[0]; // Assume only one friend for simplicity
+                                            db.collection('notifications').add({
+                                                to: friendId,
+                                                message: 'You won! Your friend left the game!',
+                                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                            });
+
+                                            db.collection('games').add({
+                                                userId: friendId,
+                                                result: 'won',
+                                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                            });
+                                            db.collection('notifications').add({
+                                                to: userId,
+                                                message: 'You lost! You left the game!',
+                                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                            });
+
+                                            db.collection('games').add({
+                                                userId: userId,
+                                                result: 'lost',
+                                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                            });
+
+                                            showPopup('You lost! You left the game!', 'error');
+                                            notifyFriend(userId, false, 'You won! Your friend left the game!', 'success');
                                         }
                                     });
-                                }
-                            }
-                        });
-                    }
-
-                    checkOpponentStatus(userId);
-
-                    window.addEventListener('beforeunload', function (e) {
-                        // Notify opponent if user leaves the page
-                        db.collection('online-users').doc(userId).delete().then(() => {
-                            db.collection('users').doc(userId).get().then((userDoc) => {
-                                const userData = userDoc.data();
-                                if (userData.friends && userData.friends.length > 0) {
-                                    const friendId = userData.friends[0]; // Assume only one friend for simplicity
-                                    db.collection('notifications').add({
-                                        to: friendId,
-                                        message: 'You won! Your friend left the game!',
-                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-
-                                    db.collection('games').add({
-                                        userId: friendId,
-                                        result: 'won',
-                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-
-                                    db.collection('notifications').add({
-                                        to: userId,
-                                        message: 'You lost! You left the game!',
-                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-
-                                    db.collection('games').add({
-                                        userId: userId,
-                                        result: 'lost',
-                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-
-                                    showPopup('You lost! You left the game!', 'error');
-                                    notifyFriend(userId, false, 'You won! Your friend left the game!', 'success');
-                                }
+                                });
                             });
-                        });
-                    });
 
-                    window.addEventListener('load', function () {
-                        // Add user to online-users collection
-                        db.collection('online-users').doc(userId).set({
-                            online: true,
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                        });
+                            window.addEventListener('load', function () {
+                                // Add user to online-users collection
+                                db.collection('online-users').doc(userId).set({
+                                    online: true,
+                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                            });
+                        }
                     });
                 }
             });
@@ -296,3 +295,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+                                           
