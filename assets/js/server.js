@@ -64,33 +64,28 @@ app.put('/profile', async (req, res) => {
     res.send({ message: 'Profile updated successfully' });
 });
 
-wss.on('connection', (ws) => {
-    console.log('WebSocket connection opened');
+const clients = {};
 
+wss.on('connection', (ws) => {
     ws.on('message', (message) => {
         const data = JSON.parse(message);
         if (data.type === 'join') {
-            ws.userId = data.userId;
-            console.log(`User ${data.userId} joined`);
+            clients[data.userId] = ws;
         } else if (data.type === 'result') {
-            const { userId, friendId, result } = data;
-            wss.clients.forEach((client) => {
-                if (client.readyState === WebSocket.OPEN && (client.userId === userId || client.userId === friendId)) {
-                    client.send(JSON.stringify({
-                        type: 'result',
-                        result: client.userId === userId ? result : (result === 'won' ? 'lost' : 'won')
-                    }));
-                }
-            });
+            const opponentWs = clients[data.friendId];
+            if (opponentWs && opponentWs.readyState === WebSocket.OPEN) {
+                opponentWs.send(JSON.stringify({ type: 'result', result: data.result === 'won' ? 'lost' : 'won' }));
+            }
         }
     });
 
     ws.on('close', () => {
-        console.log('WebSocket connection closed');
-    });
-
-    ws.on('error', (error) => {
-        console.log('WebSocket error:', error);
+        for (let userId in clients) {
+            if (clients[userId] === ws) {
+                delete clients[userId];
+                break;
+            }
+        }
     });
 });
 
