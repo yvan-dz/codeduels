@@ -4,8 +4,13 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -59,6 +64,24 @@ app.put('/profile', async (req, res) => {
     res.send({ message: 'Profile updated successfully' });
 });
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
+// WebSocket connection
+io.on('connection', (socket) => {
+    console.log('New client connected');
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
+});
+
+// Endpoint to notify players about the game result
+app.post('/notify-result', (req, res) => {
+    const { winnerId, loserId } = req.body;
+    io.to(winnerId).emit('gameResult', { message: 'You won! Your opponent lost!' });
+    io.to(loserId).emit('gameResult', { message: 'You lost! Your opponent won!' });
+    res.send({ message: 'Notification sent to both players' });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });

@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
         db.collection('users').doc(userId).get().then((userDoc) => {
             const userData = userDoc.data();
             if (userData.friends && userData.friends.length > 0) {
-                const friendId = userData.friends[0];
+                const friendId = userData.friends[0]; // Assume only one friend for simplicity
 
                 db.collection('tasks').doc(userId).get().then((taskDoc) => {
                     if (taskDoc.exists) {
@@ -44,14 +44,14 @@ document.addEventListener('DOMContentLoaded', function () {
     function initializeEditors(codeTemplate) {
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs' } });
         require(['vs/editor/editor.main'], function () {
-            const editor1 = monaco.editor.create(document.getElementById('editor1'), {
+            var editor1 = monaco.editor.create(document.getElementById('editor1'), {
                 value: codeTemplate,
                 language: 'java',
                 theme: 'vs-dark',
                 automaticLayout: true
             });
 
-            const editor2 = monaco.editor.create(document.getElementById('editor2'), {
+            var editor2 = monaco.editor.create(document.getElementById('editor2'), {
                 value: '// this is player 2\'s code\n// you cannot edit this',
                 language: 'java',
                 theme: 'vs-dark',
@@ -63,11 +63,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (user) {
                     const userId = user.uid;
 
+                    // Save editor1 content to Firestore
                     editor1.onDidChangeModelContent(() => {
                         const code = editor1.getValue();
                         db.collection('code-editors').doc(userId).set({ code });
                     });
 
+                    // Listen for changes in Firestore and update editor2
                     db.collection('users').doc(userId).get().then((userDoc) => {
                         const userData = userDoc.data();
                         if (userData.friends && userData.friends.length > 0) {
@@ -79,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
                             });
 
+                            // Check if friend is online
                             db.collection('online-users').doc(friendId).onSnapshot((friendDoc) => {
                                 if (friendDoc.exists) {
                                     hideWaitingPopup();
@@ -89,6 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     });
 
+                    // Real-time chat functionality
                     const chatInput = document.getElementById('chat-input');
                     const chatBox = document.getElementById('chat-box');
                     const sendBtn = document.getElementById('send-btn');
@@ -107,6 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     });
 
+                    // Listen for chat messages
                     db.collection('chats').orderBy('timestamp').onSnapshot((snapshot) => {
                         chatBox.innerHTML = '';
                         snapshot.forEach((doc) => {
@@ -141,13 +146,9 @@ document.addEventListener('DOMContentLoaded', function () {
                             const message = won ? 'You won! Your opponent lost!' : 'You lost! Your opponent won!';
                             const type = won ? 'success' : 'error';
 
-                            db.collection('games').add({
-                                userId: user.uid,
-                                result: won ? 'won' : 'lost',
-                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                            });
+                            // Notify both players
+                            notifyPlayers(user.uid, userData.friends[0], won);
 
-                            notifyFriend(user.uid, won);
                             showPopup(message, type);
 
                         } catch (error) {
@@ -166,41 +167,28 @@ document.addEventListener('DOMContentLoaded', function () {
                             </div>
                         `;
                         document.body.appendChild(popup);
+
+                        setTimeout(() => {
+                            closePopup();
+                            loadExerciseForFriends(userId); // Load a new task for a new game
+                        }, 20000); // 20 seconds timer
                     }
 
                     window.closePopup = function () {
                         const popup = document.querySelector('.popup');
                         if (popup) {
                             document.body.removeChild(popup);
-                            window.location.href = '../index.html'; 
+                            window.location.href = '../index.html'; // Redirect to homepage
                         }
                     };
 
-                    function notifyFriend(userId, won) {
-                        db.collection('users').doc(userId).get().then((userDoc) => {
-                            const userData = userDoc.data();
-                            if (userData.friends && userData.friends.length > 0) {
-                                const friendId = userData.friends[0];
-                                const friendMessage = won ? 'You lost! Your friend won!' : 'You won! Your friend lost!';
-
-                                db.collection('notifications').add({
-                                    to: friendId,
-                                    message: friendMessage,
-                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                });
-
-                                db.collection('games').add({
-                                    userId: friendId,
-                                    result: won ? 'lost' : 'won',
-                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                });
-
-                                db.collection('online-users').doc(friendId).get().then((friendDoc) => {
-                                    if (friendDoc.exists) {
-                                        showPopup(friendMessage, won ? 'error' : 'success');
-                                    }
-                                });
-                            }
+                    function notifyPlayers(winnerId, loserId, won) {
+                        fetch('/notify-result', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ winnerId, loserId })
                         });
                     }
 
@@ -213,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             </div>
                         `;
                         document.body.appendChild(popup);
-                        document.body.classList.add('no-scroll');
+                        document.body.classList.add('no-scroll'); // Prevent scrolling
                     }
 
                     function hideWaitingPopup() {
@@ -221,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (popup) {
                             document.body.removeChild(popup);
                         }
-                        document.body.classList.remove('no-scroll');
+                        document.body.classList.remove('no-scroll'); // Allow scrolling
                     }
 
                     function checkOpponentStatus(userId) {
@@ -230,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (doc.exists) {
                                 const userData = doc.data();
                                 if (userData && userData.friends && userData.friends.length > 0) {
-                                    const friendId = userData.friends[0];
+                                    const friendId = userData.friends[0]; // Assume only one friend for simplicity
                                     const friendDocRef = db.collection('online-users').doc(friendId);
                                     friendDocRef.onSnapshot((friendDoc) => {
                                         if (friendDoc.exists) {
@@ -247,42 +235,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     checkOpponentStatus(userId);
 
                     window.addEventListener('beforeunload', function (e) {
+                        // Notify opponent if user leaves the page
                         db.collection('online-users').doc(userId).delete().then(() => {
                             db.collection('users').doc(userId).get().then((userDoc) => {
                                 const userData = userDoc.data();
                                 if (userData.friends && userData.friends.length > 0) {
-                                    const friendId = userData.friends[0];
-                                    db.collection('notifications').add({
-                                        to: friendId,
-                                        message: 'You won! Your friend left the game!',
-                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-
-                                    db.collection('games').add({
-                                        userId: friendId,
-                                        result: 'won',
-                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-
-                                    db.collection('notifications').add({
-                                        to: userId,
-                                        message: 'You lost! You left the game!',
-                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-
-                                    db.collection('games').add({
-                                        userId: userId,
-                                        result: 'lost',
-                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-
-                                    showPopup('You lost! You left the game!', 'error');
+                                    const friendId = userData.friends[0]; // Assume only one friend for simplicity
+                                    notifyPlayers(friendId, userId, false);
                                 }
                             });
                         });
                     });
 
                     window.addEventListener('load', function () {
+                        // Add user to online-users collection
                         db.collection('online-users').doc(userId).set({
                             online: true,
                             timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -293,10 +259,27 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Load the exercise for the user
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             loadExerciseForFriends(user.uid);
         }
     });
+
+    // WebSocket for real-time notifications
+    const socket = io();
+
+    socket.on('connect', () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                socket.emit('join', user.uid);
+            }
+        });
+    });
+
+    socket.on('gameResult', (data) => {
+        showPopup(data.message, 'info');
+    });
+
 });
 
