@@ -1,33 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize Firebase Firestore
     const db = firebase.firestore();
-
-    // Initialize WebSocket
-    const ws = new WebSocket('ws://localhost:3000');
-
-    ws.onopen = () => {
-        console.log('WebSocket connection opened');
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                ws.send(JSON.stringify({ type: 'join', userId: user.uid }));
-            }
-        });
-    };
-
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === 'result') {
-            showPopup(data.result === 'won' ? 'You won! Your opponent lost!' : 'You lost! Your opponent won!', data.result === 'won' ? 'success' : 'error');
-        }
-    };
-
-    ws.onclose = () => {
-        console.log('WebSocket connection closed');
-    };
-
-    ws.onerror = (error) => {
-        console.log('WebSocket error:', error);
-    };
+    const socket = io();
 
     // Function to load the same exercise for both friends
     function loadExerciseForFriends(userId) {
@@ -91,6 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
                     const userId = user.uid;
+                    socket.emit('join', userId);
 
                     // Save editor1 content to Firestore
                     editor1.onDidChangeModelContent(() => {
@@ -175,6 +150,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             const message = won ? 'You won! Your opponent lost!' : 'You lost! Your opponent won!';
                             const type = won ? 'success' : 'error';
 
+                            db.collection('games').add({
+                                userId: user.uid,
+                                result: won ? 'won' : 'lost',
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+
                             notifyFriend(user.uid, won, message, type);
                             showPopup(message, type);
 
@@ -213,19 +194,19 @@ document.addEventListener('DOMContentLoaded', function () {
                         db.collection('users').doc(userId).get().then((userDoc) => {
                             const userData = userDoc.data();
                             if (userData.friends && userData.friends.length > 0) {
-                                userData.friends.forEach((friendId) => {
-                                    if (ws.readyState === WebSocket.OPEN) {
-                                        ws.send(JSON.stringify({
-                                            type: 'result',
-                                            userId: userId,
-                                            friendId: friendId,
-                                            result: won ? 'won' : 'lost'
-                                        }));
-                                    }
+                                const friendId = userData.friends[0]; // Assume only one friend for simplicity
+                                
+                                socket.emit('result', {
+                                    friendId: friendId,
+                                    result: won ? 'won' : 'lost'
                                 });
                             }
                         });
                     }
+
+                    socket.on('result', (data) => {
+                        showPopup(data.result === 'won' ? 'You won! Your opponent lost!' : 'You lost! Your opponent won!', data.result === 'won' ? 'success' : 'error');
+                    });
 
                     function showWaitingPopup() {
                         const popup = document.createElement('div');
@@ -259,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         if (friendDoc.exists) {
                                             hideWaitingPopup();
                                         } else {
-                                            showWaitingPopup
+                                            showWaitingPopup();
                                         }
                                     });
                                 }
@@ -276,14 +257,32 @@ document.addEventListener('DOMContentLoaded', function () {
                                 const userData = userDoc.data();
                                 if (userData.friends && userData.friends.length > 0) {
                                     const friendId = userData.friends[0]; // Assume only one friend for simplicity
-                                    if (ws.readyState === WebSocket.OPEN) {
-                                        ws.send(JSON.stringify({
-                                            type: 'result',
-                                            userId: userId,
-                                            friendId: friendId,
-                                            result: 'lost'
-                                        }));
-                                    }
+                                    db.collection('notifications').add({
+                                        to: friendId,
+                                        message: 'You won! Your friend left the game!',
+                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
+
+                                    db.collection('games').add({
+                                        userId: friendId,
+                                        result: 'won',
+                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
+
+                                    db.collection('notifications').add({
+                                        to: userId,
+                                        message: 'You lost! You left the game!',
+                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
+
+                                    db.collection('games').add({
+                                        userId: userId,
+                                        result: 'lost',
+                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
+
+                                    showPopup('You lost! You left the game!', 'error');
+                                    notifyFriend(userId, false, 'You won! Your friend left the game!', 'success');
                                 }
                             });
                         });
