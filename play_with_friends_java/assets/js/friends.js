@@ -145,12 +145,18 @@ document.addEventListener('DOMContentLoaded', function () {
                                     const won = result1.output.trim() === window.expectedOutput;
                                     const result = won ? 'won' : 'lost';
 
-                                    // Update game result
+                                    // Update game result and notify both players
                                     db.collection('games').add({
                                         userId: user.uid,
-                                        friendId: friendId, // friendId
+                                        friendId: friendId,
                                         result: result,
                                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                    }).then(() => {
+                                        if (won) {
+                                            notifyBothPlayers(user.uid, friendId, 'You won! Your opponent lost!', 'You lost! Your opponent won!', 'success', 'error');
+                                        } else {
+                                            notifyBothPlayers(user.uid, friendId, 'You lost! Your opponent won!', 'You won! Your opponent lost!', 'error', 'success');
+                                        }
                                     });
 
                                 } catch (error) {
@@ -158,6 +164,22 @@ document.addEventListener('DOMContentLoaded', function () {
                                     outputElement.textContent = `Error: ${error.message}`;
                                 }
                             });
+
+                            function notifyBothPlayers(playerId, opponentId, playerMessage, opponentMessage, playerType, opponentType) {
+                                db.collection('notifications').add({
+                                    to: playerId,
+                                    message: playerMessage,
+                                    type: playerType,
+                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+
+                                db.collection('notifications').add({
+                                    to: opponentId,
+                                    message: opponentMessage,
+                                    type: opponentType,
+                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                            }
 
                             // Listen for notifications in real-time
                             db.collection('notifications')
@@ -167,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 .onSnapshot((snapshot) => {
                                     snapshot.forEach((doc) => {
                                         const notification = doc.data();
-                                        showPopup(notification.message, 'info'); // Display the notification
+                                        showPopup(notification.message, notification.type); // Display the notification
                                     });
                                 });
 
@@ -246,6 +268,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                             db.collection('notifications').add({
                                                 to: friendId,
                                                 message: 'You won! Your friend left the game!',
+                                                type: 'success',
                                                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                             });
 
@@ -254,9 +277,11 @@ document.addEventListener('DOMContentLoaded', function () {
                                                 result: 'won',
                                                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                             });
+
                                             db.collection('notifications').add({
                                                 to: userId,
                                                 message: 'You lost! You left the game!',
+                                                type: 'error',
                                                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                             });
 
@@ -295,4 +320,3 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-                                           
