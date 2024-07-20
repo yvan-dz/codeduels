@@ -224,3 +224,12 @@ footer a {
     font-size: 1.5em;
     margin-top: 10px;
 }
+
+#result-container {
+    background-color: #ffffff;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 20px;
+    border: 1px solid #ddd;
+}
+
