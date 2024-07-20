@@ -156,6 +156,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                     updateResultContainer(userId, friendId, won, result.output, result.executionTime);
                                     runBtn.style.display = 'none';
 
+                                    // Hide the run button for both players
+                                    db.collection('games').doc(gameId).set({ runButtonHidden: true }, { merge: true });
+
                                 } catch (error) {
                                     console.error('Error executing code:', error);
                                     const outputElement = document.getElementById('output');
@@ -185,6 +188,10 @@ document.addEventListener('DOMContentLoaded', function () {
                                                 <p>Output: ${gameData.output}</p>
                                             `;
                                         });
+
+                                        if (gameData.runButtonHidden) {
+                                            document.getElementById('run-btn').style.display = 'none';
+                                        }
                                     });
                                 });
 
@@ -235,6 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         const userData = doc.data();
                                         if (userData && userData.friends && userData.friends.length > 0) {
                                             const friendId = userData.friends[0]; // Assume only one friend for simplicity
+                                           
                                             const friendDocRef = db.collection('online-users').doc(friendId);
                                             friendDocRef.onSnapshot((friendDoc) => {
                                                 if (friendDoc.exists) {
@@ -316,4 +324,3 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
-
