@@ -1,8 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize Firebase Firestore
     const db = firebase.firestore();
-    let player1Result = null;
-    let player2Result = null;
     let gameId = null;
 
     // Function to load the same exercise for both friends
@@ -100,7 +98,6 @@ document.addEventListener('DOMContentLoaded', function () {
                             const chatBox = document.getElementById('chat-box');
                             const sendBtn = document.getElementById('send-btn');
                             const runBtn = document.getElementById('run-btn');
-                            const outputElement = document.getElementById('output');
                             const resultContainer = document.getElementById('result-container');
 
                             sendBtn.addEventListener('click', function () {
@@ -129,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             runBtn.addEventListener('click', async function () {
                                 const code = editor1.getValue();
-                                console.log('Player 1 Code:', code);
+                                console.log('Player Code:', code);
 
                                 try {
                                     const response = await fetch('/api/execute', {
@@ -143,7 +140,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                     const won = result.output.trim() === window.expectedOutput;
                                     const resultMessage = won ? 'You won! Your opponent lost!' : 'You lost! Your opponent won!';
-                                    const resultType = won ? 'success' : 'error';
                                     
                                     // Save the result to Firestore
                                     const gameRef = db.collection('games').doc();
@@ -157,25 +153,45 @@ document.addEventListener('DOMContentLoaded', function () {
                                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                     });
 
-                                    if (won) {
-                                        player1Result = result.output;
-                                    } else {
-                                        player2Result = result.output;
-                                    }
-
                                     updateResultContainer(userId, friendId, won, result.output, result.executionTime);
                                     runBtn.style.display = 'none';
 
                                 } catch (error) {
                                     console.error('Error executing code:', error);
+                                    const outputElement = document.getElementById('output');
                                     outputElement.textContent = `Error: ${error.message}`;
                                 }
                             });
 
+                            // Listen for game results in real-time
+                            db.collection('games')
+                                .where('userId', 'in', [userId, friendId])
+                                .orderBy('timestamp', 'desc')
+                                .limit(1)
+                                .onSnapshot((snapshot) => {
+                                    snapshot.forEach((doc) => {
+                                        const gameData = doc.data();
+                                        const userDoc = db.collection('users').doc(gameData.userId).get();
+                                        const friendDoc = db.collection('users').doc(gameData.friendId).get();
+                                        Promise.all([userDoc, friendDoc]).then((docs) => {
+                                            const user = docs[0].data();
+                                            const friend = docs[1].data();
+                                            const winner = gameData.result === 'won' ? user.username : friend.username;
+                                            const loser = gameData.result === 'lost' ? user.username : friend.username;
+                                            resultContainer.innerHTML = `
+                                                <h3>Game Result:</h3>
+                                                <p>Winner: ${winner}</p>
+                                                <p>Loser: ${loser}</p>
+                                                <p>Output: ${gameData.output}</p>
+                                            `;
+                                        });
+                                    });
+                                });
+
                             function updateResultContainer(player1, player2, won, output, executionTime) {
                                 if (won) {
                                     resultContainer.innerHTML = `
-                                        <h3>Player 1 Output:</h3>
+                                        <h3>Player Output:</h3>
                                         <pre>${output}</pre>
                                         <p>Winner: Player 1</p>
                                         <p>Loser: Player 2</p>
@@ -183,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     `;
                                 } else {
                                     resultContainer.innerHTML = `
-                                        <h3>Player 1 Output:</h3>
+                                        <h3>Player Output:</h3>
                                         <pre>${output}</pre>
                                         <p>Winner: Player 2</p>
                                         <p>Loser: Player 1</p>
@@ -269,9 +285,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                             const resultContainer = document.getElementById('result-container');
                                             resultContainer.innerHTML = `
-                                                <h3>Player 1 left the game!</h3>
-                                                <p>Winner: Player 2</p>
-                                                <p>Loser: Player 1</p>
+                                                <h3>Player left the game!</h3>
+                                                <p>Winner: Opponent</p>
+                                                <p>Loser: Player</p>
                                             `;
                                             runBtn.style.display = 'none';
                                         }
@@ -300,3 +316,4 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
