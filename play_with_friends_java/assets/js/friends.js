@@ -314,6 +314,12 @@ document.addEventListener('DOMContentLoaded', function () {
         chatBox.innerHTML = ''; // Clear the chat box
     }
 
+    // Reset result container
+    function resetResultContainer() {
+        const resultContainer = document.getElementById('result-container');
+        resultContainer.innerHTML = 'Waiting for players\' results...'; // Clear the result container
+    }
+
     // Load the exercise for the user
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
