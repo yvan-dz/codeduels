@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const friendId = userData.friends[0]; // Assume only one friend for simplicity
                 const taskDoc = await db.collection('tasks').doc(userId).get();
 
-                const exercisesResponse = await fetch('assets/js/js_exercises.json');
+                const exercisesResponse = await fetch('assets/js/python_exercises.json');
                 const exercises = await exercisesResponse.json();
 
                 const userTaskIndexDoc = await db.collection('taskIndexes').doc(userId).get();
@@ -60,14 +60,14 @@ document.addEventListener('DOMContentLoaded', function () {
         require(['vs/editor/editor.main'], function () {
             var editor1 = monaco.editor.create(document.getElementById('editor1'), {
                 value: codeTemplate,
-                language: 'javascript',
+                language: 'python',
                 theme: 'vs-dark',
                 automaticLayout: true
             });
 
             var editor2 = monaco.editor.create(document.getElementById('editor2'), {
-                value: '// this is player 2\'s code\n// you cannot edit this',
-                language: 'javascript',
+                value: '# this is player 2\'s code\n# you cannot edit this',
+                language: 'python',
                 theme: 'vs-dark',
                 automaticLayout: true,
                 readOnly: true
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         headers: {
                                             'Content-Type': 'application/json'
                                         },
-                                        body: JSON.stringify({ code: code, language: 'javascript' })
+                                        body: JSON.stringify({ code: code, language: 'python' })
                                     });
                                     const result = await response.json();
 
@@ -346,4 +346,3 @@ document.addEventListener('DOMContentLoaded', function () {
         return confirmationMessage; // For older browsers
     });
 });
-

@@ -18,5 +18,55 @@
         ],
         "expected_output": "16",
         "code_template": "public class MultiplyTwo {\n    public static int product(int number1, int number2) {\n        // your code here\n    }\n}"
+    },
+    {
+        "title": "Square a Number",
+        "description": "Write a program that takes a number as input and returns its square.",
+        "examples": [
+            "Input: square(5)",
+            "Output: 25"
+        ],
+        "expected_output": "25",
+        "code_template": "public class SquareNumber {\n    public static int square(int number) {\n        // your code here\n    }\n}"
+    },
+    {
+        "title": "Check Even or Odd",
+        "description": "Write a program that takes a number as input and returns whether it is even or odd.",
+        "examples": [
+            "Input: checkEvenOdd(3)",
+            "Output: \"Odd\""
+        ],
+        "expected_output": "\"Odd\"",
+        "code_template": "public class CheckEvenOdd {\n    public static String checkEvenOdd(int number) {\n        // your code here\n    }\n}"
+    },
+    {
+        "title": "Reverse a String",
+        "description": "Write a program that takes a string as input and returns the string reversed.",
+        "examples": [
+            "Input: reverseString(\"hello\")",
+            "Output: \"olleh\""
+        ],
+        "expected_output": "\"olleh\"",
+        "code_template": "public class ReverseString {\n    public static String reverseString(String str) {\n        // your code here\n    }\n}"
+    },
+    {
+        "title": "Find Maximum of Three Numbers",
+        "description": "Write a program that takes three numbers as input and returns the maximum of the three.",
+        "examples": [
+            "Input: maxOfThree(1, 2, 3)",
+            "Output: 3"
+        ],
+        "expected_output": "3",
+        "code_template": "public class MaxOfThree {\n    public static int maxOfThree(int num1, int num2, int num3) {\n        // your code here\n    }\n}"
+    },
+    {
+        "title": "Calculate Factorial",
+        "description": "Write a program that takes a number as input and returns its factorial.",
+        "examples": [
+            "Input: factorial(5)",
+            "Output: 120"
+        ],
+        "expected_output": "120",
+        "code_template": "public class Factorial {\n    public static int factorial(int number) {\n        // your code here\n    }\n}"
     }
 ]

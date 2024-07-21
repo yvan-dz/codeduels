@@ -6,20 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Play with a Friend - CodeDuels</title>
     <link rel="stylesheet" href="assets/css/friends.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/material-darker.min.css">
     <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <!-- Monaco Editor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs/editor/editor.main.css">
 </head>
 
 <body>
     <header>
         <div class="logo">
             <a href="../index.html" class="logo-link">
-                <img src="assets/img/logo.png" alt="Logo">
+                <img src="../assets/img/logo.png" alt="Logo">
                 <span id="webname">CodeDuels</span>
             </a>
         </div>
@@ -28,13 +28,13 @@
                 <li><a href="../multiplayer_battle.html" id="friends-link">Play with friends</a></li>
                 <li><a href="../play_online.html" id="online-link">Play online</a></li>
                 <li><a href="../hackathon.html" id="hackathons-link">Hackathons</a></li>
-                <li><a href="profile.html" id="profile-link" style="display: none;">Profile</a></li>
-                <li><a href="settings.html" id="settings-link" style="display: none;">Settings</a></li>
+                <li><a href="../profile.html" id="profile-link" style="display: none;">Profile</a></li>
+                <li><a href="../settings.html" id="settings-link" style="display: none;">Settings</a></li>
             </ul>
         </nav>
         <div class="auth-buttons">
-            <button id="login-button"><a href="login.html" class="log">Sign in</a></button>
-            <button id="signup-button"><a href="signup.html" class="log">Join</a></button>
+            <button id="login-button"><a href="../login.html" class="log">Sign in</a></button>
+            <button id="signup-button"><a href="../signup.html" class="log">Join</a></button>
             <button class="button log" id="logout-button" style="display: none;" onclick="logout()">Logout</button>
             <span id="user-status"></span>
         </div>
@@ -46,11 +46,11 @@
         <section class="game-container">
             <div class="editor-container">
                 <h3>Player 1</h3>
-                <textarea id="editor1"></textarea>
+                <div id="editor1" style="height: 300px; border: 1px solid #ccc;"></div>
             </div>
             <div class="editor-container">
                 <h3>Player 2</h3>
-                <textarea id="editor2"></textarea>
+                <div id="editor2" style="height: 300px; border: 1px solid #ccc;"></div>
             </div>
             <div class="chat-container">
                 <h3>Chat</h3>
@@ -60,15 +60,19 @@
             </div>
         </section>
         <button id="run-btn">Run code!</button>
+        <div id="output" style="margin-top: 20px; font-weight: bold;"></div>
+        <div id="result-container" style="margin-top: 20px; font-weight: bold;">
+            Waiting for players' results...
+        </div>
     </main>
     <footer>
         <div class="footer-bottom">
             <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
         </div>
     </footer>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
-    <script src="assets/js/friends_python.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs/loader.min.js"></script>
+    <script src="assets/js/friends.js"></script>
     <script>
         // Your Firebase configuration
         var firebaseConfig = {
@@ -84,7 +88,7 @@
         firebase.initializeApp(firebaseConfig);
 
         // Check the authentication state
-        firebase.auth().onAuthStateChanged(function(user) {
+        firebase.auth().onAuthStateChanged(function (user) {
             const loginButton = document.getElementById('login-button');
             const signupButton = document.getElementById('signup-button');
             const logoutButton = document.getElementById('logout-button');
@@ -97,6 +101,7 @@
                 logoutButton.style.display = 'block';
                 profileLink.style.display = 'inline';
                 settingsLink.style.display = 'inline';
+                
             } else {
                 loginButton.style.display = 'block';
                 signupButton.style.display = 'block';

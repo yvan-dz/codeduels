@@ -247,7 +247,8 @@ footer a:hover {
     background-color: #16a085;
 }
 
-.btn {
+/* Additional button styles */
+.friend-request button, .duel-request button, #delete-all-requests-button, #delete-all-duel-requests-button {
     background-color: #1abc9c;
     color: white;
     padding: 10px 20px;
@@ -257,41 +258,40 @@ footer a:hover {
     cursor: pointer;
     transition: background-color 0.3s;
     margin-top: 10px;
-    display: inline-block;
 }
 
-.btn:hover {
+.friend-request button:hover, .duel-request button:hover, #delete-all-requests-button:hover, #delete-all-duel-requests-button:hover {
     background-color: #16a085;
 }
 
-.accept-btn {
+.friend-request .accept-btn {
     background-color: #4CAF50;
 }
 
-.reject-btn {
+.friend-request .reject-btn {
     background-color: #f44336;
 }
 
-.accept-btn:hover {
+.friend-request .accept-btn:hover {
     background-color: #45a049;
 }
 
-.reject-btn:hover {
+.friend-request .reject-btn:hover {
     background-color: #e53935;
 }
 
-.remove-btn {
+.friend .btn-group .remove-btn {
     background-color: #f44336;
 }
 
-.remove-btn:hover {
+.friend .btn-group .remove-btn:hover {
     background-color: #e53935;
 }
 
 .duel-request button {
-    background-color: #333;
+    background-color: #16a085;
 }
 
 .duel-request button:hover {
-    background-color: #555;
+    background-color: #16a085;
 }

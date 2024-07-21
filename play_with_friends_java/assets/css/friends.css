@@ -100,6 +100,7 @@ nav a:hover {
     display: flex;
     justify-content: space-between;
     padding: 20px;
+    flex-wrap: wrap;
 }
 
 .editor-container,
@@ -109,6 +110,7 @@ nav a:hover {
     background-color: #ffffff;
     border-radius: 5px;
     padding: 20px;
+    min-width: 280px;
 }
 
 .editor-container h3,
@@ -233,3 +235,89 @@ footer a {
     border: 1px solid #ddd;
 }
 
+/* Responsive styles */
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .game-container {
+        flex-direction: column;
+    }
+
+    .editor-container,
+    .chat-container {
+        margin: 10px 0;
+    }
+
+    #chat-input {
+        width: calc(100% - 60px);
+    }
+
+    #send-btn {
+        width: 50px;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .logo img {
+        height: 40px;
+    }
+
+    .logo span {
+        font-size: 1.2rem;
+    }
+
+    nav ul {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .game-container {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .editor-container,
+    .chat-container {
+        padding: 10px;
+        margin: 5px 0;
+    }
+
+    #chat-input {
+        width: calc(100% - 50px);
+    }
+
+    #send-btn {
+        width: 40px;
+        padding: 10px;
+    }
+
+    #run-btn {
+        font-size: 1em;
+        padding: 10px;
+        margin: 10px 0;
+    }
+
+    .popup,
+    .waiting-popup {
+        width: 90%;
+    }
+}

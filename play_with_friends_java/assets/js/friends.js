@@ -1,32 +1,44 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize Firebase Firestore
     const db = firebase.firestore();
-    let gameId = null;
 
     // Function to load the same exercise for both friends
-    function loadExerciseForFriends(userId) {
-        db.collection('users').doc(userId).get().then((userDoc) => {
+    async function loadExerciseForFriends(userId) {
+        try {
+            const userDoc = await db.collection('users').doc(userId).get();
             const userData = userDoc.data();
+
             if (userData.friends && userData.friends.length > 0) {
                 const friendId = userData.friends[0]; // Assume only one friend for simplicity
+                const taskDoc = await db.collection('tasks').doc(userId).get();
 
-                db.collection('tasks').doc(userId).get().then((taskDoc) => {
-                    if (taskDoc.exists) {
-                        const taskData = taskDoc.data();
-                        displayTask(taskData);
-                    } else {
-                        fetch('assets/js/java_exercises.json')
-                            .then(response => response.json())
-                            .then(exercises => {
-                                const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
-                                db.collection('tasks').doc(userId).set(randomExercise);
-                                db.collection('tasks').doc(friendId).set(randomExercise);
-                                displayTask(randomExercise);
-                            });
-                    }
-                });
+                const exercisesResponse = await fetch('assets/js/java_exercises.json');
+                const exercises = await exercisesResponse.json();
+
+                const userTaskIndexDoc = await db.collection('taskIndexes').doc(userId).get();
+                let taskIndex = 0;
+
+                if (userTaskIndexDoc.exists) {
+                    taskIndex = userTaskIndexDoc.data().index;
+                }
+
+                const nextTaskIndex = (taskIndex + 1) % exercises.length;
+                const nextTask = exercises[nextTaskIndex];
+
+                await db.collection('tasks').doc(userId).set(nextTask);
+                await db.collection('tasks').doc(friendId).set(nextTask);
+                await db.collection('taskIndexes').doc(userId).set({ index: nextTaskIndex });
+                await db.collection('taskIndexes').doc(friendId).set({ index: nextTaskIndex });
+
+                displayTask(nextTask);
+
+                // Clear chat and initialize editors when a new game is loaded
+                resetChat();
+                initializeEditors(nextTask.code_template);
             }
-        });
+        } catch (error) {
+            console.error("Error loading exercise:", error);
+        }
     }
 
     function displayTask(task) {
@@ -41,7 +53,6 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
         window.expectedOutput = task.expected_output;
         window.codeTemplate = task.code_template;
-        initializeEditors(task.code_template);
     }
 
     function initializeEditors(codeTemplate) {
@@ -140,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                     const won = result.output.trim() === window.expectedOutput;
                                     const resultMessage = won ? 'You won! Your opponent lost!' : 'You lost! Your opponent won!';
-                                    
+
                                     // Save the result to Firestore
                                     const gameRef = db.collection('games').doc();
                                     gameId = gameRef.id;
@@ -215,26 +226,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
                             }
 
-                            function showWaitingPopup() {
-                                const popup = document.createElement('div');
-                                popup.classList.add('popup', 'waiting');
-                                popup.innerHTML = `
-                                    <div class="popup-content">
-                                        <p>Waiting for your opponent...</p>
-                                    </div>
-                                `;
-                                document.body.appendChild(popup);
-                                document.body.classList.add('no-scroll'); // Prevent scrolling
-                            }
-
-                            function hideWaitingPopup() {
-                                const popup = document.querySelector('.popup.waiting');
-                                if (popup) {
-                                    document.body.removeChild(popup);
-                                }
-                                document.body.classList.remove('no-scroll'); // Allow scrolling
-                            }
-
                             function checkOpponentStatus(userId) {
                                 const userDocRef = db.collection('online-users').doc(userId);
                                 userDocRef.onSnapshot((doc) => {
@@ -242,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         const userData = doc.data();
                                         if (userData && userData.friends && userData.friends.length > 0) {
                                             const friendId = userData.friends[0]; // Assume only one friend for simplicity
-                                           
+
                                             const friendDocRef = db.collection('online-users').doc(friendId);
                                             friendDocRef.onSnapshot((friendDoc) => {
                                                 if (friendDoc.exists) {
@@ -317,10 +308,24 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Reset chat messages
+    function resetChat() {
+        const chatBox = document.getElementById('chat-box');
+        chatBox.innerHTML = ''; // Clear the chat box
+    }
+
     // Load the exercise for the user
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             loadExerciseForFriends(user.uid);
         }
     });
+
+    // Handle confirmation before leaving or reloading the page
+    window.addEventListener('beforeunload', function (e) {
+        const confirmationMessage = 'Are you sure you want to leave? Your changes might not be saved.';
+        e.returnValue = confirmationMessage; // Standard for most browsers
+        return confirmationMessage; // For older browsers
+    });
 });
+

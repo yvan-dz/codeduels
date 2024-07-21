@@ -7,7 +7,7 @@
             "Output: 2"
         ],
         "expected_output": "2",
-        "code_template": "def countConsonants(s):\n    # your code here\n    pass"
+        "code_template": "function countConsonants(s) {\n    // your code here\n}"
     },
     {
         "title": "Find Minimum in List",
@@ -17,7 +17,7 @@
             "Output: 1"
         ],
         "expected_output": "1",
-        "code_template": "def findMin(arr):\n    # your code here\n    pass"
+        "code_template": "function findMin(arr) {\n    // your code here\n}"
     },
     {
         "title": "Sum of Digits",
@@ -27,7 +27,7 @@
             "Output: 6"
         ],
         "expected_output": "6",
-        "code_template": "def sumOfDigits(n):\n    # your code here\n    pass"
+        "code_template": "function sumOfDigits(n) {\n    // your code here\n}"
     },
     {
         "title": "Reverse List",
@@ -37,7 +37,7 @@
             "Output: [3, 2, 1]"
         ],
         "expected_output": "[3, 2, 1]",
-        "code_template": "def reverseList(arr):\n    # your code here\n    pass"
+        "code_template": "function reverseList(arr) {\n    // your code here\n}"
     },
     {
         "title": "Find Unique Elements",
@@ -47,6 +47,6 @@
             "Output: [1, 2, 3]"
         ],
         "expected_output": "[1, 2, 3]",
-        "code_template": "def findUnique(arr):\n    # your code here\n    pass"
+        "code_template": "function findUnique(arr) {\n    // your code here\n}"
     }
 ]
