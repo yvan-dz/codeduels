@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Duelists</title>
+    <link rel="stylesheet" href="assets/css/topduelist.css">
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="assets/js/topduelist.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="index.html" class="logo-link">
+                <img src="assets/img/logo.png" alt="Logo">
+                <span>CodeDuels</span>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="play_with_friends.html">Play with friends</a></li>
+                <li><a href="play_online.html">Play online</a></li>
+                <li><a href="hackathons.html">Hackathons</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="settings.html">Settings</a></li>
+            </ul>
+        </nav>
+        <button id="logout-button" class="button">Logout</button>
+    </header>
+    <div class="top-duelists-container">
+        <h2>Top Duelists</h2>
+        <div class="table-container">
+            <table id="top-duelists-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Username</th>
+                        <th>Completed Challenges</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be populated here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
+        </div>
+    </footer>
+</body>
+</html>

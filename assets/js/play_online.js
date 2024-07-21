@@ -199,6 +199,31 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    // Delete all duel requests
+    window.deleteAllDuelRequests = function () {
+        const user = auth.currentUser;
+        if (!user) {
+            showPopup('Please sign in to delete duel requests.');
+            return;
+        }
+
+        db.collection('duel-requests').where('to', '==', user.uid).get()
+            .then((querySnapshot) => {
+                const batch = db.batch();
+                querySnapshot.forEach((doc) => {
+                    batch.delete(doc.ref);
+                });
+                return batch.commit();
+            })
+            .then(() => {
+                loadDuelRequests(user.uid);
+                showPopup('All duel requests deleted.');
+            })
+            .catch((error) => {
+                console.error('Error deleting duel requests: ', error);
+            });
+    };
+
     // Handle friend request form submission
     document.getElementById('send-request-form').addEventListener('submit', function (event) {
         event.preventDefault();
@@ -221,153 +246,155 @@ document.addEventListener('DOMContentLoaded', function () {
                 const friendDoc = querySnapshot.docs[0];
                 const friendId = friendDoc.id;
 
-                // Check if they are already friends
-                db.collection('users').doc(user.uid).get().then((userDoc) => {
-                    const userData = userDoc.data();
-                    if (userData.friends && userData.friends.includes(friendId)) {
-                        showPopup('You are already friends with this user.');
-                        return;
-                    }
-
-                    // Check if there is already a pending or rejected friend request
-                    db.collection('friend_requests')
-                        .where('from', '==', user.uid)
-                        .where('to', '==', friendId)
-                        .get()
-                        .then((existingRequests) => {
-                            if (!existingRequests.empty) {
-                                showPopup('You have already sent a friend request to this user.');
-                                return;
-                            }
-
-                                                        // Create a friend request
-                                                        db.collection('friend_requests').add({
-                                                            from: user.uid,
-                                                            fromUsername: user.displayName,
-                                                            to: friendId,
-                                                            status: 'pending'
-                                                        }).then(() => {
-                                                            showPopup('Friend request sent!');
-                                                        }).catch((error) => {
-                                                            console.error('Error sending friend request: ', error);
-                                                            showPopup('Error sending friend request: ' + error.message);
-                                                        });
-                                                    }).catch((error) => {
-                                                        console.error('Error checking existing friend requests: ', error);
-                                                    });
-                                            });
-                                        }).catch((error) => {
-                                            console.error('Error finding user: ', error);
-                                        });
-                                });
-                            
-                                // Accept friend request
-                                window.acceptFriendRequest = function (requestId, fromId, button) {
-                                    const user = auth.currentUser;
-                                    const userRef = db.collection('users').doc(user.uid);
-                                    const fromUserRef = db.collection('users').doc(fromId);
-                            
-                                    // Add each other as friends
-                                    userRef.update({
-                                        friends: firebase.firestore.FieldValue.arrayUnion(fromId)
-                                    }).then(() => {
-                                        fromUserRef.update({
-                                            friends: firebase.firestore.FieldValue.arrayUnion(user.uid)
-                                        }).then(() => {
-                                            // Remove the friend request
-                                            db.collection('friend_requests').doc(requestId).delete().then(() => {
-                                                const requestElement = button.parentElement;
-                                                requestElement.remove();
-                                                loadFriends(user.uid);
-                                                showPopup('Friend request accepted!');
-                                            }).catch((error) => {
-                                                console.error('Error removing friend request: ', error);
-                                            });
-                                        }).catch((error) => {
-                                            console.error('Error adding friend: ', error);
-                                        });
-                                    }).catch((error) => {
-                                        console.error('Error adding friend: ', error);
-                                    });
-                                };
-                            
-                                // Reject friend request
-                                window.rejectFriendRequest = function (requestId, button) {
-                                    const user = auth.currentUser;
-                            
-                                    // Remove the friend request
-                                    db.collection('friend_requests').doc(requestId).delete().then(() => {
-                                        const requestElement = button.parentElement;
-                                        requestElement.remove();
-                                        showPopup('Friend request rejected.');
-                                    }).catch((error) => {
-                                        console.error('Error removing friend request: ', error);
-                                    });
-                                };
-                            
-                                // Remove friend
-                                window.removeFriend = function (friendId, button) {
-                                    const user = auth.currentUser;
-                                    const userRef = db.collection('users').doc(user.uid);
-                                    const friendRef = db.collection('users').doc(friendId);
-                            
-                                    // Remove friend from user's friend list
-                                    userRef.update({
-                                        friends: firebase.firestore.FieldValue.arrayRemove(friendId)
-                                    }).then(() => {
-                                        // Remove user from friend's friend list
-                                        friendRef.update({
-                                            friends: firebase.firestore.FieldValue.arrayRemove(user.uid)
-                                        }).then(() => {
-                                            const friendElement = button.parentElement.parentElement;
-                                            friendElement.remove();
-                                            showPopup('Friend removed.');
-                                        }).catch((error) => {
-                                            console.error('Error removing friend: ', error);
-                                        });
-                                    }).catch((error) => {
-                                        console.error('Error removing friend: ', error);
-                                    });
-                                };
-                            
-                                // Function to show popup
-                                function showPopup(message) {
-                                    const popup = document.getElementById('popup');
-                                    const popupMessage = document.getElementById('popup-message');
-                                    const overlay = document.querySelector('.popup-overlay');
-                            
-                                    popupMessage.textContent = message;
-                                    popup.style.display = 'block';
-                                    overlay.style.display = 'block';
-                                }
-                            
-                                // Function to close popup
-                                window.closePopup = function () {
-                                    const popup = document.getElementById('popup');
-                                    const overlay = document.querySelector('.popup-overlay');
-                            
-                                    popup.style.display = 'none';
-                                    overlay.style.display = 'none';
-                                };
-                            
-                                // Check the authentication state
-                                auth.onAuthStateChanged(function (user) {
-                                    if (user) {
-                                        document.getElementById('login-button').style.display = 'none';
-                                        document.getElementById('signup-button').style.display = 'none';
-                                        document.getElementById('logout-button').style.display = 'block';
-                                        document.getElementById('profile-link').style.display = 'block';
-                                        document.getElementById('settings-link').style.display = 'block';
-                                        loadFriendRequests(user.uid);
-                                        loadFriends(user.uid);
-                                        loadDuelRequests(user.uid);
-                                    } else {
-                                        document.getElementById('login-button').style.display = 'block';
-                                        document.getElementById('signup-button').style.display = 'block';
-                                        document.getElementById('logout-button').style.display = 'none';
-                                        document.getElementById('profile-link').style.display = 'none';
-                                        document.getElementById('settings-link').style.display = 'none';
+                                // Check if they are already friends
+                                db.collection('users').doc(user.uid).get().then((userDoc) => {
+                                    const userData = userDoc.data();
+                                    if (userData.friends && userData.friends.includes(friendId)) {
+                                        showPopup('You are already friends with this user.');
+                                        return;
                                     }
+                
+                                    // Check if there is already a pending or rejected friend request
+                                    db.collection('friend_requests')
+                                        .where('from', '==', user.uid)
+                                        .where('to', '==', friendId)
+                                        .get()
+                                        .then((existingRequests) => {
+                                            if (!existingRequests.empty) {
+                                                showPopup('You have already sent a friend request to this user.');
+                                                return;
+                                            }
+                
+                                            // Create a friend request
+                                            db.collection('friend_requests').add({
+                                                from: user.uid,
+                                                fromUsername: user.displayName,
+                                                to: friendId,
+                                                status: 'pending'
+                                            }).then(() => {
+                                                showPopup('Friend request sent!');
+                                            }).catch((error) => {
+                                                console.error('Error sending friend request: ', error);
+                                                showPopup('Error sending friend request: ' + error.message);
+                                            });
+                                        }).catch((error) => {
+                                            console.error('Error checking existing friend requests: ', error);
+                                        });
+                                }).catch((error) => {
+                                    console.error('Error finding user: ', error);
                                 });
+                            }).catch((error) => {
+                                console.error('Error finding user: ', error);
                             });
-                            
+                    });
+                
+                    // Accept friend request
+                    window.acceptFriendRequest = function (requestId, fromId, button) {
+                        const user = auth.currentUser;
+                        const userRef = db.collection('users').doc(user.uid);
+                        const fromUserRef = db.collection('users').doc(fromId);
+                
+                        // Add each other as friends
+                        userRef.update({
+                            friends: firebase.firestore.FieldValue.arrayUnion(fromId)
+                        }).then(() => {
+                            fromUserRef.update({
+                                friends: firebase.firestore.FieldValue.arrayUnion(user.uid)
+                            }).then(() => {
+                                // Remove the friend request
+                                db.collection('friend_requests').doc(requestId).delete().then(() => {
+                                    const requestElement = button.parentElement;
+                                    requestElement.remove();
+                                    loadFriends(user.uid);
+                                    showPopup('Friend request accepted!');
+                                }).catch((error) => {
+                                    console.error('Error removing friend request: ', error);
+                                });
+                            }).catch((error) => {
+                                console.error('Error adding friend: ', error);
+                            });
+                        }).catch((error) => {
+                            console.error('Error adding friend: ', error);
+                        });
+                    };
+                
+                    // Reject friend request
+                    window.rejectFriendRequest = function (requestId, button) {
+                        const user = auth.currentUser;
+                
+                        // Remove the friend request
+                        db.collection('friend_requests').doc(requestId).delete().then(() => {
+                            const requestElement = button.parentElement;
+                            requestElement.remove();
+                            showPopup('Friend request rejected.');
+                        }).catch((error) => {
+                            console.error('Error removing friend request: ', error);
+                        });
+                    };
+                
+                    // Remove friend
+                    window.removeFriend = function (friendId, button) {
+                        const user = auth.currentUser;
+                        const userRef = db.collection('users').doc(user.uid);
+                        const friendRef = db.collection('users').doc(friendId);
+                
+                        // Remove friend from user's friend list
+                        userRef.update({
+                            friends: firebase.firestore.FieldValue.arrayRemove(friendId)
+                        }).then(() => {
+                            // Remove user from friend's friend list
+                            friendRef.update({
+                                friends: firebase.firestore.FieldValue.arrayRemove(user.uid)
+                            }).then(() => {
+                                const friendElement = button.parentElement.parentElement;
+                                friendElement.remove();
+                                showPopup('Friend removed.');
+                            }).catch((error) => {
+                                console.error('Error removing friend: ', error);
+                            });
+                        }).catch((error) => {
+                            console.error('Error removing friend: ', error);
+                        });
+                    };
+                
+                    // Function to show popup
+                    function showPopup(message) {
+                        const popup = document.getElementById('popup');
+                        const popupMessage = document.getElementById('popup-message');
+                        const overlay = document.querySelector('.popup-overlay');
+                
+                        popupMessage.textContent = message;
+                        popup.style.display = 'block';
+                        overlay.style.display = 'block';
+                    }
+                
+                    // Function to close popup
+                    window.closePopup = function () {
+                        const popup = document.getElementById('popup');
+                        const overlay = document.querySelector('.popup-overlay');
+                
+                        popup.style.display = 'none';
+                        overlay.style.display = 'none';
+                    };
+                
+                    // Check the authentication state
+                    auth.onAuthStateChanged(function (user) {
+                        if (user) {
+                            document.getElementById('login-button').style.display = 'none';
+                            document.getElementById('signup-button').style.display = 'none';
+                            document.getElementById('logout-button').style.display = 'block';
+                            document.getElementById('profile-link').style.display = 'block';
+                            document.getElementById('settings-link').style.display = 'block';
+                            loadFriendRequests(user.uid);
+                            loadFriends(user.uid);
+                            loadDuelRequests(user.uid);
+                        } else {
+                            document.getElementById('login-button').style.display = 'block';
+                            document.getElementById('signup-button').style.display = 'block';
+                            document.getElementById('logout-button').style.display = 'none';
+                            document.getElementById('profile-link').style.display = 'none';
+                            document.getElementById('settings-link').style.display = 'none';
+                        }
+                    });
+                });
+                
