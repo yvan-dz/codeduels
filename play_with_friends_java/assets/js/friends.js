@@ -320,6 +320,9 @@ document.addEventListener('DOMContentLoaded', function () {
         resultContainer.innerHTML = 'Waiting for players\' results...'; // Clear the result container
     }
 
+    resetResultContainer();
+
+
     // Load the exercise for the user
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
