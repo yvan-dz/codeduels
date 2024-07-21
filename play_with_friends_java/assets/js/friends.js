@@ -177,6 +177,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
                             });
 
+                            // Reset result container
+    function resetResultContainer() {
+        const resultContainer = document.getElementById('result-container');
+        resultContainer.innerHTML = 'Waiting for players\' results...'; // Clear the result container
+    }
+
+    resetResultContainer();
+
                             // Listen for game results in real-time
                             db.collection('games')
                                 .where('userId', 'in', [userId, friendId])
@@ -314,13 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
         chatBox.innerHTML = ''; // Clear the chat box
     }
 
-    // Reset result container
-    function resetResultContainer() {
-        const resultContainer = document.getElementById('result-container');
-        resultContainer.innerHTML = 'Waiting for players\' results...'; // Clear the result container
-    }
-
-    resetResultContainer();
+    
 
 
     // Load the exercise for the user
