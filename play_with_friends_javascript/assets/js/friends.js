@@ -202,6 +202,10 @@ document.addEventListener('DOMContentLoaded', function () {
                                     updateResultContainer(userId, friendId, won, result.output, result.executionTime);
                                     runBtn.style.display = 'none';
 
+                                    if (won) {
+                                        incrementCompletedChallenges(userId);
+                                    }
+
                                     // Hide the run button for both players
                                     db.collection('games').doc(gameId).set({ runButtonHidden: true }, { merge: true });
 
@@ -245,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         resultContainer.innerHTML = `
                                             <h3>Player Output:</h3>
                                             <pre>${output}</pre>
-                                                                                        <p>Winner: Player 1</p>
+                                            <p>Winner: Player 1</p>
                                             <p>Loser: Player 2</p>
                                             <p>Execution Time: ${executionTime} ms</p>
                                         `;
@@ -366,3 +370,22 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    function incrementCompletedChallenges(userId) {
+        const userRef = db.collection('users').doc(userId);
+        userRef.get().then((doc) => {
+            if (doc.exists) {
+                const currentChallenges = doc.data().completedChallenges || 0;
+                userRef.update({
+                    completedChallenges: currentChallenges + 1
+                }).then(() => {
+                    console.log('Completed challenges incremented successfully.');
+                }).catch((error) => {
+                    console.error('Error incrementing completed challenges:', error);
+                });
+            } else {
+                console.log('No such document!');
+            }
+        }).catch((error) => {
+            console.error('Error getting document:', error);
+        });
+    }

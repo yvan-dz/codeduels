@@ -199,6 +199,10 @@ document.addEventListener('DOMContentLoaded', function () {
                                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                     });
 
+                                    if (won) {
+                                        incrementCompletedChallenges(userId); // Increment completed challenges for the winner
+                                    }
+
                                     updateResultContainer(userId, friendId, won, result.output, result.executionTime);
                                     runBtn.style.display = 'none';
 
@@ -365,4 +369,26 @@ document.addEventListener('DOMContentLoaded', function () {
             return confirmationMessage; // For older browsers
         });
     });
+
+    // Function to increment completed challenges
+    function incrementCompletedChallenges(userId) {
+        var userRef = db.collection('users').doc(userId);
+    
+        userRef.get().then((doc) => {
+            if (doc.exists) {
+                var currentChallenges = doc.data().completedChallenges || 0;
+                userRef.update({
+                    completedChallenges: currentChallenges + 1
+                }).then(() => {
+                    console.log('Completed challenges incremented successfully.');
+                }).catch((error) => {
+                    console.error('Error incrementing completed challenges:', error);
+                });
+            } else {
+                console.log('No such document!');
+            }
+        }).catch((error) => {
+            console.error('Error getting document:', error);
+        });
+    }
 

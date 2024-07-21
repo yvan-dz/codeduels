@@ -33,6 +33,27 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
+    // Function to increment completed challenges
+    function incrementCompletedChallenges(userId) {
+        const userRef = db.collection('users').doc(userId);
+        userRef.get().then((doc) => {
+            if (doc.exists) {
+                const currentChallenges = doc.data().completedChallenges || 0;
+                userRef.update({
+                    completedChallenges: currentChallenges + 1
+                }).then(() => {
+                    console.log('Completed challenges incremented successfully.');
+                }).catch((error) => {
+                    console.error('Error incrementing completed challenges:', error);
+                });
+            } else {
+                console.log('No such document!');
+            }
+        }).catch((error) => {
+            console.error('Error getting document:', error);
+        });
+    }
+
     // Function to load the same exercise for both friends
     async function loadExerciseForFriends(userId) {
         try {
@@ -199,6 +220,10 @@ document.addEventListener('DOMContentLoaded', function () {
                                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                     });
 
+                                    if (won) {
+                                        incrementCompletedChallenges(userId); // Increment completed challenges for the winner
+                                    }
+
                                     updateResultContainer(userId, friendId, won, result.output, result.executionTime);
                                     runBtn.style.display = 'none';
 
@@ -259,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         `;
                                     }
                                 }
-    
+
                                 function checkOpponentStatus(userId) {
                                     const userDocRef = db.collection('online-users').doc(userId);
                                     userDocRef.onSnapshot((doc) => {
@@ -267,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                             const userData = doc.data();
                                             if (userData && userData.friends && userData.friends.length > 0) {
                                                 const friendId = userData.friends[0]; // Assume only one friend for simplicity
-    
+
                                                 const friendDocRef = db.collection('online-users').doc(friendId);
                                                 friendDocRef.onSnapshot((friendDoc) => {
                                                     if (friendDoc.exists) {
@@ -280,9 +305,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                         }
                                     });
                                 }
-    
+
                                 checkOpponentStatus(userId);
-    
+
                                 window.addEventListener('beforeunload', function (e) {
                                     // Notify opponent if user leaves the page
                                     db.collection('online-users').doc(userId).delete().then(() => {
@@ -296,26 +321,26 @@ document.addEventListener('DOMContentLoaded', function () {
                                                     type: 'success',
                                                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                                 });
-    
+
                                                 db.collection('games').add({
                                                     userId: friendId,
                                                     result: 'won',
                                                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                                 });
-    
+
                                                 db.collection('notifications').add({
                                                     to: userId,
                                                     message: 'You lost! You left the game!',
                                                     type: 'error',
                                                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                                 });
-    
+
                                                 db.collection('games').add({
                                                     userId: userId,
                                                     result: 'lost',
                                                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                                 });
-    
+
                                                 const resultContainer = document.getElementById('result-container');
                                                 resultContainer.innerHTML = `
                                                     <h3>Player left the game!</h3>
@@ -327,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         });
                                     });
                                 });
-    
+
                                 window.addEventListener('load', function () {
                                     // Add user to online-users collection
                                     db.collection('online-users').doc(userId).set({
@@ -365,4 +390,3 @@ document.addEventListener('DOMContentLoaded', function () {
             return confirmationMessage; // For older browsers
         });
     });
-    

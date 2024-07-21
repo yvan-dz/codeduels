@@ -31,16 +31,18 @@ function loadTopDuelists() {
         .then((querySnapshot) => {
             const tbody = document.getElementById('top-duelists-table').getElementsByTagName('tbody')[0];
             tbody.innerHTML = ''; // Clear the table body
-            
-            querySnapshot.forEach((doc, index) => {
+            let rank = 1; // Initialize rank
+
+            querySnapshot.forEach((doc) => {
                 const userData = doc.data();
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${(index + 1).toString()}</td>
+                    <td>${rank}</td>
                     <td>${userData.username}</td>
                     <td>${userData.completedChallenges || 0}</td>
                 `;
                 tbody.appendChild(row);
+                rank++; // Increment rank for each user
             });
         })
         .catch((error) => {
