@@ -21,6 +21,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Delete previous game results from Firestore
+    function deletePreviousResults(userId, friendId) {
+        db.collection('games')
+            .where('userId', 'in', [userId, friendId])
+            .get()
+            .then((snapshot) => {
+                snapshot.forEach((doc) => {
+                    db.collection('games').doc(doc.id).delete();
+                });
+            });
+    }
+
     // Function to load the same exercise for both friends
     async function loadExerciseForFriends(userId) {
         try {
@@ -51,12 +63,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 displayTask(nextTask);
 
-                // Clear chat and initialize editors when a new game is loaded
+                // Clear chat, initialize editors, and reset result container when a new game is loaded
                 resetChat();
                 initializeEditors(nextTask.code_template);
-
-                // Reset result container and show the run button
                 resetResultContainer();
+                deletePreviousResults(userId, friendId);
                 document.getElementById('run-btn').style.display = 'block';
             }
         } catch (error) {
@@ -229,122 +240,129 @@ document.addEventListener('DOMContentLoaded', function () {
                                     });
                                 });
 
-                            function updateResultContainer(player1, player2, won, output, executionTime) {
-                                if (won) {
-                                    resultContainer.innerHTML = `
-                                        <h3>Player Output:</h3>
-                                        <pre>${output}</pre>
-                                        <p>Winner: Player 1</p>
-                                        <p>Loser: Player 2</p>
-                                        <p>Execution Time: ${executionTime} ms</p>
-                                    `;
-                                } else {
-                                    resultContainer.innerHTML = `
-                                                                                <h3>Player Output:</h3>
-                                        <pre>${output}</pre>
-                                        <p>Winner: Player 2</p>
-                                        <p>Loser: Player 1</p>
-                                        <p>Example Solution: ${window.expectedOutput}</p>
-                                    `;
-                                }
-                            }
-
-                            function checkOpponentStatus(userId) {
-                                const userDocRef = db.collection('online-users').doc(userId);
-                                userDocRef.onSnapshot((doc) => {
-                                    if (doc.exists) {
-                                        const userData = doc.data();
-                                        if (userData && userData.friends && userData.friends.length > 0) {
-                                            const friendId = userData.friends[0]; // Assume only one friend for simplicity
-
-                                            const friendDocRef = db.collection('online-users').doc(friendId);
-                                            friendDocRef.onSnapshot((friendDoc) => {
-                                                if (friendDoc.exists) {
-                                                    hideWaitingPopup();
-                                                } else {
-                                                    showWaitingPopup();
-                                                }
-                                            });
-                                        }
+                                function updateResultContainer(player1, player2, won, output, executionTime) {
+                                    if (won) {
+                                        resultContainer.innerHTML = `
+                                            <h3>Player Output:</h3>
+                                            <pre>${output}</pre>
+                                            <p>Winner: Player 1</p>
+                                            <p>Loser: Player 2</p>
+                                            <p>Execution Time: ${executionTime} ms</p>
+                                        `;
+                                    } else {
+                                        resultContainer.innerHTML = `
+                                            <h3>Player Output:</h3>
+                                            <pre>${output}</pre>
+                                            <p>Winner: Player 2</p>
+                                            <p>Loser: Player 1</p>
+                                            <p>Example Solution: ${window.expectedOutput}</p>
+                                        `;
                                     }
-                                });
-                            }
-
-                            checkOpponentStatus(userId);
-
-                            window.addEventListener('beforeunload', function (e) {
-                                // Notify opponent if user leaves the page
-                                db.collection('online-users').doc(userId).delete().then(() => {
-                                    db.collection('users').doc(userId).get().then((userDoc) => {
-                                        const userData = userDoc.data();
-                                        if (userData.friends && userData.friends.length > 0) {
-                                            const friendId = userData.friends[0]; // Assume only one friend for simplicity
-                                            db.collection('notifications').add({
-                                                to: friendId,
-                                                message: 'You won! Your friend left the game!',
-                                                type: 'success',
-                                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                            });
-
-                                            db.collection('games').add({
-                                                userId: friendId,
-                                                result: 'won',
-                                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                            });
-
-                                            db.collection('notifications').add({
-                                                to: userId,
-                                                message: 'You lost! You left the game!',
-                                                type: 'error',
-                                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                            });
-
-                                            db.collection('games').add({
-                                                userId: userId,
-                                                result: 'lost',
-                                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                            });
-
-                                            const resultContainer = document.getElementById('result-container');
-                                            resultContainer.innerHTML = `
-                                                <h3>Player left the game!</h3>
-                                                <p>Winner: Opponent</p>
-                                                <p>Loser: Player</p>
-                                            `;
-                                            runBtn.style.display = 'none';
+                                }
+    
+                                function checkOpponentStatus(userId) {
+                                    const userDocRef = db.collection('online-users').doc(userId);
+                                    userDocRef.onSnapshot((doc) => {
+                                        if (doc.exists) {
+                                            const userData = doc.data();
+                                            if (userData && userData.friends && userData.friends.length > 0) {
+                                                const friendId = userData.friends[0]; // Assume only one friend for simplicity
+    
+                                                const friendDocRef = db.collection('online-users').doc(friendId);
+                                                friendDocRef.onSnapshot((friendDoc) => {
+                                                    if (friendDoc.exists) {
+                                                        hideWaitingPopup();
+                                                    } else {
+                                                        showWaitingPopup();
+                                                    }
+                                                });
+                                            }
                                         }
                                     });
+                                }
+    
+                                checkOpponentStatus(userId);
+    
+                                window.addEventListener('beforeunload', function (e) {
+                                    // Notify opponent if user leaves the page
+                                    db.collection('online-users').doc(userId).delete().then(() => {
+                                        db.collection('users').doc(userId).get().then((userDoc) => {
+                                            const userData = userDoc.data();
+                                            if (userData.friends && userData.friends.length > 0) {
+                                                const friendId = userData.friends[0]; // Assume only one friend for simplicity
+                                                db.collection('notifications').add({
+                                                    to: friendId,
+                                                    message: 'You won! Your friend left the game!',
+                                                    type: 'success',
+                                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                                });
+    
+                                                db.collection('games').add({
+                                                    userId: friendId,
+                                                    result: 'won',
+                                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                                });
+    
+                                                db.collection('notifications').add({
+                                                    to: userId,
+                                                    message: 'You lost! You left the game!',
+                                                    type: 'error',
+                                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                                });
+    
+                                                db.collection('games').add({
+                                                    userId: userId,
+                                                    result: 'lost',
+                                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                                });
+    
+                                                const resultContainer = document.getElementById('result-container');
+                                                resultContainer.innerHTML = `
+                                                    <h3>Player left the game!</h3>
+                                                    <p>Winner: Opponent</p>
+                                                    <p>Loser: Player</p>
+                                                `;
+                                                runBtn.style.display = 'none';
+                                            }
+                                        });
+                                    });
                                 });
-                            });
-
-                            window.addEventListener('load', function () {
-                                // Add user to online-users collection
-                                db.collection('online-users').doc(userId).set({
-                                    online: true,
-                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    
+                                window.addEventListener('load', function () {
+                                    // Add user to online-users collection
+                                    db.collection('online-users').doc(userId).set({
+                                        online: true,
+                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
                                 });
-                            });
-                        }
-                    });
-                }
+                            }
+                        });
+                    }
+                });
             });
-        });
-    }
-
-    // Load the exercise for the user
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            // Reset result container when the page loads
-            resetResultContainer();
-            loadExerciseForFriends(user.uid);
         }
+    
+        // Load the exercise for the user
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                const userId = user.uid;
+                db.collection('users').doc(userId).get().then((userDoc) => {
+                    const userData = userDoc.data();
+                    if (userData.friends && userData.friends.length > 0) {
+                        const friendId = userData.friends[0];
+                        resetResultContainer();
+                        deletePreviousResults(userId, friendId);
+                        loadExerciseForFriends(userId);
+                    }
+                });
+            }
+        });
+    
+        // Handle confirmation before leaving or reloading the page
+        window.addEventListener('beforeunload', function (e) {
+            const confirmationMessage = 'Are you sure you want to leave? Your changes might not be saved.';
+            e.returnValue = confirmationMessage; // Standard for most browsers
+            return confirmationMessage; // For older browsers
+        });
     });
-
-    // Handle confirmation before leaving or reloading the page
-    window.addEventListener('beforeunload', function (e) {
-        const confirmationMessage = 'Are you sure you want to leave? Your changes might not be saved.';
-        e.returnValue = confirmationMessage; // Standard for most browsers
-        return confirmationMessage; // For older browsers
-    });
-});
-
+    
