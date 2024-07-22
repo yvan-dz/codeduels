@@ -1,5 +1,5 @@
-// Firebase Configuration
-var firebaseConfig = {
+  // Firebase Configuration
+  var firebaseConfig = {
     apiKey: "AIzaSyAIwf6RVzexCZ0LMfmEFIFBq5YsHm5-lnM",
     authDomain: "codeduels-1b79f.firebaseapp.com",
     projectId: "codeduels-1b79f",
@@ -30,10 +30,9 @@ auth.onAuthStateChanged(function (user) {
                 document.getElementById('signup-button').style.display = 'none';
                 document.getElementById('profile-link').style.display = 'inline';
                 document.getElementById('settings-link').style.display = 'inline';
-                document.getElementById('friends-page-link').style.display = 'inline';
                 document.getElementById('friends-link').href = "multiplayer_battle.html";
-                document.getElementById('online-link').href = "#";
-                document.getElementById('hackathons-link').href = "#";
+                document.getElementById('online-link').href = "play_online.html";
+                document.getElementById('hackathons-link').href = "hackathon.html";
             } else {
                 console.log('No such document!');
             }
@@ -48,7 +47,6 @@ auth.onAuthStateChanged(function (user) {
         document.getElementById('signup-button').style.display = 'inline';
         document.getElementById('profile-link').style.display = 'none';
         document.getElementById('settings-link').style.display = 'none';
-        document.getElementById('friends-page-link').style.display = 'none';
         document.getElementById('friends-link').href = "login.html";
         document.getElementById('online-link').href = "login.html";
         document.getElementById('hackathons-link').href = "login.html";
@@ -59,8 +57,9 @@ auth.onAuthStateChanged(function (user) {
 function logout() {
     auth.signOut().then(function () {
         console.log('User signed out');
-        window.location.href = 'index.html'; // Redirect to homepage after logout
+        window.location.href = 'index.html';  // Redirect to homepage after logout
     }).catch(function (error) {
         console.error('Error signing out:', error);
+        alert('Error signing out: ' + error.message); // Display error message
     });
 }
