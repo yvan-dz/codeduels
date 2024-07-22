@@ -3,61 +3,120 @@
         "title": "Anagram Checker",
         "language": "JavaScript",
         "difficulty": "Medium",
-        "description": "Write a function that checks if two strings are anagrams."
+        "description": "Write a function that checks if two strings are anagrams.",
+        "examples": [
+            "Input: areAnagrams('listen', 'silent')",
+            "Output: true"
+        ],
+        "expected_output": "true",
+        "code_template": "function areAnagrams(str1, str2) {\n    // your code here\n}"
     },
     {
         "title": "Palindrome Checker",
         "language": "JavaScript",
         "difficulty": "Easy",
-        "description": "Write a function that checks if a string is a palindrome."
+        "description": "Write a function that checks if a string is a palindrome.",
+        "examples": [
+            "Input: isPalindrome('racecar')",
+            "Output: true"
+        ],
+        "expected_output": "true",
+        "code_template": "function isPalindrome(str) {\n    // your code here\n}"
     },
     {
         "title": "Prime Numbers",
         "language": "JavaScript",
         "difficulty": "Hard",
-        "description": "Write a function that prints all prime numbers up to a given number."
+        "description": "Write a function that returns all prime numbers up to a given number.",
+        "examples": [
+            "Input: getPrimes(10)",
+            "Output: [2, 3, 5, 7]"
+        ],
+        "expected_output": "[2, 3, 5, 7]",
+        "code_template": "function getPrimes(n) {\n    // your code here\n}"
     },
     {
         "title": "Fibonacci Sequence",
         "language": "JavaScript",
         "difficulty": "Easy",
-        "description": "Write a function that generates the first n numbers of the Fibonacci sequence."
+        "description": "Write a function that generates the first n numbers of the Fibonacci sequence.",
+        "examples": [
+            "Input: fibonacci(5)",
+            "Output: [0, 1, 1, 2, 3]"
+        ],
+        "expected_output": "[0, 1, 1, 2, 3]",
+        "code_template": "function fibonacci(n) {\n    // your code here\n}"
     },
     {
         "title": "Factorial Calculation",
         "language": "JavaScript",
         "difficulty": "Medium",
-        "description": "Write a function that calculates the factorial of a given number."
+        "description": "Write a function that calculates the factorial of a given number.",
+        "examples": [
+            "Input: factorial(5)",
+            "Output: 120"
+        ],
+        "expected_output": "120",
+        "code_template": "function factorial(n) {\n    // your code here\n}"
     },
     {
         "title": "Bubble Sort",
         "language": "JavaScript",
         "difficulty": "Medium",
-        "description": "Implement the bubble sort algorithm to sort an array of integers."
+        "description": "Implement the bubble sort algorithm to sort an array of integers.",
+        "examples": [
+            "Input: bubbleSort([3, 1, 4, 1, 5])",
+            "Output: [1, 1, 3, 4, 5]"
+        ],
+        "expected_output": "[1, 1, 3, 4, 5]",
+        "code_template": "function bubbleSort(arr) {\n    // your code here\n}"
     },
     {
         "title": "Binary Search",
         "language": "JavaScript",
         "difficulty": "Hard",
-        "description": "Implement the binary search algorithm to find an element in a sorted array."
+        "description": "Implement the binary search algorithm to find an element in a sorted array.",
+        "examples": [
+            "Input: binarySearch([1, 2, 3, 4, 5], 3)",
+            "Output: 2"
+        ],
+        "expected_output": "2",
+        "code_template": "function binarySearch(arr, target) {\n    // your code here\n}"
     },
     {
         "title": "String Reversal",
         "language": "JavaScript",
         "difficulty": "Easy",
-        "description": "Write a function that reverses a given string."
+        "description": "Write a function that reverses a given string.",
+        "examples": [
+            "Input: reverseString('hello')",
+            "Output: 'olleh'"
+        ],
+        "expected_output": "'olleh'",
+        "code_template": "function reverseString(str) {\n    // your code here\n}"
     },
     {
         "title": "Matrix Multiplication",
         "language": "JavaScript",
         "difficulty": "Hard",
-        "description": "Write a function that multiplies two matrices."
+        "description": "Write a function that multiplies two matrices.",
+        "examples": [
+            "Input: multiplyMatrices([[1, 2], [3, 4]], [[2, 0], [1, 2]])",
+            "Output: [[4, 4], [10, 8]]"
+        ],
+        "expected_output": "[[4, 4], [10, 8]]",
+        "code_template": "function multiplyMatrices(matrix1, matrix2) {\n    // your code here\n}"
     },
     {
         "title": "GCD Calculation",
         "language": "JavaScript",
         "difficulty": "Medium",
-        "description": "Write a function that calculates the greatest common divisor (GCD) of two numbers."
+        "description": "Write a function that calculates the greatest common divisor (GCD) of two numbers.",
+        "examples": [
+            "Input: gcd(48, 18)",
+            "Output: 6"
+        ],
+        "expected_output": "6",
+        "code_template": "function gcd(a, b) {\n    // your code here\n}"
     }
 ]
-       

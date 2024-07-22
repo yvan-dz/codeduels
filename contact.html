@@ -8,7 +8,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-functions.js"></script>
     <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/contact.js" defer></script>
 </head>
 <body>
     <header>
@@ -37,7 +39,7 @@
         <section class="contact-form">
             <h1>Contact Us</h1>
             <p>Have any questions or feedback? We'd love to hear from you!</p>
-            <form action="#" method="post">
+            <form id="contact-form">
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" id="name" name="name" required>
@@ -67,7 +69,9 @@
             </ul>
             <p><strong>Thanks for your support and happy coding!</strong></p>
         </section>
+        <div id="popup" class="popup">Your message has been sent successfully!</div>
     </main>
+    
     <footer>
         <div class="footer-bottom">
             <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
@@ -84,10 +88,8 @@
             appId: "1:927315184082:web:e115d2bdc6465ffea6a00b",
             measurementId: "G-6Z7PS1DT05"
         };
-
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-
+        
         // Firebase Authentication and Firestore
         var auth = firebase.auth();
         var db = firebase.firestore();
@@ -95,7 +97,6 @@
         // Check auth state and update UI
         auth.onAuthStateChanged(function (user) {
             if (user) {
-                // User is signed in
                 var docRef = db.collection("users").doc(user.uid);
                 docRef.get().then(function (doc) {
                     if (doc.exists) {
@@ -112,7 +113,6 @@
                     console.error('Error getting document:', error);
                 });
             } else {
-                // No user is signed in
                 document.getElementById('login-button').style.display = 'inline';
                 document.getElementById('signup-button').style.display = 'inline';
                 document.getElementById('logout-button').style.display = 'none';

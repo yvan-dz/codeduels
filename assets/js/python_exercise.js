@@ -16,21 +16,16 @@ function loadRandomExercise() {
                 <p id="exercise-description">${exercise.description}</p>
             `;
             document.getElementById('exercise-info').innerHTML = exerciseInfo;
-            initializeMonaco('python');
+            initializeMonaco('python', exercise.code_template);
         })
         .catch(error => console.error('Error loading exercises:', error));
 }
 
-function initializeMonaco(language) {
+function initializeMonaco(language, codeTemplate) {
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs' }});
     require(['vs/editor/editor.main'], function() {
-        monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-            target: monaco.languages.typescript.ScriptTarget.ES6,
-            allowNonTsExtensions: true
-        });
-
         window.editor = monaco.editor.create(document.getElementById('code-editor'), {
-            value: '# your code here',
+            value: codeTemplate || '# your code here',
             language: language.toLowerCase(),
             theme: 'vs-dark',
             automaticLayout: true

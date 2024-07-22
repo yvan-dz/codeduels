@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - CodeDuels</title>
+    <link rel="stylesheet" href="assets/css/faq.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="assets/js/faq.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="index.html" class="logo-link">
+                <img src="assets/img/logo.png" alt="Logo">
+                <span id="webname">CodeDuels</span>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="multiplayer_battle.html">Play with friends</a></li>
+                <li><a href="play_online.html">Play online</a></li>
+                <li><a href="hackathon.html">Hackathons</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="settings.html">Settings</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <a href="login.html" class="button log" id="login-button">Sign in</a>
+            <a href="signup.html" class="button log" id="signup-button">Join</a>
+            <button class="button log" id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+        </div>
+    </header>
+    <main>
+        <section class="faq-section">
+            <h2 id="faq1">Frequently Asked Questions</h2>
+            <div class="faq-item">
+                <button class="faq-question">What is CodeDuels?</button>
+                <div class="faq-answer">
+                    <p>CodeDuels is an online platform where users can engage in coding challenges and compete against others.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">How do I start a duel?</button>
+                <div class="faq-answer">
+                    <p>To start a duel, go to the 'Play with friends' or 'Play online' section, select an opponent, and choose a challenge to begin.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">How are winners determined?</button>
+                <div class="faq-answer">
+                    <p>Winners are determined based on the accuracy and efficiency of the submitted code according to the challenge criteria.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">Can I track my progress?</button>
+                <div class="faq-answer">
+                    <p>Yes, you can track your progress in the 'Profile' section where you can see your completed challenges and ranking.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">How do I participate in hackathons?</button>
+                <div class="faq-answer">
+                    <p>You can participate in hackathons by navigating to the 'Hackathons' section and registering for any upcoming events.</p>
+                </div>
+            </div>
+        </section>
+        <section class="contact-section">
+            <p>For any specific questions, feel free to <a href="contact.html">contact us</a>.</p>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
+        </div>
+    </footer>
+</body>
+</html>

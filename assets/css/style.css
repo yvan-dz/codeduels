@@ -89,6 +89,10 @@ nav a:hover {
     background-color: #16a085;
 }
 
+#single{
+    text-decoration: none;
+}
+
 main {
     padding: 20px;
     max-width: 1200px;

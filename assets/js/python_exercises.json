@@ -1,50 +1,122 @@
 [
     {
-        "title": "Anagram Checker",
+        "title": "Count Vowels",
+        "language": "Python",
+        "difficulty": "Easy",
+        "description": "Write a function that counts the number of vowels in a string.",
+        "examples": [
+            "Input: count_vowels('hello')",
+            "Output: 2"
+        ],
+        "expected_output": "2",
+        "code_template": "def count_vowels(s):\n    # your code here\n    pass"
+    },
+    {
+        "title": "Find Maximum in List",
+        "language": "Python",
+        "difficulty": "Easy",
+        "description": "Write a function that returns the maximum value in a list.",
+        "examples": [
+            "Input: find_max([1, 2, 3])",
+            "Output: 3"
+        ],
+        "expected_output": "3",
+        "code_template": "def find_max(lst):\n    # your code here\n    pass"
+    },
+    {
+        "title": "Sum of Digits",
+        "language": "Python",
+        "difficulty": "Easy",
+        "description": "Write a function that returns the sum of digits of a number.",
+        "examples": [
+            "Input: sum_of_digits(123)",
+            "Output: 6"
+        ],
+        "expected_output": "6",
+        "code_template": "def sum_of_digits(n):\n    # your code here\n    pass"
+    },
+    {
+        "title": "Unique Elements",
         "language": "Python",
         "difficulty": "Medium",
-        "description": "Write a function that checks if two strings are anagrams."
-    },
-    {
-        "title": "Palindrome Checker",
-        "language": "Python",
-        "difficulty": "Easy",
-        "description": "Write a function that checks if a string is a palindrome."
-    },
-    {
-        "title": "Prime Numbers",
-        "language": "Python",
-        "difficulty": "Hard",
-        "description": "Write a function that prints all prime numbers up to a given number."
-    },
-    {
-        "title": "Fibonacci Sequence",
-        "language": "Python",
-        "difficulty": "Easy",
-        "description": "Write a function that generates the first n numbers of the Fibonacci sequence."
+        "description": "Write a function that returns a list of unique elements from the given list.",
+        "examples": [
+            "Input: unique_elements([1, 2, 2, 3, 4, 4])",
+            "Output: [1, 2, 3, 4]"
+        ],
+        "expected_output": "[1, 2, 3, 4]",
+        "code_template": "def unique_elements(lst):\n    # your code here\n    pass"
     },
     {
         "title": "Factorial Calculation",
         "language": "Python",
         "difficulty": "Medium",
-        "description": "Write a function that calculates the factorial of a given number."
+        "description": "Write a function that calculates the factorial of a given number.",
+        "examples": [
+            "Input: factorial(5)",
+            "Output: 120"
+        ],
+        "expected_output": "120",
+        "code_template": "def factorial(n):\n    # your code here\n    pass"
     },
     {
-        "title": "Bubble Sort",
+        "title": "Prime Checker",
         "language": "Python",
         "difficulty": "Medium",
-        "description": "Implement the bubble sort algorithm to sort an array of integers."
+        "description": "Write a function that checks if a number is a prime number.",
+        "examples": [
+            "Input: is_prime(7)",
+            "Output: True"
+        ],
+        "expected_output": "True",
+        "code_template": "def is_prime(n):\n    # your code here\n    pass"
     },
     {
-        "title": "Binary Search",
+        "title": "Merge Sorted Lists",
         "language": "Python",
         "difficulty": "Hard",
-        "description": "Implement the binary search algorithm to find an element in a sorted array."
+        "description": "Write a function that merges two sorted lists into one sorted list.",
+        "examples": [
+            "Input: merge_sorted([1, 3, 5], [2, 4, 6])",
+            "Output: [1, 2, 3, 4, 5, 6]"
+        ],
+        "expected_output": "[1, 2, 3, 4, 5, 6]",
+        "code_template": "def merge_sorted(lst1, lst2):\n    # your code here\n    pass"
     },
     {
-        "title": "String Reversal",
+        "title": "Longest Common Subsequence",
         "language": "Python",
-        "difficulty": "Easy",
-        "description": "Write a function that reverses a given string."
+        "difficulty": "Hard",
+        "description": "Write a function that finds the longest common subsequence between two strings.",
+        "examples": [
+            "Input: lcs('abcde', 'ace')",
+            "Output: 'ace'"
+        ],
+        "expected_output": "'ace'",
+        "code_template": "def lcs(str1, str2):\n    # your code here\n    pass"
+    },
+    {
+        "title": "Rotate Matrix",
+        "language": "Python",
+        "difficulty": "Hard",
+        "description": "Write a function that rotates a given NxN matrix by 90 degrees clockwise.",
+        "examples": [
+            "Input: rotate_matrix([[1, 2], [3, 4]])",
+            "Output: [[3, 1], [4, 2]]"
+        ],
+        "expected_output": "[[3, 1], [4, 2]]",
+        "code_template": "def rotate_matrix(matrix):\n    # your code here\n    pass"
+    },
+    {
+        "title": "Balanced Parentheses",
+        "language": "Python",
+        "difficulty": "Medium",
+        "description": "Write a function that checks if the parentheses in a string are balanced.",
+        "examples": [
+            "Input: is_balanced('()()')",
+            "Output: True"
+        ],
+        "expected_output": "True",
+        "code_template": "def is_balanced(s):\n    # your code here\n    pass"
     }
 ]

@@ -17,7 +17,7 @@
             <a href="index.html" class="logo-link">
                 <img src="assets/img/logo.png" alt="Logo">
                 <span id="webname">CodeDuels</span>
-            </a>
+            </a> 
         </div>
         <nav>
             <ul>
@@ -39,12 +39,7 @@
             <h2>Settings</h2>
             <form id="settings-form">
                 <div class="form-group">
-                    <label for="profile-picture">Profile Picture:</label>
-                    <input type="file" id="profile-picture" name="profile-picture">
-                    <img id="profile-picture-preview" src="#" alt="Profile Picture Preview" style="display: none;">
-                </div>
-                <div class="form-group">
-                    <label for="username">Username:</label>
+                    <label for="username">Change Username:</label>
                     <input type="text" id="username" name="username" required>
                 </div>
                 <div class="form-group">
@@ -84,7 +79,6 @@
         // Firebase Authentication and Firestore
         var auth = firebase.auth();
         var db = firebase.firestore();
-        var storage = firebase.storage();
 
         // Check auth state and populate settings form
         auth.onAuthStateChanged(function(user) {
@@ -95,10 +89,6 @@
                         var userData = doc.data();
                         document.getElementById('username').value = userData.username;
                         document.getElementById('email').value = userData.email;
-                        if (userData.profilePicture) {
-                            document.getElementById('profile-picture-preview').src = userData.profilePicture;
-                            document.getElementById('profile-picture-preview').style.display = 'block';
-                        }
                         document.getElementById('login-button').style.display = 'none';
                         document.getElementById('signup-button').style.display = 'none';
                         document.getElementById('logout-button').style.display = 'block';
@@ -121,7 +111,6 @@
             var username = document.getElementById('username').value;
             var email = document.getElementById('email').value;
             var password = document.getElementById('password').value;
-            var profilePicture = document.getElementById('profile-picture').files[0];
 
             if (user) {
                 var updates = {
@@ -129,46 +118,21 @@
                     email: email
                 };
 
-                if (profilePicture) {
-                    var storageRef = storage.ref('profile_pictures/' + user.uid + '/' + profilePicture.name);
-                    storageRef.put(profilePicture).then(function(snapshot) {
-                        return snapshot.ref.getDownloadURL();
-                    }).then(function(downloadURL) {
-                        updates.profilePicture = downloadURL;
-                        return db.collection('users').doc(user.uid).update(updates);
-                    }).then(function() {
-                        console.log('User updated in Firestore with profile picture');
-                        if (password) {
-                            return user.updatePassword(password).then(function() {
-                                console.log('Password updated');
-                            }).catch(function(error) {
-                                console.error('Error updating password:', error);
-                                alert('Error updating password: ' + error.message); // Display error message
-                            });
-                        }
-                    }).then(function() {
-                        alert('Profile updated successfully');
-                    }).catch(function(error) {
-                        console.error('Error updating user:', error);
-                        alert('Error updating user: ' + error.message); // Display error message
-                    });
-                } else {
-                    db.collection('users').doc(user.uid).update(updates).then(function() {
-                        console.log('User updated in Firestore');
-                        if (password) {
-                            user.updatePassword(password).then(function() {
-                                console.log('Password updated');
-                            }).catch(function(error) {
-                                console.error('Error updating password:', error);
-                                alert('Error updating password: ' + error.message); // Display error message
-                            });
-                        }
-                        alert('Profile updated successfully');
-                    }).catch(function(error) {
-                        console.error('Error updating user:', error);
-                        alert('Error updating user: ' + error.message); // Display error message
-                    });
-                }
+                db.collection('users').doc(user.uid).update(updates).then(function() {
+                    console.log('User updated in Firestore');
+                    if (password) {
+                        user.updatePassword(password).then(function() {
+                            console.log('Password updated');
+                        }).catch(function(error) {
+                            console.error('Error updating password:', error);
+                            alert('Error updating password: ' + error.message); // Display error message
+                        });
+                    }
+                    alert('Profile updated successfully');
+                }).catch(function(error) {
+                    console.error('Error updating user:', error);
+                    alert('Error updating user: ' + error.message); // Display error message
+                });
             }
         });
 

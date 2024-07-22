@@ -107,7 +107,7 @@ section h2 {
     margin-bottom: 20px;
 }
 
-.friend-request, .friend, .duel-request {
+.friend-request, .friend, .duel-request { 
     display: flex;
     align-items: center;
     justify-content: space-between;

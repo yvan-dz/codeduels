@@ -137,3 +137,9 @@ footer a {
 footer a:hover {
     color: #0056b3;
 }
+
+#contact, #privacy{
+    text-decoration: none;
+    color: #16a085;
+    
+}
