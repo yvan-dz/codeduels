@@ -1,5 +1,3 @@
-/* privacy.css */
-
 body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
@@ -138,8 +136,111 @@ footer a:hover {
     color: #0056b3;
 }
 
-#contact{
+#contact {
     text-decoration: none;
     color: #16a085;
-    
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    header {
+        padding: 15px 10px;
+    }
+
+    nav ul {
+        gap: 10px;
+    }
+
+    .auth-buttons {
+        gap: 5px;
+    }
+
+    main {
+        padding: 30px 15px;
+    }
+
+    .privacy-policy h1, .privacy-policy h2 {
+        font-size: 1.4rem;
+    }
+
+    .privacy-policy p, .privacy-policy ul {
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    nav ul li {
+        margin: 10px 0;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .auth-buttons .button {
+        margin: 10px 0;
+    }
+
+    main {
+        padding: 20px;
+    }
+
+    .privacy-policy h1, .privacy-policy h2 {
+        font-size: 1.2rem;
+    }
+
+    .privacy-policy p, .privacy-policy ul {
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 10px 5px;
+    }
+
+    nav ul {
+        gap: 5px;
+    }
+
+    .auth-buttons {
+        gap: 5px;
+        margin-top: 5px;
+    }
+
+    main {
+        padding: 20px 10px;
+    }
+
+    .privacy-policy {
+        padding: 15px;
+    }
+
+    .privacy-policy h1, .privacy-policy h2 {
+        font-size: 1rem;
+    }
+
+    .privacy-policy p, .privacy-policy ul {
+        font-size: 0.8em;
+    }
+
+    footer {
+        padding: 10px 5px;
+    }
+
+    footer a {
+        font-size: 0.9em;
+    }
 }

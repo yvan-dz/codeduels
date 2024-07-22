@@ -139,10 +139,48 @@ footer a {
     margin: 0 5px;
 }
 
+footer a:hover {
+    color: #16a085;
+}
+
 /* Responsive Design */
+@media (max-width: 1024px) {
+    header {
+        padding: 10px 10px;
+    }
+
+    nav ul {
+        gap: 10px;
+    }
+
+    .auth-buttons .button {
+        padding: 8px 15px;
+    }
+
+    main {
+        padding: 20px 15px;
+    }
+
+    .exercise-info, .code-editor-container {
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    #code-editor {
+        height: 400px;
+    }
+
+    .run-button {
+        font-size: 0.9em;
+        padding: 8px 15px;
+    }
+}
+
 @media (max-width: 768px) {
     header {
         flex-direction: column;
+        align-items: center;
+        padding: 10px 5px;
     }
 
     nav ul {
@@ -157,19 +195,67 @@ footer a {
     .auth-buttons {
         flex-direction: column;
         align-items: center;
+        gap: 5px;
     }
 
     .auth-buttons .button {
         margin: 10px 0;
+        padding: 10px 15px;
     }
 
     main {
         flex-direction: column;
         align-items: center;
+        padding: 15px 10px;
     }
 
     .exercise-info, .code-editor-container {
         width: 100%;
         margin: 10px 0;
+    }
+
+    #code-editor {
+        height: 350px;
+    }
+
+    .run-button {
+        width: 100%;
+        padding: 10px;
+        font-size: 1em;
+        align-self: center;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 10px 5px;
+    }
+
+    nav ul {
+        gap: 5px;
+    }
+
+    .auth-buttons {
+        gap: 5px;
+        margin-top: 5px;
+    }
+
+    main {
+        padding: 10px 5px;
+    }
+
+    .exercise-info, .code-editor-container {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    #code-editor {
+        height: 300px;
+    }
+
+    .run-button {
+        width: 100%;
+        padding: 10px;
+        font-size: 0.9em;
     }
 }

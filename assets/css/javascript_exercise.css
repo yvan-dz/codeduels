@@ -173,3 +173,46 @@ footer a {
         margin: 10px 0;
     }
 }
+
+@media (max-width: 480px) {
+    header {
+        padding: 10px;
+    }
+
+    .logo img {
+        height: 40px;
+    }
+
+    .logo span {
+        font-size: 1.2rem;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    nav ul li {
+        margin: 10px 0;
+    }
+
+    main {
+        padding: 20px 10px;
+    }
+
+    #code-editor {
+        height: 300px;
+    }
+
+    .exercise-info, .code-editor-container {
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .run-button {
+        width: 100%;
+        margin-top: 20px;
+        padding: 15px 20px;
+    }
+}

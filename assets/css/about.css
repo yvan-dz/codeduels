@@ -130,8 +130,83 @@ footer a:hover {
     color: #0056b3;
 }
 
-#contact{
+#contact {
     text-decoration: none;
     color: #16a085;
-    
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .logo img {
+        height: 40px;
+    }
+
+    .logo span {
+        font-size: 1.2rem;
+    }
+
+    nav ul {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    main {
+        padding: 20px 10px;
+        max-width: 100%;
+    }
+
+    .about h1, .about h2 {
+        font-size: 1.5rem;
+    }
+
+    .about p {
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .logo img {
+        height: 30px;
+    }
+
+    .logo span {
+        font-size: 1rem;
+    }
+
+    nav ul {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    main {
+        padding: 20px 10px;
+        max-width: 100%;
+    }
+
+    .about h1, .about h2 {
+        font-size: 1.2rem;
+    }
+
+    .about p {
+        font-size: 0.9em;
+    }
 }

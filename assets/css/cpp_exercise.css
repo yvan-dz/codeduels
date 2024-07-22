@@ -173,3 +173,55 @@ footer a {
         margin: 10px 0;
     }
 }
+
+@media (max-width: 480px) {
+    header {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .logo img {
+        height: 30px;
+    }
+
+    .logo span {
+        font-size: 1.2em;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav ul li {
+        margin: 10px 0;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .auth-buttons .button {
+        margin: 10px 0;
+    }
+
+    main {
+        padding: 20px 10px;
+        max-width: 100%;
+    }
+
+    .exercise-info, .code-editor-container {
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    #code-editor {
+        height: 300px;
+    }
+
+    .run-button {
+        width: 100%;
+        text-align: center;
+    }
+}

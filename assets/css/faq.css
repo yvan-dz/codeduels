@@ -100,7 +100,6 @@ main {
     border-radius: 10px;
 }
 
-
 .faq-section h2 {
     font-size: 2em;
     color: #16a085;
@@ -158,30 +157,6 @@ footer a:hover {
     text-decoration: underline;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-    }
-
-    nav ul {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    nav ul li {
-        margin: 10px 0;
-    }
-
-    .faq-section {
-        padding: 20px;
-    }
-
-    .faq-question {
-        font-size: 1em;
-    }
-}
-
 .contact-section {
     background-color: #f4f4f4;
     color: #333;
@@ -199,4 +174,84 @@ footer a:hover {
 
 .contact-section a:hover {
     text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav ul li {
+        margin: 10px 0;
+    }
+
+    .faq-section {
+        padding: 20px;
+        margin: 20px 5%;
+    }
+
+    .faq-question {
+        font-size: 1em;
+    }
+
+    main {
+        padding: 20px 10px;
+    }
+
+    .faq-container {
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .logo img {
+        height: 30px;
+    }
+
+    .logo span {
+        font-size: 1.2em;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav ul li {
+        margin: 10px 0;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .auth-buttons .button {
+        margin: 10px 0;
+    }
+
+    main {
+        padding: 20px 10px;
+        max-width: 100%;
+    }
+
+    .faq-section {
+        padding: 20px;
+        margin: 20px 5%;
+    }
+
+    .faq-question {
+        font-size: 0.9em;
+    }
 }

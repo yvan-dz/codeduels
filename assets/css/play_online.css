@@ -295,3 +295,122 @@ footer a:hover {
 .duel-request button:hover {
     background-color: #16a085;
 }
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    header {
+        padding: 15px 10px;
+    }
+
+    nav ul {
+        gap: 10px;
+    }
+
+    .auth-buttons {
+        gap: 5px;
+    }
+
+    main {
+        padding: 30px 15px;
+    }
+
+    section {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .auth-buttons .button {
+        margin: 10px 0;
+    }
+
+    main {
+        padding: 20px;
+    }
+
+    section {
+        padding: 15px;
+    }
+
+    .friend-request, .friend, .duel-request {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .friend .btn-group {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .form-group input {
+        padding: 8px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 10px 5px;
+    }
+
+    nav ul {
+        gap: 5px;
+    }
+
+    .auth-buttons {
+        gap: 5px;
+        margin-top: 5px;
+    }
+
+    main {
+        padding: 20px 10px;
+    }
+
+    section {
+        padding: 10px;
+    }
+
+    .friend-request, .friend, .duel-request {
+        padding: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .friend .btn-group button {
+        flex: 1 1 100%;
+    }
+
+    .form-group label {
+        font-size: 0.9em;
+    }
+
+    .form-group input {
+        padding: 8px;
+        font-size: 0.9em;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        font-size: 0.9em;
+    }
+}

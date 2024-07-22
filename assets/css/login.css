@@ -143,3 +143,61 @@ footer {
     text-decoration: none;
     margin: 0 5px;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-container {
+        margin-top: 20%;
+        margin-bottom: 20%;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-actions button {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .extra-links {
+        margin-top: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 10px;
+    }
+
+    .logo img {
+        height: 40px;
+    }
+
+    .logo span {
+        font-size: 1.2rem;
+    }
+
+    .login-container {
+        padding: 20px;
+    }
+
+    .form-group input {
+        padding: 8px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-actions button {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .extra-links {
+        margin-top: 20px;
+    }
+}

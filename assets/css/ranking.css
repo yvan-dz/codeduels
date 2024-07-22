@@ -1,5 +1,3 @@
-/* ranking.css */
-
 body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
@@ -157,4 +155,127 @@ footer a {
 
 footer a:hover {
     color: #0056b3;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    header {
+        padding: 10px 10px;
+    }
+
+    nav ul {
+        gap: 10px;
+    }
+
+    .auth-buttons .button {
+        padding: 8px 15px;
+    }
+
+    main {
+        padding: 20px 15px;
+    }
+
+    .rank-cards {
+        gap: 15px;
+    }
+
+    .rank-card {
+        width: 220px;
+        padding: 15px;
+    }
+
+    .rank-card h2 {
+        font-size: 1.3em;
+    }
+
+    .rank-card p {
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 5px;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav ul li {
+        margin: 10px 0;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .auth-buttons .button {
+        margin: 10px 0;
+        padding: 10px 15px;
+    }
+
+    main {
+        flex-direction: column;
+        align-items: center;
+        padding: 15px 10px;
+    }
+
+    .rank-cards {
+        gap: 10px;
+    }
+
+    .rank-card {
+        width: 200px;
+        padding: 15px;
+    }
+
+    .rank-card h2 {
+        font-size: 1.2em;
+    }
+
+    .rank-card p {
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 10px 5px;
+    }
+
+    nav ul {
+        gap: 5px;
+    }
+
+    .auth-buttons {
+        gap: 5px;
+        margin-top: 5px;
+    }
+
+    main {
+        padding: 10px 5px;
+    }
+
+    .rank-cards {
+        gap: 5px;
+    }
+
+    .rank-card {
+        width: 180px;
+        padding: 10px;
+    }
+
+    .rank-card h2 {
+        font-size: 1.1em;
+    }
+
+    .rank-card p {
+        font-size: 0.8em;
+    }
 }
