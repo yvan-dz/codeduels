@@ -21,16 +21,11 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
-    flex-wrap: wrap;
-    text-align: center;
 }
 
 .logo {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 100%;
-    margin-bottom: 10px;
 }
 
 .logo-link {
@@ -57,9 +52,6 @@ nav ul {
     padding: 0;
     display: flex;
     gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
 }
 
 nav a {
@@ -76,9 +68,6 @@ nav a:hover {
 .auth-buttons {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
 }
 
 .auth-buttons .button {
@@ -226,20 +215,28 @@ footer a:hover {
     header {
         flex-direction: column;
         align-items: center;
+        padding: 10px 5px;
     }
 
     nav ul {
         flex-direction: column;
-        gap: 10px;
         align-items: center;
+    }
+
+    nav ul li {
+        margin: 3px 0;
     }
 
     .auth-buttons {
         flex-direction: column;
         align-items: center;
-        gap: 10px;
+        gap: 5px;
     }
 
+    .auth-buttons .button {
+        margin: 10px 0;
+        padding: 10px 15px;
+    }
 
     main {
         flex-direction: column;

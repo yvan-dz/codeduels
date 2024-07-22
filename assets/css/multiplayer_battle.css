@@ -21,16 +21,11 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
-    flex-wrap: wrap;
-    text-align: center;
 }
 
 .logo {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 100%;
-    margin-bottom: 10px;
 }
 
 .logo-link {
@@ -57,9 +52,6 @@ nav ul {
     padding: 0;
     display: flex;
     gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
 }
 
 nav a {
@@ -76,9 +68,6 @@ nav a:hover {
 .auth-buttons {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
 }
 
 .auth-buttons .button {
@@ -184,6 +173,7 @@ footer a {
 footer a:hover {
     color: #0056b3;
 }
+
 
 /* Responsive Design */
 @media (max-width: 768px) {
