@@ -38,8 +38,17 @@
                 <input type="password" id="password" name="password" placeholder="Password" required>
             </div>
             <div class="form-actions">
-                <a href="#">Forgot password?</a>
+                <a href="#" id="reset-link">Forgot password?</a>
                 <button type="submit">Sign in</button>
+            </div>
+        </form>
+        <form id="reset-form" style="display: none;">
+            <div class="form-group">
+                <label for="reset-email">Email</label>
+                <input type="text" id="reset-email" name="email" placeholder="Email" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit">Reset Password</button>
             </div>
         </form>
         <div class="extra-links">
@@ -47,6 +56,7 @@
             <p>Need help? <a href="contact.html">Contact us</a> or check out our <a href="#">FAQs</a>.</p>
         </div>
     </div>
+    <div id="popup" class="popup"></div> <!-- Popup container -->
     <footer>
         <div class="footer-bottom">
             <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>

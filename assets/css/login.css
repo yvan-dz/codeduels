@@ -222,3 +222,36 @@ footer {
         margin-top: 20px;
     }
 }
+
+/* Popup styles */
+.popup {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1abc9c;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+    z-index: 1000;
+    font-size: 1rem;
+    text-align: center;
+}
+
+/* Add animation for the popup */
+.popup.show {
+    display: block;
+    animation: fadeOut 4s forwards; /* Adjust the duration as needed */
+}
+
+@keyframes fadeOut {
+    0%, 80% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        display: none;
+    }
+}
