@@ -54,6 +54,20 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+
+   // Function to reset both editors and their content in Firebase
+   function resetEditors(userId, friendId) {
+    const editor1Container = document.getElementById('editor1');
+    const editor2Container = document.getElementById('editor2');
+    editor1Container.innerHTML = ''; // Clear editor1 container
+    editor2Container.innerHTML = ''; // Clear editor2 container
+
+    // Delete editor content from Firestore
+    db.collection('code-editors').doc(userId).delete();
+    db.collection('code-editors').doc(friendId).delete();
+}
+
+
     // Function to load the same exercise for both friends
     async function loadExerciseForFriends(userId) {
         try {
@@ -121,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             var editor2 = monaco.editor.create(document.getElementById('editor2'), {
-                value: '// this is player 2\'s code\n// you cannot edit this',
+                value: codeTemplate,
                 language: 'java',
                 theme: 'vs-dark',
                 automaticLayout: true,
@@ -378,6 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         resetResultContainer();
                         deletePreviousResults(userId, friendId);
                         loadExerciseForFriends(userId);
+                        resetEditors(userId, friendId);
                     }
                 });
             }

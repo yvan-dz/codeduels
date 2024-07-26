@@ -13,6 +13,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <!-- Monaco Editor -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs/editor/editor.main.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs/loader.min.js"></script>
+    <script src="assets/js/friends.js" defer></script>
 </head>
 
 <body>
@@ -46,11 +49,11 @@
         <section class="game-container">
             <div class="editor-container">
                 <h3>Player 1</h3>
-                <div id="editor1" style="height: 300px; border: 1px solid #ccc;"></div>
+                <div id="editor1" class="editor" style="height: 300px; border: 1px solid #ccc;"></div>
             </div>
             <div class="editor-container">
                 <h3>Player 2</h3>
-                <div id="editor2" style="height: 300px; border: 1px solid #ccc;"></div>
+                <div id="editor2" class="editor" style="height: 300px; border: 1px solid #ccc;"></div>
             </div>
             <div class="chat-container">
                 <h3>Chat</h3>
@@ -70,9 +73,6 @@
             <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
         </div>
     </footer>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs/loader.min.js"></script>
-    <script src="assets/js/friends.js"></script>
     <script>
         // Your Firebase configuration
         var firebaseConfig = {
