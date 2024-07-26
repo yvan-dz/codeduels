@@ -54,19 +54,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Function to reset both editors and their content in Firebase
+    function resetEditors(userId, friendId) {
+        const editor1Container = document.getElementById('editor1');
+        const editor2Container = document.getElementById('editor2');
+        editor1Container.innerHTML = ''; // Clear editor1 container
+        editor2Container.innerHTML = ''; // Clear editor2 container
 
-   // Function to reset both editors and their content in Firebase
-   function resetEditors(userId, friendId) {
-    const editor1Container = document.getElementById('editor1');
-    const editor2Container = document.getElementById('editor2');
-    editor1Container.innerHTML = ''; // Clear editor1 container
-    editor2Container.innerHTML = ''; // Clear editor2 container
-
-    // Delete editor content from Firestore
-    db.collection('code-editors').doc(userId).delete();
-    db.collection('code-editors').doc(friendId).delete();
-}
-
+        // Delete editor content from Firestore
+        db.collection('code-editors').doc(userId).delete();
+        db.collection('code-editors').doc(friendId).delete();
+    }
 
     // Function to load the same exercise for both friends
     async function loadExerciseForFriends(userId) {
@@ -98,8 +96,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 displayTask(nextTask);
 
-                // Clear chat, initialize editors, and reset result container when a new game is loaded
+                // Clear chat, reset editors, initialize editors, and reset result container when a new game is loaded
                 resetChat();
+                resetEditors(userId, friendId);
                 initializeEditors(nextTask.code_template);
                 resetResultContainer();
                 deletePreviousResults(userId, friendId);
@@ -181,11 +180,14 @@ document.addEventListener('DOMContentLoaded', function () {
                             const outputElement = document.getElementById('output');
                             const resultContainer = document.getElementById('result-container');
 
-                            sendBtn.addEventListener('click', function () {
+                            sendBtn.addEventListener('click', async function () {
                                 const message = chatInput.value;
                                 if (message.trim()) {
+                                    const userDoc = await db.collection('users').doc(userId).get();
+                                    const username = userDoc.data().username;
                                     db.collection('chats').add({
                                         from: userId,
+                                        username: username, // Add username to the message data
                                         message: message,
                                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                     });
@@ -199,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 snapshot.forEach((doc) => {
                                     const chatData = doc.data();
                                     const messageElement = document.createElement('div');
-                                    messageElement.textContent = chatData.message;
+                                    messageElement.textContent = `${chatData.username}: ${chatData.message}`; // Show username before the message
                                     chatBox.appendChild(messageElement);
                                 });
                                 chatBox.scrollTop = chatBox.scrollHeight;
@@ -236,6 +238,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                     if (won) {
                                         incrementCompletedChallenges(userId); // Increment completed challenges for the winner
+                                    } else {
+                                        incrementCompletedChallenges(friendId); // Increment completed challenges for the friend if user loses
                                     }
 
                                     updateResultContainer(userId, friendId, won, result.output, result.executionTime);
@@ -380,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             });
         }
-    
+
         // Load the exercise for the user
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
@@ -397,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
         });
-    
+
         // Handle confirmation before leaving or reloading the page
         window.addEventListener('beforeunload', function (e) {
             const confirmationMessage = 'Are you sure you want to leave? Your changes might not be saved.';

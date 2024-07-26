@@ -34,6 +34,13 @@
         </div>
     </header>
     <main>
+        <section class="all-users">
+            <h2>All Users</h2>
+            <div id="all-users-list">
+                <!-- User items will be displayed here -->
+            </div>
+            <button id="view-more-btn">View More Players</button>
+        </section>
         <section class="send-request">
             <h2>Send Friend Request</h2>
             <form id="send-request-form">
@@ -70,6 +77,16 @@
             <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
         </div>
     </footer>
+    <div class="popup-overlay" onclick="closeUserPopup()"></div>
+    <div class="popup" id="user-popup">
+        <div class="popup-content">
+            <h2>All Users</h2>
+            <div id="user-popup-list">
+                <!-- All user items will be displayed here -->
+            </div>
+            <button onclick="closeUserPopup()">Close</button>
+        </div>
+    </div>
     <div class="popup-overlay" onclick="closePopup()"></div>
     <div class="popup" id="popup">
         <div class="popup-content">
@@ -108,6 +125,7 @@
                 loadFriendRequests(user.uid);
                 loadFriends(user.uid);
                 loadDuelRequests(user.uid);
+                loadAllUsers();
             } else {
                 loginButton.style.display = 'block';
                 signupButton.style.display = 'block';
@@ -126,6 +144,98 @@
                 console.error('Error signing out:', error);
             });
         }
+
+        // Show popup function
+        function showPopup(message) {
+            const popup = document.getElementById('popup');
+            const popupMessage = document.getElementById('popup-message');
+            const overlay = document.querySelector('.popup-overlay');
+
+            popupMessage.textContent = message;
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        // Close popup function
+        window.closePopup = function () {
+            const popup = document.getElementById('popup');
+            const overlay = document.querySelector('.popup-overlay');
+
+            popup.style.display = 'none';
+            overlay.style.display = 'none';
+        };
+
+        // Fetch and display all users
+        function loadAllUsers() {
+            db.collection('users').orderBy('username').get()
+                .then((querySnapshot) => {
+                    const allUsersList = document.getElementById('all-users-list');
+                    const userPopupList = document.getElementById('user-popup-list');
+                    allUsersList.innerHTML = '';
+                    userPopupList.innerHTML = '';
+                    let count = 0;
+                    querySnapshot.forEach((doc) => {
+                        const userData = doc.data();
+                        const userItem = createUserItem(userData.username, doc.id);
+                        if (count < 3) {
+                            allUsersList.appendChild(userItem.cloneNode(true));
+                        }
+                        userPopupList.appendChild(userItem);
+                        count++;
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error getting users: ', error);
+                });
+        }
+
+        // Function to create a user item
+        function createUserItem(username, userId) {
+            const userItem = document.createElement('div');
+            userItem.classList.add('user-item');
+            userItem.innerHTML = `
+                <span>${username}</span>
+                <button onclick="sendFriendRequest('${userId}')">Send Friend Request</button>
+            `;
+            return userItem;
+        }
+
+        // Function to send a friend request
+        window.sendFriendRequest = function (userId) {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                showPopup('Please sign in to send a friend request.');
+                return;
+            }
+
+            db.collection('friend_requests').add({
+                from: user.uid,
+                to: userId,
+                status: 'pending'
+            }).then(() => {
+                showPopup('Friend request sent!');
+            }).catch((error) => {
+                console.error('Error sending friend request: ', error);
+                showPopup('Error sending friend request: ' + error.message);
+            });
+        };
+
+        // Show the user popup
+        document.getElementById('view-more-btn').addEventListener('click', function () {
+            const userPopup = document.getElementById('user-popup');
+            const popupOverlay = document.querySelector('.popup-overlay');
+            userPopup.style.display = 'block';
+            popupOverlay.style.display = 'block';
+        });
+
+        // Close the user popup
+        window.closeUserPopup = function () {
+            const userPopup = document.getElementById('user-popup');
+            const popupOverlay = document.querySelector('.popup-overlay');
+            userPopup.style.display = 'none';
+            popupOverlay.style.display = 'none';
+        };
+
     </script>
 </body>
 </html>
