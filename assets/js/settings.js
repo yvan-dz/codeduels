@@ -96,7 +96,7 @@ function deleteAccount() {
         db.collection('users').doc(user.uid).delete().then(function() {
             return user.delete();
         }).then(function() {
-            console.log('User account deleted');
+            console.log('User account and Firestore document deleted');
             window.location.href = 'index.html';  // Redirect to homepage after account deletion
         }).catch(function(error) {
             console.error('Error deleting user account:', error);
