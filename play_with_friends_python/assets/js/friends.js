@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Timer duration in seconds
     const TIMER_DURATION = 30; // 5 minutes
+    let timerInterval; // Variable to store the timer interval
 
     // Reset result container
     function resetResultContainer() {
@@ -214,6 +215,9 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
 
                             runBtn.addEventListener('click', async function () {
+                                // Stop the timer
+                                clearInterval(timerInterval);
+
                                 const code = editor1.getValue();
                                 console.log('Player Code:', code);
 
@@ -396,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let timer = duration, minutes, seconds;
         const timerElement = document.getElementById('timer');
 
-        const interval = setInterval(() => {
+        timerInterval = setInterval(() => {
             minutes = parseInt(timer / 60, 10);
             seconds = parseInt(timer % 60, 10);
 
@@ -406,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function () {
             timerElement.textContent = `Time left: ${minutes}:${seconds}`;
 
             if (--timer < 0) {
-                clearInterval(interval);
+                clearInterval(timerInterval);
                 markPlayersAsLosers(userId, friendId);
             }
         }, 1000);
