@@ -112,6 +112,22 @@
                 alert('Error signing out: ' + error.message); // Display error message
             });
         }
+
+        let lastScrollTop = 0;
+const header = document.querySelector('header');
+
+window.addEventListener('scroll', function() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    if (scrollTop > lastScrollTop) {
+        // Scrolling down
+        header.style.top = '-300px'; // Hide header
+    } else if (scrollTop === 0) {
+        // At the top of the page
+        header.style.top = '0'; // Show header
+    }
+    lastScrollTop = scrollTop;
+});
+
     </script>
 </body>
 </html>

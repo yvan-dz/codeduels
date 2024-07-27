@@ -279,7 +279,7 @@ footer {
         font-size: 1.5rem;
     }
 }
-
+/* Responsive Design */
 @media (max-width: 768px) {
     header {
         flex-direction: column;
@@ -351,8 +351,6 @@ footer {
     header {
         padding: 10px 5px;
     }
-
-    
 
     nav ul {
         gap: 5px;

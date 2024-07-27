@@ -205,7 +205,8 @@ footer a:hover {
     }
 
     nav ul li {
-        margin: 10px 0;
+        margin: 2px 0;
+        font-weight: bold;
     }
 
     .auth-buttons {
