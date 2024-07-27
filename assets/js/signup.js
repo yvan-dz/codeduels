@@ -30,6 +30,14 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
     }
 
     try {
+        // Check if the username is already taken
+        const usernameQuery = await db.collection('users').where('username', '==', username).get();
+        if (!usernameQuery.empty) {
+            showPopup("Username already taken");
+            return;
+        }
+
+        // Create the user with email and password
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
 

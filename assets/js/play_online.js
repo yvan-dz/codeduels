@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             listItem.classList.add('friend');
                             listItem.innerHTML = `
                                 <div class="friend-info">
-                                    <p>${friendData.username}</p>
+                                    <p><strong>${friendData.username}</strong></p>
                                 </div>
                                 <div class="btn-group">
                                     <button class="btn" onclick="requestDuel('${friendId}', 'java')">Request Java Duel 1v1</button>
@@ -107,14 +107,29 @@ document.addEventListener('DOMContentLoaded', function () {
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        db.collection('duel-requests').add(duelRequest)
-            .then(() => {
-                showPopup('Duel request sent!');
-                listenForDuelAcceptance(user.uid, friendId, language); // Listen for duel acceptance
+        // Check if a duel request already exists
+        db.collection('duel-requests')
+            .where('from', '==', user.uid)
+            .where('to', '==', friendId)
+            .where('language', '==', language)
+            .get()
+            .then((snapshot) => {
+                if (snapshot.empty) {
+                    db.collection('duel-requests').add(duelRequest)
+                        .then(() => {
+                            showPopup('Duel request sent!');
+                            listenForDuelAcceptance(user.uid, friendId, language); // Listen for duel acceptance
+                        })
+                        .catch((error) => {
+                            console.error('Error sending duel request: ', error);
+                            showPopup('Error sending duel request: ' + error.message);
+                        });
+                } else {
+                    showPopup('You have already sent a duel request to this user for this language.');
+                }
             })
             .catch((error) => {
-                console.error('Error sending duel request: ', error);
-                showPopup('Error sending duel request: ' + error.message);
+                console.error('Error checking duel requests: ', error);
             });
     };
 
@@ -149,6 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         listItem.innerHTML = `
                             <p><strong>${fromUsername}</strong> invited you to a ${request.language} duel</p>
                             <button class="btn" onclick="acceptDuel('${doc.id}', '${request.language}')">Start ${request.language} Duel</button>
+                            <button class="btn delete-btn" onclick="deleteDuelRequest('${doc.id}')">Delete</button>
                         `;
                         duelRequestsList.appendChild(listItem);
                     }).catch((error) => {
@@ -170,6 +186,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error accepting duel request: ', error);
                 showPopup('Error accepting duel request: ' + error.message);
             });
+    };
+
+    // Delete a duel request
+    window.deleteDuelRequest = function (requestId) {
+        db.collection('duel-requests').doc(requestId).delete().then(() => {
+            loadDuelRequests(auth.currentUser.uid);
+            showPopup('Duel request deleted.');
+        }).catch((error) => {
+            console.error('Error deleting duel request: ', error);
+        });
     };
 
     // Start a duel and delete the request
@@ -224,6 +250,43 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     };
 
+    // Fetch and display all users
+    function loadAllUsers(currentUserId) {
+        db.collection('users').orderBy('username').get()
+            .then((querySnapshot) => {
+                const allUsersList = document.getElementById('all-users-list');
+                const userPopupList = document.getElementById('user-popup-list');
+                allUsersList.innerHTML = '';
+                userPopupList.innerHTML = '';
+                let count = 0;
+                querySnapshot.forEach((doc) => {
+                    const userData = doc.data();
+                    if (doc.id !== currentUserId) {
+                        const userItem = createUserItem(userData.username, doc.id, currentUserId);
+                        if (count < 3) {
+                            allUsersList.appendChild(userItem.cloneNode(true));
+                        }
+                        userPopupList.appendChild(userItem);
+                        count++;
+                    }
+                });
+            })
+            .catch((error) => {
+                console.error('Error getting users: ', error);
+            });
+    }
+
+    // Function to create a user item
+    function createUserItem(username, userId, currentUserId) {
+        const userItem = document.createElement('div');
+        userItem.classList.add('user-item');
+        userItem.innerHTML = `
+            <span>${username}</span>
+            <button onclick="sendFriendRequest('${userId}', '${currentUserId}')">Send Friend Request</button>
+        `;
+        return userItem;
+    }
+
     // Handle friend request form submission
     document.getElementById('send-request-form').addEventListener('submit', function (event) {
         event.preventDefault();
@@ -234,6 +297,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const friendUsername = document.getElementById('friend-username').value;
+
+        // Check if the user is trying to add themselves
+        if (friendUsername === user.displayName) {
+            showPopup('You cannot add yourself as a friend.');
+            return;
+        }
 
         // Check if the user with the given username exists
         db.collection('users').where('username', '==', friendUsername).get()
@@ -287,6 +356,59 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error finding user: ', error);
             });
     });
+
+    // Send a friend request
+    window.sendFriendRequest = function (friendId, currentUserId) {
+        const user = auth.currentUser;
+        if (!user) {
+            showPopup('Please sign in to send a friend request.');
+            return;
+        }
+
+        // Check if they are trying to add themselves
+        if (friendId === currentUserId) {
+            showPopup('You cannot add yourself as a friend.');
+            return;
+        }
+
+        // Check if they are already friends
+        db.collection('users').doc(currentUserId).get().then((userDoc) => {
+            const userData = userDoc.data();
+            if (userData.friends && userData.friends.includes(friendId)) {
+                showPopup('You are already friends with this user.');
+                return;
+            }
+
+            // Check if there is already a pending or rejected friend request
+            db.collection('friend_requests')
+                .where('from', '==', currentUserId)
+                .where('to', '==', friendId)
+                .get()
+                .then((existingRequests) => {
+                    if (!existingRequests.empty) {
+                        showPopup('You have already sent a friend request to this user.');
+                        return;
+                    }
+
+                    // Create a friend request
+                    db.collection('friend_requests').add({
+                        from: currentUserId,
+                        fromUsername: user.displayName,
+                        to: friendId,
+                        status: 'pending'
+                    }).then(() => {
+                        showPopup('Friend request sent!');
+                    }).catch((error) => {
+                        console.error('Error sending friend request: ', error);
+                        showPopup('Error sending friend request: ' + error.message);
+                    });
+                }).catch((error) => {
+                    console.error('Error checking existing friend requests: ', error);
+                });
+        }).catch((error) => {
+            console.error('Error checking if users are already friends: ', error);
+        });
+    };
 
     // Accept friend request
     window.acceptFriendRequest = function (requestId, fromId, button) {
@@ -377,76 +499,17 @@ document.addEventListener('DOMContentLoaded', function () {
         overlay.style.display = 'none';
     };
 
-    // Function to show user popup
-    document.getElementById('view-more-btn').addEventListener('click', function () {
-        const userPopup = document.getElementById('user-popup');
-        const popupOverlay = document.querySelector('.popup-overlay');
-        userPopup.style.display = 'block';
-        popupOverlay.style.display = 'block';
-    });
-
-    // Function to close user popup
-    window.closeUserPopup = function () {
-        const userPopup = document.getElementById('user-popup');
-        const popupOverlay = document.querySelector('.popup-overlay');
-        userPopup.style.display = 'none';
-        popupOverlay.style.display = 'none';
+    // Function to open all users popup
+    window.openAllUsersPopup = function () {
+        document.getElementById('all-users-popup-overlay').style.display = 'block';
+        document.getElementById('all-users-popup').style.display = 'block';
     };
 
-    // Function to create a user item
-    function createUserItem(username, userId) {
-        const userItem = document.createElement('div');
-        userItem.classList.add('user-item');
-        userItem.innerHTML = `
-            <span>${username}</span>
-            <button onclick="sendFriendRequest('${userId}')">Send Friend Request</button>
-        `;
-        return userItem;
-    }
-
-    // Function to send a friend request
-    window.sendFriendRequest = function (userId) {
-        const user = auth.currentUser;
-        if (!user) {
-            showPopup('Please sign in to send a friend request.');
-            return;
-        }
-
-        db.collection('friend_requests').add({
-            from: user.uid,
-            to: userId,
-            status: 'pending'
-        }).then(() => {
-            showPopup('Friend request sent!');
-        }).catch((error) => {
-            console.error('Error sending friend request: ', error);
-            showPopup('Error sending friend request: ' + error.message);
-        });
+    // Function to close all users popup
+    window.closeAllUsersPopup = function () {
+        document.getElementById('all-users-popup-overlay').style.display = 'none';
+        document.getElementById('all-users-popup').style.display = 'none';
     };
-
-    // Fetch and display all users
-    function loadAllUsers() {
-        db.collection('users').orderBy('username').get()
-            .then((querySnapshot) => {
-                const allUsersList = document.getElementById('all-users-list');
-                const userPopupList = document.getElementById('user-popup-list');
-                allUsersList.innerHTML = '';
-                userPopupList.innerHTML = '';
-                let count = 0;
-                querySnapshot.forEach((doc) => {
-                    const userData = doc.data();
-                    const userItem = createUserItem(userData.username, doc.id);
-                    if (count < 3) {
-                        allUsersList.appendChild(userItem.cloneNode(true));
-                    }
-                    userPopupList.appendChild(userItem);
-                    count++;
-                });
-            })
-            .catch((error) => {
-                console.error('Error getting users: ', error);
-            });
-    }
 
     // Check the authentication state
     auth.onAuthStateChanged(function (user) {
@@ -459,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function () {
             loadFriendRequests(user.uid);
             loadFriends(user.uid);
             loadDuelRequests(user.uid);
-            loadAllUsers();
+            loadAllUsers(user.uid);
         } else {
             document.getElementById('login-button').style.display = 'block';
             document.getElementById('signup-button').style.display = 'block';

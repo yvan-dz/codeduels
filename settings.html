@@ -9,7 +9,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-    
 </head>
 <body>
     <header>
@@ -17,7 +16,7 @@
             <a href="index.html" class="logo-link">
                 <img src="assets/img/logo.png" alt="Logo">
                 <span id="webname">CodeDuels</span>
-            </a> 
+            </a>
         </div>
         <nav>
             <ul>
@@ -52,6 +51,7 @@
                 </div>
                 <div class="form-actions">
                     <button type="submit">Save Changes</button>
+                    <button type="button" class="delete-account-button" onclick="confirmDeleteAccount()" id="delete-account-button">Delete Account</button>
                 </div>
             </form>
         </section>
@@ -61,6 +61,11 @@
             <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
         </div>
     </footer>
+    <div class="popup" id="delete-confirmation-popup" style="display: none;">
+        <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+        <button class="confirm-delete" onclick="deleteAccount()">Yes, delete my account</button>
+        <button class="cancel-delete" onclick="hideDeleteConfirmation()">No, keep my account</button>
+    </div>
     <script>
         // Firebase Configuration
         var firebaseConfig = {
@@ -145,6 +150,34 @@
                 console.error('Error signing out:', error);
                 alert('Error signing out: ' + error.message); // Display error message
             });
+        }
+
+        // Confirm delete account
+        function confirmDeleteAccount() {
+            document.getElementById('delete-confirmation-popup').style.display = 'block';
+        }
+
+        // Hide delete confirmation
+        function hideDeleteConfirmation() {
+            document.getElementById('delete-confirmation-popup').style.display = 'none';
+        }
+
+        // Delete account
+        function deleteAccount() {
+            var user = auth.currentUser;
+            if (user) {
+                var uid = user.uid;
+                user.delete().then(function() {
+                    db.collection('users').doc(uid).delete().then(function() {
+                        console.log('User deleted from Firestore');
+                        window.location.href = 'index.html';  // Redirect to homepage after account deletion
+                    }).catch(function(error) {
+                        console.error('Error deleting user from Firestore:', error);
+                    });
+                }).catch(function(error) {
+                    console.error('Error deleting user:', error);
+                });
+            }
         }
     </script>
 </body>

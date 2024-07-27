@@ -79,3 +79,28 @@ function logout() {
         alert('Error signing out: ' + error.message); // Display error message
     });
 }
+
+// Confirm delete account function
+function confirmDeleteAccount() {
+    document.getElementById('confirm-delete-popup').style.display = 'block';
+}
+
+function closeConfirmDeletePopup() {
+    document.getElementById('confirm-delete-popup').style.display = 'none';
+}
+
+// Delete account function
+function deleteAccount() {
+    var user = auth.currentUser;
+    if (user) {
+        db.collection('users').doc(user.uid).delete().then(function() {
+            return user.delete();
+        }).then(function() {
+            console.log('User account deleted');
+            window.location.href = 'index.html';  // Redirect to homepage after account deletion
+        }).catch(function(error) {
+            console.error('Error deleting user account:', error);
+            alert('Error deleting user account: ' + error.message); // Display error message
+        });
+    }
+}

@@ -80,6 +80,10 @@ nav a:hover {
     transition: background-color 0.3s;
 }
 
+#logout-button{
+    font-size: small;
+}
+
 .auth-buttons .button:hover {
     background-color: #16a085;
 }
@@ -302,6 +306,13 @@ footer a:hover {
 
 .duel-request button:hover {
     background-color: #16a085;
+}
+.duel-request .delete-btn {
+    background-color: #f44336;
+}
+
+.duel-request .delete-btn:hover {
+    background-color: #e53935;
 }
 
 /* Popup for all users */
