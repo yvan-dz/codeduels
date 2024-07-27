@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize Firebase Firestore
     const db = firebase.firestore();
 
+    // Timer duration in seconds
+    const TIMER_DURATION = 30; // 5 minutes
+
     // Reset result container
     function resetResultContainer() {
         const resultContainer = document.getElementById('result-container');
@@ -74,7 +77,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (userData.friends && userData.friends.length > 0) {
                 const friendId = userData.friends[0]; // Assume only one friend for simplicity
-                const taskDoc = await db.collection('tasks').doc(userId).get();
 
                 const exercisesResponse = await fetch('assets/js/python_exercises.json');
                 const exercises = await exercisesResponse.json();
@@ -103,6 +105,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 resetResultContainer();
                 deletePreviousResults(userId, friendId);
                 document.getElementById('run-btn').style.display = 'block';
+
+                // Start the timer
+                startTimer(userId, friendId, TIMER_DURATION);
             }
         } catch (error) {
             console.error("Error loading exercise:", error);
@@ -118,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <ul>
                 ${task.examples.map(example => `<li>${example}</li>`).join('')}
             </ul>
+            <div id="timer">Time left: ${TIMER_DURATION} seconds</div>
         `;
         window.expectedOutput = task.expected_output;
         window.codeTemplate = task.code_template;
@@ -226,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                     // Save the result to Firestore
                                     const gameRef = db.collection('games').doc();
-                                    gameId = gameRef.id;
+                                    const gameId = gameRef.id;
 
                                     await gameRef.set({
                                         userId: userId,
@@ -385,6 +391,57 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Timer function
+    function startTimer(userId, friendId, duration) {
+        let timer = duration, minutes, seconds;
+        const timerElement = document.getElementById('timer');
+
+        const interval = setInterval(() => {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            timerElement.textContent = `Time left: ${minutes}:${seconds}`;
+
+            if (--timer < 0) {
+                clearInterval(interval);
+                markPlayersAsLosers(userId, friendId);
+            }
+        }, 1000);
+    }
+
+    // Mark both players as losers
+    function markPlayersAsLosers(userId, friendId) {
+        const gameRef = db.collection('games').doc();
+
+        gameRef.set({
+            userId: userId,
+            friendId: friendId,
+            result: 'both_lost',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            document.getElementById('run-btn').style.display = 'none';
+            const resultContainer = document.getElementById('result-container');
+            resultContainer.style.display = 'none'; // Hide the result container
+            showPopup(); // Show the popup
+        }).catch((error) => {
+            console.error('Error marking players as losers:', error);
+        });
+    }
+
+    // Show the popup
+    function showPopup() {
+        const popup = document.getElementById('popup');
+        popup.style.display = 'block';
+
+        // Close the popup when the close button is clicked
+        document.getElementById('close-popup').addEventListener('click', () => {
+            popup.style.display = 'none';
+        });
+    }
+
     // Load the exercise for the user
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
@@ -396,6 +453,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     resetResultContainer();
                     deletePreviousResults(userId, friendId);
                     loadExerciseForFriends(userId);
+                    resetEditors(userId, friendId);
                 }
             });
         }
