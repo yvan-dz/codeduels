@@ -147,16 +147,17 @@ main {
 
 footer {
     background-color: #333;
-    color: white;
+    color: #fff;
     text-align: center;
     padding: 15px 0;
     margin-top: auto;
 }
 
 footer a {
-    color: #007bff;
+    color: #1abc9c;
     text-decoration: none;
     margin: 0 5px;
+    font-size: 1em;
 }
 
 footer a:hover {
