@@ -30,7 +30,21 @@ function showPopup(message) {
 async function signUp() {
     var email = document.getElementById('email').value;
     var password = document.getElementById('password').value;
+    var confirmPassword = document.getElementById('confirm-password').value;
     var username = document.getElementById('username').value;
+
+    // Regular expression for password validation
+    const passwordRegex = /^(?=.*\d)(?=.*[A-Z]).{6,}$/;
+
+    if (!passwordRegex.test(password)) {
+        showPopup('Password must be at least 6 characters long, contain at least one uppercase letter, and one digit.');
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        showPopup('Passwords do not match.');
+        return;
+    }
 
     try {
         // Check if the username is already taken
@@ -166,4 +180,5 @@ function logout() {
         console.error('Error signing out:', error);
         showPopup('Error signing out: ' + error.message); // Display error message
     });
+
 }
