@@ -3,8 +3,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const db = firebase.firestore();
 
     // Timer duration in seconds
-    const TIMER_DURATION = 300; // 5 minutes
+    const TIMER_DURATION = 10; // 5 minutes
     let timerInterval; // Variable to store the timer interval
+
+    // Store game reference to stop listeners
+    let currentGameListener = null;
 
     // Reset result container
     function resetResultContainer() {
@@ -266,7 +269,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
 
                             // Listen for game results in real-time
-                            db.collection('games')
+                            if (currentGameListener) {
+                                currentGameListener(); // Detach the previous listener
+                            }
+                            currentGameListener = db.collection('games')
                                 .where('userId', 'in', [userId, friendId])
                                 .orderBy('timestamp', 'desc')
                                 .limit(1)
