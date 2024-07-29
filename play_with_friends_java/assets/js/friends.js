@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const db = firebase.firestore();
 
     // Timer duration in seconds
-    const TIMER_DURATION = 30; // 5 minutes
+    const TIMER_DURATION = 300; // 5 minutes
     let timerInterval; // Variable to store the timer interval
 
     // Reset result container
