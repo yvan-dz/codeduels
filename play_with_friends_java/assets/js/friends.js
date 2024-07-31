@@ -3,11 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const db = firebase.firestore();
 
     // Timer duration in seconds
-    const TIMER_DURATION = 10; // 5 minutes
-    let timerInterval; // Variable to store the timer interval
-
-    // Store game reference to stop listeners
-    let currentGameListener = null;
+    const TIMER_DURATION = 100; // 5 minutes
 
     // Reset result container
     function resetResultContainer() {
@@ -16,22 +12,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Reset chat messages
-    function resetChat() {
+    function resetChat(gameId) {
         const chatBox = document.getElementById('chat-box');
         chatBox.innerHTML = ''; // Clear the chat box
 
         // Optionally delete chat messages from Firestore if needed
-        db.collection('chats').get().then((snapshot) => {
-            snapshot.forEach((doc) => {
-                db.collection('chats').doc(doc.id).delete();
+        db.collection('chats')
+            .where('gameId', '==', gameId)
+            .get()
+            .then((snapshot) => {
+                snapshot.forEach((doc) => {
+                    db.collection('chats').doc(doc.id).delete();
+                });
             });
-        });
     }
 
     // Delete previous game results from Firestore
-    function deletePreviousResults(userId, friendId) {
+    function deletePreviousResults(gameId) {
         db.collection('games')
-            .where('userId', 'in', [userId, friendId])
+            .where('gameId', '==', gameId)
             .get()
             .then((snapshot) => {
                 snapshot.forEach((doc) => {
@@ -62,58 +61,58 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Function to reset both editors and their content in Firebase
-    function resetEditors(userId, friendId) {
+    function resetEditors(gameId) {
         const editor1Container = document.getElementById('editor1');
         const editor2Container = document.getElementById('editor2');
         editor1Container.innerHTML = ''; // Clear editor1 container
         editor2Container.innerHTML = ''; // Clear editor2 container
 
         // Delete editor content from Firestore
-        db.collection('code-editors').doc(userId).delete();
-        db.collection('code-editors').doc(friendId).delete();
+        db.collection('code-editors')
+            .where('gameId', '==', gameId)
+            .get()
+            .then((snapshot) => {
+                snapshot.forEach((doc) => {
+                    db.collection('code-editors').doc(doc.id).delete();
+                });
+            });
     }
 
     // Function to load the same exercise for both friends
-    async function loadExerciseForFriends(userId) {
+    async function loadExerciseForFriends(userId, friendId) {
         try {
-            const userDoc = await db.collection('users').doc(userId).get();
-            const userData = userDoc.data();
+            const exercisesResponse = await fetch('assets/js/java_exercises.json');
+            const exercises = await exercisesResponse.json();
 
-            if (userData.friends && userData.friends.length > 0) {
-                const friendId = userData.friends[0]; // Assume only one friend for simplicity
-                const taskDoc = await db.collection('tasks').doc(userId).get();
+            const userTaskIndexDoc = await db.collection('taskIndexes').doc(userId).get();
+            let taskIndex = 0;
 
-                const exercisesResponse = await fetch('assets/js/java_exercises.json');
-                const exercises = await exercisesResponse.json();
-
-                const userTaskIndexDoc = await db.collection('taskIndexes').doc(userId).get();
-                let taskIndex = 0;
-
-                if (userTaskIndexDoc.exists) {
-                    taskIndex = userTaskIndexDoc.data().index;
-                }
-
-                const nextTaskIndex = (taskIndex + 1) % exercises.length;
-                const nextTask = exercises[nextTaskIndex];
-
-                await db.collection('tasks').doc(userId).set(nextTask);
-                await db.collection('tasks').doc(friendId).set(nextTask);
-                await db.collection('taskIndexes').doc(userId).set({ index: nextTaskIndex });
-                await db.collection('taskIndexes').doc(friendId).set({ index: nextTaskIndex });
-
-                displayTask(nextTask);
-
-                // Clear chat, reset editors, initialize editors, and reset result container when a new game is loaded
-                resetChat();
-                resetEditors(userId, friendId);
-                initializeEditors(nextTask.code_template);
-                resetResultContainer();
-                deletePreviousResults(userId, friendId);
-                document.getElementById('run-btn').style.display = 'block';
-
-                // Start the timer
-                startTimer(userId, friendId, TIMER_DURATION);
+            if (userTaskIndexDoc.exists) {
+                taskIndex = userTaskIndexDoc.data().index;
             }
+
+            const nextTaskIndex = (taskIndex + 1) % exercises.length;
+            const nextTask = exercises[nextTaskIndex];
+
+            const gameId = db.collection('games').doc().id; // Create a unique game ID
+
+            await db.collection('tasks').doc(userId).set({ ...nextTask, gameId });
+            await db.collection('tasks').doc(friendId).set({ ...nextTask, gameId });
+            await db.collection('taskIndexes').doc(userId).set({ index: nextTaskIndex });
+            await db.collection('taskIndexes').doc(friendId).set({ index: nextTaskIndex });
+
+            displayTask(nextTask);
+
+            // Clear chat, reset editors, initialize editors, and reset result container when a new game is loaded
+            resetChat(gameId);
+            resetEditors(gameId);
+            initializeEditors(nextTask.code_template, gameId);
+            resetResultContainer();
+            deletePreviousResults(gameId);
+            document.getElementById('run-btn').style.display = 'block';
+
+            // Start the timer
+            startTimer(userId, friendId, gameId, TIMER_DURATION);
         } catch (error) {
             console.error("Error loading exercise:", error);
         }
@@ -134,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
         window.codeTemplate = task.code_template;
     }
 
-    function initializeEditors(codeTemplate) {
+    function initializeEditors(codeTemplate, gameId) {
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs' } });
         require(['vs/editor/editor.main'], function () {
             var editor1 = monaco.editor.create(document.getElementById('editor1'), {
@@ -159,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Save editor1 content to Firestore
                     editor1.onDidChangeModelContent(() => {
                         const code = editor1.getValue();
-                        db.collection('code-editors').doc(userId).set({ code });
+                        db.collection('code-editors').doc(`${userId}_${gameId}`).set({ code, gameId });
                     });
 
                     // Listen for changes in Firestore and update editor2
@@ -167,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         const userData = userDoc.data();
                         if (userData.friends && userData.friends.length > 0) {
                             const friendId = userData.friends[0];
-                            db.collection('code-editors').doc(friendId).onSnapshot((doc) => {
+                            db.collection('code-editors').doc(`${friendId}_${gameId}`).onSnapshot((doc) => {
                                 const data = doc.data();
                                 if (data && data.code) {
                                     editor2.setValue(data.code);
@@ -200,6 +199,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         from: userId,
                                         username: username, // Add username to the message data
                                         message: message,
+                                        gameId: gameId,
                                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                     });
                                     chatInput.value = '';
@@ -207,21 +207,21 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
 
                             // Listen for chat messages
-                            db.collection('chats').orderBy('timestamp').onSnapshot((snapshot) => {
-                                chatBox.innerHTML = '';
-                                snapshot.forEach((doc) => {
-                                    const chatData = doc.data();
-                                    const messageElement = document.createElement('div');
-                                    messageElement.textContent = `${chatData.username}: ${chatData.message}`; // Show username before the message
-                                    chatBox.appendChild(messageElement);
+                            db.collection('chats')
+                                .where('gameId', '==', gameId)
+                                .orderBy('timestamp')
+                                .onSnapshot((snapshot) => {
+                                    chatBox.innerHTML = '';
+                                    snapshot.forEach((doc) => {
+                                        const chatData = doc.data();
+                                        const messageElement = document.createElement('div');
+                                        messageElement.textContent = `${chatData.username}: ${chatData.message}`; // Show username before the message
+                                        chatBox.appendChild(messageElement);
+                                    });
+                                    chatBox.scrollTop = chatBox.scrollHeight;
                                 });
-                                chatBox.scrollTop = chatBox.scrollHeight;
-                            });
 
                             runBtn.addEventListener('click', async function () {
-                                // Stop the timer
-                                clearInterval(timerInterval);
-
                                 const code = editor1.getValue();
                                 console.log('Player Code:', code);
 
@@ -269,11 +269,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
 
                             // Listen for game results in real-time
-                            if (currentGameListener) {
-                                currentGameListener(); // Detach the previous listener
-                            }
-                            currentGameListener = db.collection('games')
-                                .where('userId', 'in', [userId, friendId])
+                            db.collection('games')
+                                .where('gameId', '==', gameId)
                                 .orderBy('timestamp', 'desc')
                                 .limit(1)
                                 .onSnapshot((snapshot) => {
@@ -403,11 +400,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Timer function
-    function startTimer(userId, friendId, duration) {
+    function startTimer(userId, friendId, gameId, duration) {
         let timer = duration, minutes, seconds;
         const timerElement = document.getElementById('timer');
 
-        timerInterval = setInterval(() => {
+        const interval = setInterval(() => {
             minutes = parseInt(timer / 60, 10);
             seconds = parseInt(timer % 60, 10);
 
@@ -417,15 +414,15 @@ document.addEventListener('DOMContentLoaded', function () {
             timerElement.textContent = `Time left: ${minutes}:${seconds}`;
 
             if (--timer < 0) {
-                clearInterval(timerInterval);
-                markPlayersAsLosers(userId, friendId);
+                clearInterval(interval);
+                markPlayersAsLosers(userId, friendId, gameId);
             }
         }, 1000);
     }
 
     // Mark both players as losers
-    function markPlayersAsLosers(userId, friendId) {
-        const gameRef = db.collection('games').doc();
+    function markPlayersAsLosers(userId, friendId, gameId) {
+        const gameRef = db.collection('games').doc(gameId);
 
         gameRef.set({
             userId: userId,
@@ -453,6 +450,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Function to reset both users at the end of the game
+    function resetUsers(gameId) {
+        resetChat(gameId);
+        resetEditors(gameId);
+        resetResultContainer();
+        deletePreviousResults(gameId);
+        // Additional actions if needed
+    }
+
     // Load the exercise for the user
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
@@ -462,9 +468,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (userData.friends && userData.friends.length > 0) {
                     const friendId = userData.friends[0];
                     resetResultContainer();
-                    deletePreviousResults(userId, friendId);
-                    loadExerciseForFriends(userId);
-                    resetEditors(userId, friendId);
+                    loadExerciseForFriends(userId, friendId);
                 }
             });
         }
