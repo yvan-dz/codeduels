@@ -12,25 +12,22 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Reset chat messages
-    function resetChat(gameId) {
+    function resetChat() {
         const chatBox = document.getElementById('chat-box');
         chatBox.innerHTML = ''; // Clear the chat box
 
         // Optionally delete chat messages from Firestore if needed
-        db.collection('chats')
-            .where('gameId', '==', gameId)
-            .get()
-            .then((snapshot) => {
-                snapshot.forEach((doc) => {
-                    db.collection('chats').doc(doc.id).delete();
-                });
+        db.collection('chats').get().then((snapshot) => {
+            snapshot.forEach((doc) => {
+                db.collection('chats').doc(doc.id).delete();
             });
+        });
     }
 
     // Delete previous game results from Firestore
-    function deletePreviousResults(gameId) {
+    function deletePreviousResults(userId, friendId) {
         db.collection('games')
-            .where('gameId', '==', gameId)
+            .where('userId', 'in', [userId, friendId])
             .get()
             .then((snapshot) => {
                 snapshot.forEach((doc) => {
@@ -61,58 +58,58 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Function to reset both editors and their content in Firebase
-    function resetEditors(gameId) {
+    function resetEditors(userId, friendId) {
         const editor1Container = document.getElementById('editor1');
         const editor2Container = document.getElementById('editor2');
         editor1Container.innerHTML = ''; // Clear editor1 container
         editor2Container.innerHTML = ''; // Clear editor2 container
 
         // Delete editor content from Firestore
-        db.collection('code-editors')
-            .where('gameId', '==', gameId)
-            .get()
-            .then((snapshot) => {
-                snapshot.forEach((doc) => {
-                    db.collection('code-editors').doc(doc.id).delete();
-                });
-            });
+        db.collection('code-editors').doc(userId).delete();
+        db.collection('code-editors').doc(friendId).delete();
     }
 
     // Function to load the same exercise for both friends
-    async function loadExerciseForFriends(userId, friendId) {
+    async function loadExerciseForFriends(userId) {
         try {
-            const exercisesResponse = await fetch('assets/js/java_exercises.json');
-            const exercises = await exercisesResponse.json();
+            const userDoc = await db.collection('users').doc(userId).get();
+            const userData = userDoc.data();
 
-            const userTaskIndexDoc = await db.collection('taskIndexes').doc(userId).get();
-            let taskIndex = 0;
+            if (userData.friends && userData.friends.length > 0) {
+                const friendId = userData.friends[0]; // Assume only one friend for simplicity
+                const taskDoc = await db.collection('tasks').doc(userId).get();
 
-            if (userTaskIndexDoc.exists) {
-                taskIndex = userTaskIndexDoc.data().index;
+                const exercisesResponse = await fetch('assets/js/java_exercises.json');
+                const exercises = await exercisesResponse.json();
+
+                const userTaskIndexDoc = await db.collection('taskIndexes').doc(userId).get();
+                let taskIndex = 0;
+
+                if (userTaskIndexDoc.exists) {
+                    taskIndex = userTaskIndexDoc.data().index;
+                }
+
+                const nextTaskIndex = (taskIndex + 1) % exercises.length;
+                const nextTask = exercises[nextTaskIndex];
+
+                await db.collection('tasks').doc(userId).set(nextTask);
+                await db.collection('tasks').doc(friendId).set(nextTask);
+                await db.collection('taskIndexes').doc(userId).set({ index: nextTaskIndex });
+                await db.collection('taskIndexes').doc(friendId).set({ index: nextTaskIndex });
+
+                displayTask(nextTask);
+
+                // Clear chat, reset editors, initialize editors, and reset result container when a new game is loaded
+                resetChat();
+                resetEditors(userId, friendId);
+                initializeEditors(nextTask.code_template);
+                resetResultContainer();
+                deletePreviousResults(userId, friendId);
+                document.getElementById('run-btn').style.display = 'block';
+
+                // Start the timer
+                startTimer(userId, friendId, TIMER_DURATION);
             }
-
-            const nextTaskIndex = (taskIndex + 1) % exercises.length;
-            const nextTask = exercises[nextTaskIndex];
-
-            const gameId = db.collection('games').doc().id; // Create a unique game ID
-
-            await db.collection('tasks').doc(userId).set({ ...nextTask, gameId });
-            await db.collection('tasks').doc(friendId).set({ ...nextTask, gameId });
-            await db.collection('taskIndexes').doc(userId).set({ index: nextTaskIndex });
-            await db.collection('taskIndexes').doc(friendId).set({ index: nextTaskIndex });
-
-            displayTask(nextTask);
-
-            // Clear chat, reset editors, initialize editors, and reset result container when a new game is loaded
-            resetChat(gameId);
-            resetEditors(gameId);
-            initializeEditors(nextTask.code_template, gameId);
-            resetResultContainer();
-            deletePreviousResults(gameId);
-            document.getElementById('run-btn').style.display = 'block';
-
-            // Start the timer
-            startTimer(userId, friendId, gameId, TIMER_DURATION);
         } catch (error) {
             console.error("Error loading exercise:", error);
         }
@@ -133,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
         window.codeTemplate = task.code_template;
     }
 
-    function initializeEditors(codeTemplate, gameId) {
+    function initializeEditors(codeTemplate) {
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs' } });
         require(['vs/editor/editor.main'], function () {
             var editor1 = monaco.editor.create(document.getElementById('editor1'), {
@@ -158,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Save editor1 content to Firestore
                     editor1.onDidChangeModelContent(() => {
                         const code = editor1.getValue();
-                        db.collection('code-editors').doc(`${userId}_${gameId}`).set({ code, gameId });
+                        db.collection('code-editors').doc(userId).set({ code });
                     });
 
                     // Listen for changes in Firestore and update editor2
@@ -166,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         const userData = userDoc.data();
                         if (userData.friends && userData.friends.length > 0) {
                             const friendId = userData.friends[0];
-                            db.collection('code-editors').doc(`${friendId}_${gameId}`).onSnapshot((doc) => {
+                            db.collection('code-editors').doc(friendId).onSnapshot((doc) => {
                                 const data = doc.data();
                                 if (data && data.code) {
                                     editor2.setValue(data.code);
@@ -199,7 +196,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                         from: userId,
                                         username: username, // Add username to the message data
                                         message: message,
-                                        gameId: gameId,
                                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                                     });
                                     chatInput.value = '';
@@ -207,19 +203,16 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
 
                             // Listen for chat messages
-                            db.collection('chats')
-                                .where('gameId', '==', gameId)
-                                .orderBy('timestamp')
-                                .onSnapshot((snapshot) => {
-                                    chatBox.innerHTML = '';
-                                    snapshot.forEach((doc) => {
-                                        const chatData = doc.data();
-                                        const messageElement = document.createElement('div');
-                                        messageElement.textContent = `${chatData.username}: ${chatData.message}`; // Show username before the message
-                                        chatBox.appendChild(messageElement);
-                                    });
-                                    chatBox.scrollTop = chatBox.scrollHeight;
+                            db.collection('chats').orderBy('timestamp').onSnapshot((snapshot) => {
+                                chatBox.innerHTML = '';
+                                snapshot.forEach((doc) => {
+                                    const chatData = doc.data();
+                                    const messageElement = document.createElement('div');
+                                    messageElement.textContent = `${chatData.username}: ${chatData.message}`; // Show username before the message
+                                    chatBox.appendChild(messageElement);
                                 });
+                                chatBox.scrollTop = chatBox.scrollHeight;
+                            });
 
                             runBtn.addEventListener('click', async function () {
                                 const code = editor1.getValue();
@@ -270,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             // Listen for game results in real-time
                             db.collection('games')
-                                .where('gameId', '==', gameId)
+                                .where('userId', 'in', [userId, friendId])
                                 .orderBy('timestamp', 'desc')
                                 .limit(1)
                                 .onSnapshot((snapshot) => {
@@ -400,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Timer function
-    function startTimer(userId, friendId, gameId, duration) {
+    function startTimer(userId, friendId, duration) {
         let timer = duration, minutes, seconds;
         const timerElement = document.getElementById('timer');
 
@@ -415,14 +408,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (--timer < 0) {
                 clearInterval(interval);
-                markPlayersAsLosers(userId, friendId, gameId);
+                markPlayersAsLosers(userId, friendId);
             }
         }, 1000);
     }
 
     // Mark both players as losers
-    function markPlayersAsLosers(userId, friendId, gameId) {
-        const gameRef = db.collection('games').doc(gameId);
+    function markPlayersAsLosers(userId, friendId) {
+        const gameRef = db.collection('games').doc();
 
         gameRef.set({
             userId: userId,
@@ -451,11 +444,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Function to reset both users at the end of the game
-    function resetUsers(gameId) {
-        resetChat(gameId);
-        resetEditors(gameId);
+    function resetUsers(userId, friendId) {
+        resetChat();
+        resetEditors(userId, friendId);
         resetResultContainer();
-        deletePreviousResults(gameId);
+        deletePreviousResults(userId, friendId);
         // Additional actions if needed
     }
 
@@ -468,7 +461,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (userData.friends && userData.friends.length > 0) {
                     const friendId = userData.friends[0];
                     resetResultContainer();
-                    loadExerciseForFriends(userId, friendId);
+                    deletePreviousResults(userId, friendId);
+                    loadExerciseForFriends(userId);
+                    resetEditors(userId, friendId);
                 }
             });
         }
