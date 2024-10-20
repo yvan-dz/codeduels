@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Request a duel
+    // Request a duel
     window.requestDuel = function (friendId, language) {
         const user = auth.currentUser;
         if (!user) {
@@ -100,10 +101,14 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // Generiere eine eindeutige gameID
+        const gameId = db.collection('games').doc().id;
+
         const duelRequest = {
             from: user.uid,
             to: friendId,
             language: language,
+            gameId: gameId, // Die neue gameID hinzufügen
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
@@ -117,6 +122,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (snapshot.empty) {
                     db.collection('duel-requests').add(duelRequest)
                         .then(() => {
+                            // Füge die gameID zum Benutzer hinzu, der die Anfrage sendet
+                            db.collection('users').doc(user.uid).update({
+                                gameId: gameId
+                            });
                             showPopup('Duel request sent!');
                             listenForDuelAcceptance(user.uid, friendId, language); // Listen for duel acceptance
                         })
@@ -132,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error checking duel requests: ', error);
             });
     };
+
 
     // Listen for duel acceptance
     function listenForDuelAcceptance(userId, friendId, language) {
@@ -179,14 +189,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Accept a duel request
     window.acceptDuel = function (requestId, language) {
-        db.collection('duel-requests').doc(requestId).update({ accepted: true })
-            .then(() => {
-                startDuel(language, requestId);
-            }).catch((error) => {
-                console.error('Error accepting duel request: ', error);
-                showPopup('Error accepting duel request: ' + error.message);
+        db.collection('duel-requests').doc(requestId).get().then((doc) => {
+            const duelRequest = doc.data();
+            const gameId = duelRequest.gameId; // Hole die gameID aus der Duel-Anfrage
+
+            // Aktualisiere die gameID im Dokument des Benutzers, der die Anfrage annimmt
+            const user = auth.currentUser;
+            db.collection('users').doc(user.uid).update({
+                gameId: gameId
             });
+
+            db.collection('duel-requests').doc(requestId).update({ accepted: true })
+                .then(() => {
+                    startDuel(language, requestId);
+                }).catch((error) => {
+                    console.error('Error accepting duel request: ', error);
+                    showPopup('Error accepting duel request: ' + error.message);
+                });
+        }).catch((error) => {
+            console.error('Error getting duel request: ', error);
+        });
     };
+
 
     // Delete a duel request
     window.deleteDuelRequest = function (requestId) {

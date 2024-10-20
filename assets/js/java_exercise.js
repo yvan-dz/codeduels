@@ -30,7 +30,7 @@ function initializeMonaco(language, codeTemplate) {
         });
 
         window.editor = monaco.editor.create(document.getElementById('code-editor'), {
-            value: codeTemplate || '// your code here',
+            value: codeTemplate || '//  code here',
             language: language,
             theme: 'vs-dark',
             automaticLayout: true

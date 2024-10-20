@@ -6,12 +6,14 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100vh; /* Updated from height to min-height */
+    min-height: 100vh;
+    /* Updated from height to min-height */
 }
 
 header {
     display: flex;
-    justify-content: center; /* Center the logo and webname */
+    justify-content: center;
+    /* Center the logo and webname */
     align-items: center;
     width: 100%;
     padding: 15px 20px;
@@ -41,7 +43,8 @@ header {
 }
 
 nav {
-    display: none; /* Hide the nav links */
+    display: none;
+    /* Hide the nav links */
 }
 
 .signup-container {
@@ -160,11 +163,13 @@ footer {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     font-size: 1rem;
-    display: none; /* Initially hidden */
+    display: none;
+    /* Initially hidden */
 }
 
 .popup.show {
-    display: block; /* Show when class 'show' is added */
+    display: block;
+    /* Show when class 'show' is added */
 }
 
 /* Responsive Design */
