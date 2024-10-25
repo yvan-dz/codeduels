@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let friendId = null;  // Define friendId at the beginning
 
     // Timer duration in seconds
-    const TIMER_DURATION = 20; // 5 minutes
+    const TIMER_DURATION = 90; 
 
     // Funktion zum Bestimmen des friendId basierend auf der gleichen gameId
     function getFriendIdByGameId(userId, gameId) {
