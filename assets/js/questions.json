@@ -1,0 +1,52 @@
+[
+    {
+        "question": "What is the output of console.log(2 + 2)?",
+        "answers": ["3", "4", "5"],
+        "correctAnswer": 1
+    },
+    {
+        "question": "Which language runs in a web browser?",
+        "answers": ["Java", "C", "JavaScript"],
+        "correctAnswer": 2
+    },
+    {
+        "question": "What does HTML stand for?",
+        "answers": ["HyperText Markup Language", "Hyper Transfer Mark Language", "Home Tool Markup Language"],
+        "correctAnswer": 0
+    },
+    {
+        "question": "What year was JavaScript created?",
+        "answers": ["1993", "1995", "1999"],
+        "correctAnswer": 1
+    },
+    {
+        "question": "Who created JavaScript?",
+        "answers": ["Brendan Eich", "Linus Torvalds", "Mark Zuckerberg"],
+        "correctAnswer": 0
+    },
+    {
+        "question": "What does CSS stand for?",
+        "answers": ["Cascading Style Sheets", "Colorful Style Sheets", "Computer Style Sheets"],
+        "correctAnswer": 0
+    },
+    {
+        "question": "Which HTML tag is used to define an unordered list?",
+        "answers": ["<ol>", "<li>", "<ul>"],
+        "correctAnswer": 2
+    },
+    {
+        "question": "Which company developed JavaScript?",
+        "answers": ["Netscape", "Microsoft", "Apple"],
+        "correctAnswer": 0
+    },
+    {
+        "question": "What is the most common programming language in 2023?",
+        "answers": ["Python", "Java", "JavaScript"],
+        "correctAnswer": 0
+    },
+    {
+        "question": "Which HTML attribute is used to define inline styles?",
+        "answers": ["class", "style", "id"],
+        "correctAnswer": 1
+    }
+]

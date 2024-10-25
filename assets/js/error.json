@@ -1,0 +1,42 @@
+[
+    {
+        "error": "public class Main { public static void main(String[] args) { System.out.println(\"Hello World\" } }",
+        "fix": "public class Main { public static void main(String[] args) { System.out.println(\"Hello World\"); } }"
+    },
+    {
+        "error": "int number = 10 System.out.println(number);",
+        "fix": "int number = 10; System.out.println(number);"
+    },
+    {
+        "error": "public class Car { String brand; public Car(String b) { brand = b } }",
+        "fix": "public class Car { String brand; public Car(String b) { brand = b; } }"
+    },
+    {
+        "error": "if (x > 5) { System.out.println(\"X is greater than 5\")",
+        "fix": "if (x > 5) { System.out.println(\"X is greater than 5\"); }"
+    },
+    {
+        "error": "for (int i = 0; i < 10; i++) { System.out.println(i) }",
+        "fix": "for (int i = 0; i < 10; i++) { System.out.println(i); }"
+    },
+    {
+        "error": "public class Student { String name; int age; public Student(String name, int age) { this.name = name; this.age = age } }",
+        "fix": "public class Student { String name; int age; public Student(String name, int age) { this.name = name; this.age = age; } }"
+    },
+    {
+        "error": "String greeting = \"Hello, + name;",
+        "fix": "String greeting = \"Hello, \" + name;"
+    },
+    {
+        "error": "public void printSum(int a, int b) { System.out.println(a + b }",
+        "fix": "public void printSum(int a, int b) { System.out.println(a + b); }"
+    },
+    {
+        "error": "int[] numbers = {1, 2, 3, 4; System.out.println(numbers.length);",
+        "fix": "int[] numbers = {1, 2, 3, 4}; System.out.println(numbers.length);"
+    },
+    {
+        "error": "while (x < 10) { x++; System.out.println(x);",
+        "fix": "while (x < 10) { x++; } System.out.println(x);"
+    }
+]

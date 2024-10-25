@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Fix Challenge</title>
+    <link rel="stylesheet" href="assets/css/error_fix.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <a href="index.html" class="logo-link">
+                <img src="assets/img/logo.png" alt="Logo">
+                <span id="webname">CodeDuels</span>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="multiplayer_battle.html">Play with friends</a></li>
+                <li><a href="play_online.html">Play online</a></li>
+                <li><a href="hackathon.html">Hackathons</a></li>
+                <li><a href="profile.html" id="profile-link" style="display: none;">Profile</a></li>
+                <li><a href="settings.html" id="settings-link" style="display: none;">Settings</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <a href="login.html" class="button log" id="login-button">Sign in</a>
+            <a href="signup.html" class="button log" id="signup-button">Join</a>
+            <button class="button log" id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+        </div>
+    </header>
+    <main>
+        <div class="game-container">
+            <h1>Find and Fix the Error</h1>
+            <p id="error-message">/* Hier wird der Fehlercode angezeigt */</p>
+            <textarea id="user-answer" placeholder="Enter your fix here..."></textarea>
+            <button id="submit-btn">Send</button>
+            <button id="next-btn" style="display:none;">Next</button>
+
+            <p id="feedback" style="display:none;"></p>
+            <div id="correct-answer" style="display:none;"></div>
+            <p id="score">Score: 0</p>
+            <p id="timer">Time left: 10 seconds</p>
+        </div>
+        
+
+        <!-- Popup für Endergebnis -->
+        <div id="popup" class="popup" style="display: none;">
+            <div class="popup-content">
+                <p id="popup-message"></p>
+                <button id="close-popup-btn" onclick="closePopup()">OK</button>
+            </div>
+        </div>
+
+    </main>
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2024 CodeDuels | <a href="contact.html">Contact Us</a> | <a href="terms.html">Terms</a> | <a
+                    href="privacy.html">Privacy Policy</a> | <a href="about.html">About</a></p>
+        </div>
+    </footer>
+    <script>let lastScrollTop = 0;
+        const header = document.querySelector('header');
+        
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop) {
+                // Scrolling down
+                header.style.top = '-300px'; // Hide header
+            } else if (scrollTop === 0) {
+                // At the top of the page
+                header.style.top = '0'; // Show header
+            }
+            lastScrollTop = scrollTop;
+        });
+        </script>
+    <script src="assets/js/error_fix.js"></script>
+</body>
+
+</html>
