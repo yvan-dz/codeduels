@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let friendId = null;  // Define friendId at the beginning
 
     // Timer duration in seconds
-    const TIMER_DURATION = 90; 
+    const TIMER_DURATION = 120; 
 
     // Funktion zum Bestimmen des friendId basierend auf der gleichen gameId
     function getFriendIdByGameId(userId, gameId) {
@@ -106,39 +106,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load the same exercise for both friends using gameId
     async function loadExerciseForFriends(userId) {
-        try {
-            const userDoc = await db.collection('users').doc(userId).get();
-            const userData = userDoc.data();
+    try {
+        const userDoc = await db.collection('users').doc(userId).get();
+        const userData = userDoc.data();
 
-            if (!userData) {
-                throw new Error("User data not found.");
+        if (!userData) throw new Error("User data not found.");
+
+        const gameId = userData.gameId;
+        if (!gameId) throw new Error("No gameId for this user.");
+
+        // Ermittle den friendId basierend auf der gameId
+        const friendSnapshot = await db.collection('users').where('gameId', '==', gameId).get();
+        let friendId = null;
+
+        friendSnapshot.forEach((doc) => {
+            if (doc.id !== userId) {
+                friendId = doc.id;
             }
+        });
 
-            // Verwende die gameId, um den friendId zu ermitteln
-            const gameId = userData.gameId;  // Erhalte die gameId des Benutzers
-            let friendId = null;
+        if (!friendId) throw new Error("No friend found with same gameId.");
 
-            if (gameId) {
-                // Ermittele den friendId basierend auf der gameId
-                const friendSnapshot = await db.collection('users')
-                    .where('gameId', '==', gameId)
-                    .get();
-
-                friendSnapshot.forEach((doc) => {
-                    if (doc.id !== userId) {
-                        friendId = doc.id;
-                    }
-                });
-
-                if (!friendId) {
-                    throw new Error("No friend found with the same gameId.");
-                }
-            } else {
-                throw new Error("gameId not found for user.");
-            }
-
-            const taskDoc = await db.collection('tasks').doc(userId).get();
-
+        // 👇 Nur der Spieler mit der kleineren UID bestimmt die Aufgabe
+        if (userId < friendId) {
             const exercisesResponse = await fetch('assets/js/java_exercises.json');
             const exercises = await exercisesResponse.json();
 
@@ -152,40 +142,59 @@ document.addEventListener('DOMContentLoaded', function () {
             const nextTaskIndex = (taskIndex + 1) % exercises.length;
             const nextTask = exercises[nextTaskIndex];
 
-            // Setze die Aufgabe für beide Spieler
-            await db.collection('tasks').doc(userId).set(nextTask);
-            await db.collection('tasks').doc(friendId).set(nextTask);
+            // 📌 Speichere Aufgabe nur 1x zentral im Game-Dokument
+            await db.collection('games').doc(gameId).set({
+                task: nextTask,
+                taskIndex: nextTaskIndex,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            // 👇 Task-Index lokal speichern (optional)
             await db.collection('taskIndexes').doc(userId).set({ index: nextTaskIndex });
             await db.collection('taskIndexes').doc(friendId).set({ index: nextTaskIndex });
-
-            displayTask(nextTask);
-
-            // Clear chat, reset editors, initialize editors, and reset result container when a new game is loaded
-            resetChat();
-            resetEditors(userId, friendId);
-            initializeEditors(nextTask.code_template);
-            resetResultContainer();
-            deletePreviousResults(userId, friendId);
-            document.getElementById('run-btn').style.display = 'block';
-
-            // Update players' names
-            const friendDoc = await db.collection('users').doc(friendId).get();
-            if (friendDoc.exists && userData) {
-                const friendData = friendDoc.data();
-                if (!friendData) {
-                    throw new Error("Friend data not found.");
-                }
-                updatePlayersContainer(userData.username, friendData.username);
-            } else {
-                console.error("Error: Unable to retrieve user or friend data.");
-            }
-
-            // Start the timer
-            startTimer(userId, friendId, TIMER_DURATION);
-        } catch (error) {
-            console.error("Error loading exercise:", error);
         }
+
+        // 🔁 Nun Aufgabe synchron aus zentralem Game-Dokument laden
+        let taskLoaded = false;
+        let retries = 0;
+        let task = null;
+
+        while (!taskLoaded && retries < 10) {
+            const gameDoc = await db.collection('games').doc(gameId).get();
+            const gameData = gameDoc.data();
+            if (gameData && gameData.task) {
+                task = gameData.task;
+                taskLoaded = true;
+            } else {
+                await new Promise(resolve => setTimeout(resolve, 500)); // 500ms warten
+                retries++;
+            }
+        }
+
+        if (!taskLoaded) throw new Error("Task not available in game document.");
+
+        displayTask(task);
+        resetChat();
+        resetEditors(userId, friendId);
+        initializeEditors(task.code_template);
+        resetResultContainer();
+        deletePreviousResults(userId, friendId);
+        document.getElementById('run-btn').style.display = 'block';
+
+        // Spieler-Namen anzeigen
+        const friendDoc = await db.collection('users').doc(friendId).get();
+        if (friendDoc.exists && userData) {
+            const friendData = friendDoc.data();
+            updatePlayersContainer(userData.username, friendData.username);
+        }
+
+        startTimer(userId, friendId, TIMER_DURATION);
+
+    } catch (error) {
+        console.error("Error loading synchronized exercise:", error);
     }
+}
+
 
     function displayTask(task) {
         const taskContainer = document.getElementById('task-container');
